@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 import { icon_type, Logged_Alumno, Logged_Profesor, Modulo, Profesor, User } from '@/components/types'
 import { router } from 'expo-router';
 import { error_alert } from '@/components/alert';

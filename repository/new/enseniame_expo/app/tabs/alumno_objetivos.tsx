@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 import { useUserContext } from '@/context/UserContext';
 import ObjetivoCard from '@/components/ObjetivoCard';
 import ObjetivoModal from '@/components/ObjetivoModal';

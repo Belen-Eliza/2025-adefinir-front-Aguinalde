@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, SectionList, RefreshControl,
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 import ProgressCard from '@/components/ProgressCard';
 import GlobalProgress from '@/components/GlobalProgress';
 import HistorialItem from '@/components/HistorialItem';

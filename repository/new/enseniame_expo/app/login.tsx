@@ -5,14 +5,13 @@ import { Pressable,  TextInput,  View,
 import { Image } from 'expo-image';
 import { useState } from "react";
 import { Link , router} from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { validateEmail, validatePassword } from '@/components/validaciones';
 import { error_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
 import {ingresar} from "../conexiones/gestion_usuarios"
 import { useUserContext } from '@/context/UserContext';
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 import { estilos } from '@/components/estilos';
 import { paleta, paleta_colores } from '@/components/colores';
 import { IconTextInput, PasswordInput } from '@/components/inputs';

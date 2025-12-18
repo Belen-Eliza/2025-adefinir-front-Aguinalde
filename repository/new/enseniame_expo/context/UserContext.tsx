@@ -1,7 +1,7 @@
 import { Alumno, Logged_Alumno, Logged_Profesor, Logged_User, User } from '@/components/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useState } from 'react';
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 import { error_alert } from '@/components/alert';
 import { cuenta_existe } from '@/conexiones/gestion_usuarios';
 import * as Crypto from 'expo-crypto';

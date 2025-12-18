@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 
 // Estructura de objetivo activo esperada en BD
 export type ObjetivoActivo = {

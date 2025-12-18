@@ -11,7 +11,7 @@ import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { borrar_video_de_storage, cambiar_nombre_senia, cambiar_video } from '@/conexiones/videos';
 import { paleta } from '@/components/colores';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 import { ThemedText } from '@/components/ThemedText';
 
 export default function VideoUploadForm() {

@@ -1,5 +1,5 @@
 import { AppState } from 'react-native'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 import { Logged_Alumno, Logged_Profesor, Profesor, User } from '@/components/types'
 import { error_alert } from '@/components/alert';
 import { validateEmail } from '@/components/validaciones';
