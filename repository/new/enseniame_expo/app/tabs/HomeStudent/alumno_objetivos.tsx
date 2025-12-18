@@ -7,6 +7,7 @@ import ObjetivoModal from '@/components/ObjetivoModal';
 import { Ionicons } from '@expo/vector-icons';
 import { paleta } from '@/components/colores';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { ganar_insignia_objetivos } from '@/conexiones/insignias';
 
 type Objetivo = {
   id: number;
@@ -156,6 +157,7 @@ export default function AlumnoObjetivosScreen() {
       const { error } = await supabase.from('objetivos').update({ completado: !o.completado }).eq('id', o.id);
       if (error) throw error;
       await loadObjetivos();
+      ganar_insignia_objetivos(user.id);
     } catch (err) {
       console.error(err);
       Alert.alert('Error', 'No se pudo actualizar el estado');
@@ -214,7 +216,7 @@ export default function AlumnoObjetivosScreen() {
         ListEmptyComponent={
           <View style={{ alignItems: 'center', marginTop: 40 }}>
             <Text style={styles.empty}>No tienes objetivos aún</Text>
-            <TouchableOpacity onPress={openCreate} style={{ marginTop: 12, backgroundColor: '#0a7ea4', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8 }}>
+            <TouchableOpacity onPress={openCreate} style={{ marginTop: 12, backgroundColor: paleta.blue, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8 }}>
               <Text style={{ color: 'white', fontWeight: '600' }}>Crear tu primer objetivo</Text>
             </TouchableOpacity>
           </View>

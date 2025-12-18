@@ -35,27 +35,49 @@ const get_antiguedad = (date: string)=>{
     var elapsed = ahora.getTime() - antes.getTime();
 
     if (elapsed < msPerMinute) {
-         return 'Hace '+ Math.round(elapsed/1000) + ' segundos';   
+        let seg=Math.round(elapsed/1000);
+         return 'Hace '+ seg + ' segundos';   
     }
 
     else if (elapsed < msPerHour) {
-         return 'Hace '+Math.round(elapsed/msPerMinute) + ' minutos';   
+        let min= Math.round(elapsed/msPerMinute);
+         return 'Hace '+ min + (min ==1 ? " minuto":' minutos');   
     }
 
     else if (elapsed < msPerDay ) {
-         return 'Hace '+ Math.round(elapsed/msPerHour ) + ' horas';   
+        let hs= Math.round(elapsed/msPerHour ) ;
+         return 'Hace '+ hs+ (hs==1 ? ' hora':' horas');   
     }
 
     else if (elapsed < msPerMonth) {
-        return 'Hace ' + Math.round(elapsed/msPerDay) + ' días';   
+        let d = Math.round(elapsed/msPerDay);
+        return 'Hace ' + d + (d==1 ? ' día' :' días');   
     }
 
     else if (elapsed < msPerYear) {
-        return 'Hace ' + Math.round(elapsed/msPerMonth) + ' meses';   
+        let m= Math.round(elapsed/msPerMonth)
+        return 'Hace ' + m + (m==1 ? ' mes' :' meses');   
     }
 
     else {
-        return 'Hace ' + Math.round(elapsed/msPerYear ) + ' años';   
+        let a = Math.round(elapsed/msPerYear );
+        return 'Hace ' + a + (a==1 ? ' año' :' años');   
     }
   }
-export {validatePassword, validateEmail, validateInstitution, get_antiguedad}
+
+const now= ()=>{
+    let ya = new Date();
+    return ya.getFullYear().toString() +"-" + (ya.getMonth()+1).toString()+"-" + ya.getDate().toString()
+}
+
+const fue_ayer = (dia:Date)=>{
+    let ayer = new Date();
+    ayer.setDate(ayer.getDate()-1);      
+    return (ayer.toDateString()==dia.toDateString())
+}
+
+const es_hoy=(dia:Date)=>{
+    let hoy = new Date();
+    return (hoy.toDateString()==dia.toDateString())
+}
+export {validatePassword, validateEmail, validateInstitution, get_antiguedad, now, fue_ayer, es_hoy}

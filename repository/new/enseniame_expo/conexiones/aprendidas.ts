@@ -19,4 +19,16 @@ const marcar_no_aprendida = async (id_senia:number, id_alumno:number)=>{
     if (error) throw error;
 }
 
-export {marcar_aprendida, marcar_no_aprendida}
+const cantidad_aprendidas = async (id_alumno:number) => {
+    
+    let { data: Alumno_Senia, error } = await supabase
+        .from('Alumno_Senia')
+        .select('*')
+        .eq("user_id",id_alumno)
+        .eq("aprendida",true)
+    if (error) throw error;
+    if (Alumno_Senia) return Alumno_Senia.length
+    return 0
+}
+
+export {marcar_aprendida, marcar_no_aprendida, cantidad_aprendidas}

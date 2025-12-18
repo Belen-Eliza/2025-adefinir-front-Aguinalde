@@ -57,7 +57,7 @@ abstract class Logged_User {
     }
     abstract goHome():void;
     abstract gotToModules():void;
-
+    abstract gotToProfile():void;
 }
 class Logged_Profesor extends Logged_User {
     institution: string;
@@ -75,7 +75,9 @@ class Logged_Profesor extends Logged_User {
     gotToModules():void{
         router.push('/tabs/Modulos_Profe');
     }
-
+    gotToProfile():void{
+        router.push('/tabs/perfil');
+    }
 }
 
 class Logged_Alumno extends Logged_User {
@@ -88,6 +90,9 @@ class Logged_Alumno extends Logged_User {
     }
     gotToModules():void{
         router.navigate('/tabs/Modulos_Alumno');
+    }
+    gotToProfile():void{
+        router.push('/tabs/PerfilAlumno');
     }
 }
 
@@ -135,4 +140,12 @@ type Calificaciones = {
   created_at: string
 }
 
-export {User,Logged_User, Logged_Profesor, Alumno, Profesor, Logged_Alumno, Senia,  Senia_Info, Modulo, icon_type, Calificaciones}
+type Avatar = {
+  id: number;
+  image_url: string;
+  racha_desbloquear: number;
+}
+
+export {User,Logged_User, Logged_Profesor, Alumno, Profesor, Logged_Alumno, Senia,  Senia_Info, Modulo, icon_type, Calificaciones,
+    Avatar
+}

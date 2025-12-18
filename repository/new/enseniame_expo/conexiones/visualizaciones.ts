@@ -26,6 +26,11 @@ const senias_aprendidas_alumno = async (id: number) =>{
     if (data && data.length>0) return data
 }
 
+const now= ()=>{
+    let ya = new Date();
+    return ya.getFullYear().toString() +"-" + (ya.getMonth()+1).toString()+"-" + ya.getDate().toString()
+}
+
 const alumno_ver_senia = async (user_id:number,senia_id:number)=>{
     
     const { data, error } = await supabase
@@ -51,7 +56,7 @@ const alumno_ver_senia = async (user_id:number,senia_id:number)=>{
                     const {  error } = await supabase
                         .from('Alumno_Modulo')
                         .insert([
-                            { id_modulo: id_modulo, id_alumno: user_id, completado: true },
+                            { id_modulo: id_modulo, id_alumno: user_id, completado: true, fecha_completado: now()},
                         ])
                         
                     if (error) throw error

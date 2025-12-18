@@ -13,7 +13,8 @@ export default function Layout(){
             },
           }}>
             <Stack.Screen name='index' options={{headerShown:false}}/>
-            
+            <Stack.Screen name='objetivos_activos' options={{headerShown:false , presentation: "modal"}}   />
+            <Stack.Screen name='reporte_historico' options={{headerShown:false , presentation: "modal"}}   />
             <Stack.Screen name='ranking' options={{headerShown:false , presentation: "modal"}}   />
 
     </Stack>)

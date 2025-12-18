@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, Pressable, Image, TextInput, Alert, ActivityIndicator, Modal, Touchable, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, FlatList, Pressable, Image, TextInput, Alert, ActivityIndicator, TouchableOpacity, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../utils/supabase";
@@ -8,7 +8,7 @@ import { ThemedText } from "@/components/ThemedText";
 import VideoPlayer from "@/components/VideoPlayer";
 import { Senia_Info } from "@/components/types";
 import { paleta } from "@/components/colores";
-import { buscar_senias_modulo } from "@/conexiones/modulos";
+import { buscar_senias_modulo, sumar_descripcion_senia_modulo } from "@/conexiones/modulos";
 import Toast from "react-native-toast-message";
 import { SmallPopupModal } from "@/components/modals";
 import { calificacionesModulo } from "@/conexiones/calificaciones";
@@ -16,6 +16,8 @@ import { estilos } from "@/components/estilos";
 import { get_antiguedad } from "@/components/validaciones";
 import { nombre_usuario } from "@/conexiones/gestion_usuarios";
 import { RatingStars } from "@/components/review";
+import { error_alert, success_alert } from "@/components/alert";
+import { BotonLogin } from "@/components/botones";
 
 interface Senia {
   id: number;
@@ -33,21 +35,29 @@ type Calificaciones = {
   id:number;
 }
 
+interface Senia_Modulo {
+  Senias: Senia_Info;
+  descripcion?: string
+}
+
 export default function DetalleModuloScreen() {
   const { id, nombre } = useLocalSearchParams<{ id: string, nombre?: string }>();
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [seniasModulo, setSeniasModulo] = useState<Senia_Info[]>([]);
+  const [seniasModulo, setSeniasModulo] = useState<Senia_Modulo[]>([]);
   const [calificaciones_modulo,setCalificacionesModulo] = useState<Calificaciones[]>()
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [diccionario, setDiccionario] = useState<Senia[]>([]);
   const [agregando, setAgregando] = useState(false);
 
-  const [selectedSenia, setSelectedSenia] = useState<Senia_Info | null>(null);
+  const [selectedSenia, setSelectedSenia] = useState<Senia_Modulo | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
   const [modalCalificaciones,setModalCalificaciones] = useState(false);
+
+  const [showDescripcionModal, setShowDescripcionModal] = useState(false);
+  const [descripcion_senia, setDescripcion] = useState("");
 
   const contexto = useUserContext();
 
@@ -64,7 +74,7 @@ export default function DetalleModuloScreen() {
   const fetchSeniasModulo = async () => {
     setLoading(true);
     try {
-      const s = await  buscar_senias_modulo(Number(id));    
+      const s = await  buscar_senias_modulo(Number(id));   
       setSeniasModulo(s || []);
       const calificaciones =await calificacionesModulo(Number(id));
       setCalificacionesModulo(calificaciones || []);
@@ -92,7 +102,7 @@ export default function DetalleModuloScreen() {
             if (error) {
               Alert.alert('Error', 'No se pudo eliminar la seña');
             } else {
-              setSeniasModulo(seniasModulo.filter(s => s.id !== seniaId));
+              setSeniasModulo(seniasModulo.filter(s => s.Senias.id !== seniaId));
               fetchSeniasModulo();
               Alert.alert('Seña eliminada', 'La seña fue eliminada del módulo correctamente.');
             }
@@ -107,7 +117,7 @@ export default function DetalleModuloScreen() {
     fetchSeniasModulo();
   };
 
-  const handleVerSenia = (senia: Senia_Info) => {
+  const handleVerSenia = (senia: Senia_Modulo) => {
     setSelectedSenia(senia);
     setModalVisible(true)
   };
@@ -127,10 +137,32 @@ export default function DetalleModuloScreen() {
     }
   };
 
+  const confirmar_descripcion = async () => {
+    try {
+      if (selectedSenia) {
+        await sumar_descripcion_senia_modulo(Number(id),selectedSenia?.Senias.id,descripcion_senia);
+        success_alert("La descripción se agregó exitosamente");
+        fetchSeniasModulo();
+        setShowDescripcionModal(false);
+        setDescripcion("");
+      }
+      
+    } catch (error) {
+      error_alert("No se pudo guardar la descripcion");
+      console.error(error)
+    }
+  }
+
+  const agregar_descripcion = ()=>{
+    setModalVisible(false)
+    setShowDescripcionModal(true);
+  
+  }
+
   const filteredDiccionario = diccionario.filter(
     s =>
       s.significado.toLowerCase().includes(search.toLowerCase()) &&
-      !seniasModulo.some(sm => sm.id === s.id)
+      !seniasModulo.some(sm => sm.Senias.id === s.id)
   );
 
   const promedio_reseñas = ()=>{
@@ -215,7 +247,7 @@ export default function DetalleModuloScreen() {
       ) : (
         <FlatList
           data={seniasModulo}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.Senias.id.toString()}
           onRefresh={handleRefresh}
           refreshing={refreshing}
           renderItem={({ item }) => (
@@ -223,7 +255,7 @@ export default function DetalleModuloScreen() {
               <View style={styles.row}>
                 <Image source={{ uri: /* item.thumbnail || */ 'https://img.youtube.com/vi/1/default.jpg' }} style={styles.thumbnail} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>{item.significado}</Text>
+                  <Text style={styles.cardTitle}>{item.Senias.significado}</Text>
                   <View style={{ flexDirection: 'row', gap: 8 }}>
                     <Pressable
                       style={styles.viewBtn}
@@ -233,7 +265,7 @@ export default function DetalleModuloScreen() {
                     </Pressable>
                     <Pressable
                       style={[styles.viewBtn, { backgroundColor: '#e74c3c' }]}
-                      onPress={() => handleEliminarSenia(item.id)}
+                      onPress={() => handleEliminarSenia(item.Senias.id)}
                     >
                       <Ionicons name="trash" size={18} color="#fff" />
                     </Pressable>
@@ -252,28 +284,69 @@ export default function DetalleModuloScreen() {
         <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Guardar</Text>
       </Pressable>
 
-        <SmallPopupModal title={selectedSenia?.significado} modalVisible={modalVisible} setVisible={setModalVisible}>
+      {/* Modal para descripcion */}
+        <Modal
+          visible={showDescripcionModal}
+          animationType="slide"
+          transparent={true}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Añade una descripción para la seña "{selectedSenia?.Senias.significado}"</Text>                                       
+              <TextInput
+                style={[styles.input, { height: 60 }]}
+                placeholder="Comentario (opcional)"
+                value={descripcion_senia}
+                onChangeText={setDescripcion}
+                multiline
+              />
+              <View style={styles.modalButtons}>
+                <Pressable style={styles.button} onPress={confirmar_descripcion} disabled={descripcion_senia === ""}>
+                  <Text style={styles.buttonText}>Confirmar</Text>
+                </Pressable>
+                <Pressable style={styles.button} onPress={() => setShowDescripcionModal(false)}>
+                  <Text style={styles.buttonText}>Cerrar</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <SmallPopupModal title={selectedSenia?.Senias.significado} modalVisible={modalVisible} setVisible={setModalVisible}>
           {selectedSenia && (
             <VideoPlayer 
-              uri={selectedSenia.video_url}
+              uri={selectedSenia.Senias.video_url}
               style={styles.video}
             />
           )}
-          {selectedSenia && selectedSenia.Categorias ?
+          {selectedSenia ?
           <ThemedText style={{margin:10}}>
             <ThemedText type='defaultSemiBold'>Categoría:</ThemedText> {''}
-            <ThemedText>{selectedSenia.Categorias.nombre}</ThemedText>
+            <ThemedText>{selectedSenia.Senias.Categorias.nombre}</ThemedText>
           </ThemedText>
             :null
           }
               
-              {selectedSenia && selectedSenia.Users  ?
-              <ThemedText style={{margin:10}}>
-                <ThemedText type='defaultSemiBold'>Autor:</ThemedText> {''}
-                <ThemedText>{selectedSenia.Users.username} </ThemedText> {''}
-              </ThemedText>
-                :null
-              }
+          {selectedSenia && selectedSenia.Senias.Users  ?
+          <ThemedText style={{margin:10}}>
+            <ThemedText type='defaultSemiBold'>Autor:</ThemedText> {''}
+            <ThemedText>{selectedSenia.Senias.Users.username} </ThemedText> {''}
+          </ThemedText>
+            :null
+          }
+
+          {selectedSenia ?
+          <View >
+          <ThemedText style={{margin:10}}>
+            <ThemedText type='defaultSemiBold'>Descripción:</ThemedText> {''}
+            <ThemedText>{selectedSenia.descripcion? selectedSenia.descripcion : "  -  "}</ThemedText>
+          </ThemedText>
+
+          <BotonLogin callback={()=>agregar_descripcion()} textColor={"black"} bckColor={paleta.aqua} text={"Editar descripción"}  />
+            
+          </View>
+            :null
+          }
 
         </SmallPopupModal>
 
@@ -282,7 +355,8 @@ export default function DetalleModuloScreen() {
               <View>
 
                 <FlatList
-                  keyExtractor={(item)=>item.id_alumno.toString()}
+                style={[{maxHeight:500}]}
+                  keyExtractor={(item)=>item.id.toString()}
                   data={calificaciones_modulo}
                   renderItem={({ item }) => (
                     <View style={[styles.card,estilos.shadow, {marginBottom:5,marginHorizontal:5}]}>
@@ -291,7 +365,7 @@ export default function DetalleModuloScreen() {
                         <ThemedText lightColor="gray">{get_antiguedad(item.created_at)}</ThemedText>{' - '}
                         <ThemedText lightColor="gray">{item.Users? item.Users.username: "Anónimo"}</ThemedText>
                       </ThemedText>
-                      <ThemedText style={{marginVertical: 10}} lightColor="#404243ff">{item.comentario ? item.comentario : null}</ThemedText>
+                      <ThemedText style={{marginTop: 10}} lightColor="#404243ff">{item.comentario ? item.comentario : null}</ThemedText>
                     </View> 
                   )}
 
@@ -320,6 +394,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#222',
     alignSelf: 'center',
+    textAlign:"center",
     marginBottom: 18,
     marginTop:15
   },
@@ -381,5 +456,51 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 16/9,
     borderRadius: 12,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+    color: "#10bdef"
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  button: {
+    backgroundColor: "#20bfa9",
+    paddingVertical: 10,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 15,
+    paddingHorizontal: 5,
   },
 });

@@ -7,7 +7,9 @@ import { SmallPopupModal } from '@/components/modals';
 
 type Mensual = { label: string; anio: number; mes: number; cantidad: number };
 type ModComp = { id: number; nombre: string; fecha: string };
-type ObjetivoPersonal = { id?: number; user_id: number; mes: number; anio: number; meta_mensual: number; progreso_actual: number; completado: boolean };
+type ObjetivoPersonal = { id?: number; user_id: number; mes: number; 
+                          anio: number; meta_mensual: number; 
+                          progreso_actual: number; completado: boolean };
 
 export default function ReporteHistoricoScreen() {
   const { user } = useUserContext();

@@ -1,16 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TouchableOpacity, FlatList, ActivityIndicator, TextInput } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback,  useState } from 'react';
+import { View, Text, StyleSheet,  FlatList, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { error_alert } from '@/components/alert';
-import { paleta, paleta_colores } from '@/components/colores';
+import { paleta } from '@/components/colores';
 
 import { ThemedText } from '@/components/ThemedText';
-import VideoPlayer from '@/components/VideoPlayer';
 import { estilos } from '@/components/estilos';
 import Toast from 'react-native-toast-message';
 import { getRanking } from '@/conexiones/calificaciones';
-import { RatingCard, RatingStars } from '@/components/review';
+import { RatingCard } from '@/components/review';
 import { useUserContext } from '@/context/UserContext';
 
 type DatosRanking ={
@@ -23,9 +21,7 @@ type DatosRanking ={
 export default function RankingProfes (){
 
     const [loading, setLoading] = useState(false);
-    const [dataRanking,setDataRanking] = useState<DatosRanking[]>()
-
-    const contexto = useUserContext();
+    const [dataRanking,setDataRanking] = useState<DatosRanking[]>()    
 
     useFocusEffect(
         useCallback(() => {
@@ -101,14 +97,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     zIndex: 2,
     letterSpacing: 0.5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#20bfa9',
-    fontWeight: '500',
-    marginBottom: 18,
-    alignSelf: 'center',
-    zIndex: 2,
   },
 
   card: {

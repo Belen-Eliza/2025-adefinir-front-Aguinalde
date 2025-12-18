@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { View, StyleSheet, Text } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { paleta } from "./colores";
@@ -14,6 +14,21 @@ function RatingStars (props: {puntaje:number, color:string}){
             <Ionicons name={props.puntaje>=5 ? "star": "star-outline"} size={24} color={props.color} />
         </View>
     )
+}
+
+function AntDesignStars(props: {puntaje:number, color:string}){
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
+      {[...Array(5)].map((_, i) => (
+        <AntDesign
+          key={i}
+          name="star"
+          size={20}
+          color={props.puntaje >= i+1 ? props.color : "#E0E0E0"}
+        />
+      ))}
+    </View>
+  )
 }
 
 type Props = {
@@ -36,7 +51,7 @@ function RatingCard({ nombre, rating, cant_reviews }: Props){
     </View>
     );
 }
-export {RatingStars, RatingCard}
+export {RatingStars, RatingCard, AntDesignStars}
 
 const styles = StyleSheet.create({
   card: {

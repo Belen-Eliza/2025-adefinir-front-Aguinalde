@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, FlatList,  TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { Senia_Info, Modulo } from "@/components/types";
-import { buscar_modulo, buscar_senias_modulo } from "@/conexiones/modulos";
+import { alumno_completo_modulo, buscar_modulo, buscar_senias_modulo, completar_modulo_alumno } from "@/conexiones/modulos";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import VideoPlayer from "@/components/VideoPlayer";
@@ -19,15 +19,18 @@ import { RatingStars } from "@/components/review";
 import { estilos } from "@/components/estilos";
 import { get_antiguedad } from "@/components/validaciones";
 import { AntDesign } from "@expo/vector-icons";
+import { ganar_insignia_senia } from "@/conexiones/insignias";
+
 
 type Senia_Aprendida ={
   senia: Senia_Info;
   vista: boolean;
-  aprendida: boolean
+  aprendida: boolean;
+  descripcion?: string
 }
 type Calificaciones = {
   id_alumno: number;
-  Users?: {username:string};
+  Users?: {username:string, id:number};
   id_modulo: number;
   puntaje: number;
   comentario? : string;
@@ -39,7 +42,9 @@ export default function ModuloDetalleScreen() {
   const { id=0 } = useLocalSearchParams<{ id: string }>();
   if (id==0) router.back();
   const [modulo,setModulo] = useState<Modulo | undefined>();
+  const [completado,setCompletado] =useState(false);
   const [senias,setSenias] = useState<Senia_Aprendida[]>();
+  const [cant_aprendidas, setCantAprendidas] = useState(0);
   const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({});
   const [calificaciones_modulo,setCalificacionesModulo] = useState<Calificaciones[]>()
 
@@ -70,6 +75,9 @@ export default function ModuloDetalleScreen() {
       setModulo(m || []);
       const calificaciones =await calificacionesModulo(Number(id));
       setCalificacionesModulo(calificaciones || []);
+
+      const c = await alumno_completo_modulo(contexto.user.id,Number(id));            
+      setCompletado(c);
     } catch (error) {
       error_alert("No se pudo cargar el módulo");
       console.error(error)
@@ -78,7 +86,7 @@ export default function ModuloDetalleScreen() {
 
   const fetch_senias = async ()=>{
     try {
-      const s = await  buscar_senias_modulo(Number(id));
+      const s = await  buscar_senias_modulo(Number(id));      
       const vistas = await visualizaciones_alumno(contexto.user.id);
       const aprendidas = await senias_aprendidas_alumno(contexto.user.id);
 
@@ -93,19 +101,22 @@ export default function ModuloDetalleScreen() {
       const fue_aprendida =(senia_id:number)=>{
         let res = false;
         aprendidas?.forEach(each=>{
-          if (each.senia_id==senia_id && each.aprendida) res= true
+          if (each.senia_id==senia_id && each.aprendida) {
+            res= true;
+            setCantAprendidas(prev=>prev+=1);            
+          }
         });
         return res
       }
 
       const senias_vistas = s?.map(each=>{
-        let vista = fue_vista(each.id);
-        return {senia:each, vista:vista}
+        let vista = fue_vista(each.Senias.id);
+        return {senia:each.Senias, vista:vista, descripcion:each.descripcion}
       });
 
       const senias_vistas_aprendidas =senias_vistas?.map(each=>{
         let aprendida = fue_aprendida(each.senia.id);
-        return {senia:each.senia, vista:each.vista,aprendida:aprendida}
+        return {senia:each.senia, vista:each.vista,aprendida:aprendida,descripcion:each.descripcion}
       });
 
       setSenias(senias_vistas_aprendidas || []);
@@ -145,31 +156,65 @@ export default function ModuloDetalleScreen() {
         })
         .then(()=>{
           item.vista= true
-        })
-        
+        })        
     }
   }
 
-  const toggleAprendida = async (info_senia: Senia_Aprendida, value: boolean) => {
-  
+  const toggleAprendida = async (info_senia: Senia_Aprendida, value: boolean) => {    
     if (value) {
       marcar_aprendida(info_senia.senia.id,contexto.user.id)
         .catch(reason =>{
           console.error(reason);
           error_alert("No se pudo actualizar el estado")
         })
-    } else {
+        .then(async ()=>{
+          success_alert('Marcada como aprendida' );
+          info_senia.aprendida= value;
+          setAprendidasMap((prev) => ({ ...prev, [info_senia.senia.id]: value }));
+          setCantAprendidas((prev) => (prev+=1));  
+          //si aprendiste todas, completar el módulo:
+          if (!completado && todas_aprendidas()){
+            try {
+              setModalVisible(false);
+              await completar_modulo_alumno(contexto.user.id,Number(id));
+              //router.push({ pathname: '/tabs/Modulos_Alumno/lecciones/completado', params: { id: id } })
+            } catch (error) {
+              console.error(error);
+              error_alert("No se pudo guardar tu progreso.");
+            }
+          }
+          
+        })
+      ganar_insignia_senia(contexto.user.id);
+    } else if (!completado) {
       marcar_no_aprendida(info_senia.senia.id,contexto.user.id)
         .catch(reason=>{
           console.error(reason);
-          error_alert("No se pudo actualizar el estado")
+          error_alert("No se pudo actualizar el estado");
         })
-    }
-    setAprendidasMap((prev) => ({ ...prev, [info_senia.senia.id]: value }));
-    success_alert(value ? 'Marcada como aprendida' : 'Marcada como no aprendida')
-    info_senia.aprendida= value;
+        .then(()=>{
+          success_alert( 'Marcada como no aprendida');
+          info_senia.aprendida= value;
+          setCantAprendidas((prev) => (prev-=1));   
+          setAprendidasMap((prev) => ({ ...prev, [info_senia.senia.id]: value }));
+        })
+    } else {
+      alert("No puedes marcar como no aprendida una seña en un módulo completado");
+    }  
   }
 
+  const todas_aprendidas = ()=>{    
+    let res = true;
+    if (senias){
+      senias.forEach(s=>{
+        if (!s.aprendida) res = false
+      })
+    } else {
+      res=false;
+    }
+    return res
+  }
+  
   const promedio_reseñas = ()=>{
     let promedio =0;
     calificaciones_modulo?.forEach(each=>{
@@ -188,6 +233,7 @@ export default function ModuloDetalleScreen() {
       }
     } catch (e) {
       // Si hay error, no bloquea la vista
+      console.error(e);
     }
   };
 
@@ -203,6 +249,7 @@ export default function ModuloDetalleScreen() {
   const enviarCalificacion = async () => {
     try {
       await calificarModulo(Number(id), contexto.user.id, puntaje, comentario);
+      fetch_modulo();
       setShowCalificacionModal(false);
       setYaCalificado(true);
       success_alert("¡Gracias por tu calificación!");
@@ -225,9 +272,9 @@ export default function ModuloDetalleScreen() {
               style={[styles.backBtn, { marginBottom: 10, marginTop:30, flexDirection: 'row', alignItems: 'center' }]}
               onPress={() => {   contexto.user.gotToModules()   }}
             >
-              <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
-              <Text style={styles.backBtnText}>Volver</Text>
-            </Pressable>
+        <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
+        <Text style={styles.backBtnText}>Volver</Text>
+      </Pressable>
       <Text style={styles.title}> {modulo?.nombre}</Text>
 
       <TouchableOpacity style={{ backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 14, elevation: 2 }} onPress={()=>setModalCalificaciones(true)}>
@@ -248,9 +295,15 @@ export default function ModuloDetalleScreen() {
           <ThemedText lightColor="gray">Este módulo aún no tiene calificaciones</ThemedText>
           </>
         }
-      </TouchableOpacity>
+      </TouchableOpacity>  
+
+      <Pressable onPress={()=>router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id } })} 
+        style={styles.ctaButtonCursos}>
+        <Ionicons name="flash" size={24} color="#fff" style={styles.buttonIcon} />
+        <Text style={styles.ctaButtonTextCursos}>Empezar lección</Text>
+      </Pressable>    
       
-      <FlatList
+      <FlatList      
         data={senias ? senias : []}
         keyExtractor={(item) => item.senia.id.toString()}
         ListFooterComponent={<View style={{marginVertical:28}}></View>}
@@ -270,7 +323,7 @@ export default function ModuloDetalleScreen() {
             
           </View>
         )}
-      />
+      />      
 
         <SmallPopupModal title={selectedSenia?.senia.significado} modalVisible={modalVisible} setVisible={setModalVisible}>
           {selectedSenia && (
@@ -295,13 +348,21 @@ export default function ModuloDetalleScreen() {
             :null
           }
 
+          {selectedSenia && selectedSenia.descripcion && selectedSenia.descripcion!=""  ?
+          <ThemedText style={{margin:10}}>
+            <ThemedText type='defaultSemiBold'>Descripción:</ThemedText> {''}
+            <ThemedText>{selectedSenia.descripcion} </ThemedText> {''}
+          </ThemedText>
+            :null
+          }
+
           {/* Toggle Aprendida */}
           {selectedSenia && (
             <View style={styles.row}>
               <Checkbox
-                value={!!aprendidasMap[selectedSenia.senia.id]}
+                value={selectedSenia.aprendida}
                 onValueChange={(v) => toggleAprendida(selectedSenia, v)}
-                color={aprendidasMap[selectedSenia.senia.id] ? '#20bfa9' : undefined}
+                color={selectedSenia.aprendida ? '#20bfa9' : undefined}
                 style={styles.checkbox}
               />
               <Text style={styles.checkboxLabel}>Aprendida</Text>
@@ -357,6 +418,7 @@ export default function ModuloDetalleScreen() {
             <View>
 
               <FlatList
+              style={[{maxHeight:500}]}
                 keyExtractor={(item)=>item.id.toString()}
                 data={calificaciones_modulo}
                 renderItem={({ item }) => (
@@ -365,6 +427,9 @@ export default function ModuloDetalleScreen() {
                     <ThemedText>
                       <ThemedText lightColor="gray">{get_antiguedad(item.created_at)}</ThemedText>{' - '}
                       <ThemedText lightColor="gray">{item.Users? item.Users.username: "Anónimo"}</ThemedText>
+                      {item.Users && item.Users.id==contexto.user.id ? 
+                        <ThemedText lightColor="gray">  (Yo)</ThemedText>:null
+                      }
                     </ThemedText>
                     <ThemedText style={{marginVertical: 10}} lightColor="#404243ff">{item.comentario ? item.comentario : null}</ThemedText>
                   </View> 
@@ -510,5 +575,26 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  ctaButtonCursos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: paleta.dark_aqua,
+    borderRadius: 14,
+    height: 50,
+    marginVertical: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  ctaButtonTextCursos: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+   buttonIcon: {
+    marginRight: 8,
   },
 });
