@@ -16,7 +16,7 @@ const hash = async (text: string) =>{
 
 export  const UserContext = createContext({
     
-    user: new Logged_Alumno("","","",0),
+    user: new Logged_Alumno("","","",0,0,0,0,0),
     isLoggedIn: false,
     cambiarNombre: (nombre_nuevo: string) => { },
     cambiar_mail: (mail_nuevo: string) => { },
@@ -28,7 +28,7 @@ export  const UserContext = createContext({
 });
 
 export const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0));
+    const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0,0,0,0,0));
     
     const [isLoggedIn, setIsLoggedIn] = useState(false); 
 
