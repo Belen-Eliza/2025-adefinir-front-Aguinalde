@@ -11,3 +11,14 @@ Metacello new
    githubUser: 'uca-argentina' project: 'project-template' commitish: 'master' path: 'repository';
    load: 'development'.
 ```
+
+
+## Dependencias
+
+* npx expo install expo-checkbox
+* npm install --save react-native-toast-message
+* npm i @emailjs/react-native
+* npx expo install expo-crypto
+* npx expo install @supabase/supabase-js @react-native-async-storage/async-storage @rneui/themed
+* npm i @react-native-picker/picker
+* npm install react-native-dropdown-picker
