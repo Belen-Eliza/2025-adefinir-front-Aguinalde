@@ -48,7 +48,7 @@ const ingresar = async  (mail:string, contraseña: string) =>{
     
     if (user ) {
       const password_hash = await hash(contraseña);
-      if (password_hash!= user[0].hashed_password || mail!= user[0].mail) {
+      if (password_hash!= user.hashed_password || mail!= user.mail) {
         error_alert("Usuario o contraseña incorrectos");
         
       } else{
@@ -82,7 +82,7 @@ const registrar_profe = async (user:Profesor )=>{
   try {
     const {data, error } = await supabase
         .from('Users')
-        .insert(user)
+        .insert(user.getUser())
         .select("*")
         .single()
         ;
@@ -93,7 +93,7 @@ const registrar_profe = async (user:Profesor )=>{
     }
     if (data ) {      
       //insertar profe
-      const { data: profe, error } = await supabase.from('Alumnos')
+      const { data: profe, error } = await supabase.from('Profesores')
                                       .insert([{id:data.id,institucion:user.institution,is_admin:false}])
                                       .select().single();
       if (error) throw error

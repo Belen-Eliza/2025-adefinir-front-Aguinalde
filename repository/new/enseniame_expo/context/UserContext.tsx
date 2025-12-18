@@ -16,7 +16,7 @@ const hash = async (text: string) =>{
 
 export  const UserContext = createContext({
     
-    user: new Logged_Alumno("","","",0,0,0,0,0),
+    user: new  Logged_User("","","",0),
     isLoggedIn: false,
     cambiarNombre: (nombre_nuevo: string) => { },
     cambiar_mail: (mail_nuevo: string) => { },
@@ -115,7 +115,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
 
     const logout = async () => {
         setIsLoggedIn(false);
-        setUser(new Logged_Alumno("","","",0))
+        setUser(new Logged_Alumno("","","",0,0,0,0,0))
         try {
             await  AsyncStorage.removeItem("token");
         } catch (error) {
@@ -139,11 +139,17 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
                 const mailNorm: string = String(raw?.mail ?? '').trim().toLowerCase();
                 const usernameNorm: string = String(raw?.username ?? '').trim() || 'Alumno';
                 const passwordHash: string = String(raw?.hashed_password ?? '');
-                const institution: string | null = raw?.institution ? String(raw.institution).trim() : null;
+                
                 if (isProf) {
-                    setUser(new Logged_Profesor(mailNorm, usernameNorm, passwordHash, institution ?? '', id));
+                    const { data: profe, error } = await supabase.from('Profesores').select('*').eq('id', id).single();
+                    const institution: string  =  String(profe.institution).trim() ;
+                    if (error) throw error
+                    setUser(new Logged_Profesor(mailNorm, usernameNorm, passwordHash, institution ?? '', id,profe.is_admin));
                 } else {
-                    setUser(new Logged_Alumno(mailNorm, usernameNorm, passwordHash, id));
+                    const { data: alumno, error } = await supabase.from('Alumnos').select('*').eq('id', id).single();
+                    if (error) throw error
+                    setUser(new Logged_Alumno(mailNorm, usernameNorm, passwordHash, id,alumno.racha,
+                                            alumno.racha_maxima,alumno.xp,alumno.coins,user[0].avatar));
                 }
                 console.log(user)
             }
