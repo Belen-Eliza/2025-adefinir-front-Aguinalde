@@ -7,7 +7,7 @@ import { LeaderboardMyPositionCard } from '@/components/leaderboard/LeaderboardM
 import { fetchGroupLeaderboard } from '@/conexiones/leaderboard';
 import { getUserClub, getClubUsersProgress } from '@/conexiones/leaderboard_grupo_lectura';
 import type { PeriodType, LeaderboardEntry, LeaderboardResponse } from '@/components/leaderboard/types';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 
 export default function LeaderboardGrupoScreen() {
   const { user } = useUserContext();

@@ -25,10 +25,10 @@ export default function Index() {
         <ThemedText type="title">¡Hola!</ThemedText>
         <HelloWave />
       </ThemedView>
-
+{/* 
       <Pressable onPress={()=>contexto.login_app(new Logged_Profesor("admin@mail.com","Administrador","","HQ",1))}><ThemedText>Login debug</ThemedText></Pressable>
       <Pressable onPress={()=>contexto.login_app(new Logged_Alumno("belcaguinalde@uca.edu.ar","Belu","",8))}><ThemedText>Login alumno</ThemedText></Pressable>
-      
+       */}
       <ThemedView style={styles.stepContainer}>
         <ThemedText>
           <ThemedText type="subtitle">¿Qué es </ThemedText>{''}

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 import type { PeriodType, LeaderboardResponse, LeaderboardEntry } from '@/components/leaderboard/types';
 
 

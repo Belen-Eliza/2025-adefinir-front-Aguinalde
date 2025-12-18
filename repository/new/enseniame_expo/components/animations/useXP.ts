@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 import { fetchMyXP } from '@/conexiones/xp';
 
 export function useXP(userId: number | undefined) {

@@ -1,5 +1,5 @@
 import { Avatar } from '@/components/types';
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 
 const my_avatar = async (id:number) => {
     let { data: Avatar, error } = await supabase

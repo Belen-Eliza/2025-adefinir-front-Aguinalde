@@ -10,7 +10,7 @@ import { estilos } from '@/components/estilos';
 import { error_alert,success_alert } from '@/components/alert';
 import { validateEmail, validatePassword, validateInstitution } from '@/components/validaciones';
 import Toast from 'react-native-toast-message';
-import { registrarse } from '@/conexiones/gestion_usuarios';
+import { registrar_profe } from '@/conexiones/gestion_usuarios';
 import { Profesor } from '@/components/types';
 import { useUserContext } from '@/context/UserContext';
 import { BotonLogin } from '@/components/botones';
@@ -85,7 +85,7 @@ export default function Signup() {
 
     if (isEmailValid && isNameValid && isPasswordValid && isPasswordConfirmValid && isInstitutionValid) {
       const user = new Profesor(lower_case_mail,name,password1,institucion);
-      const usuario_log = await registrarse(user);
+      const usuario_log = await registrar_profe(user);
       if (usuario_log) login_app(usuario_log);
            
     }

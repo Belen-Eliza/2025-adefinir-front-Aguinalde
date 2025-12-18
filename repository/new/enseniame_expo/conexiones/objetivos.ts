@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 
 const mis_objetivos_completados = async (id_alumno:number) => {
     

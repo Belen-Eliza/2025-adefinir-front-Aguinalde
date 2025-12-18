@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { error_alert,success_alert } from '@/components/alert';
 import { validateEmail, validatePassword, } from '@/components/validaciones';
 import Toast from 'react-native-toast-message';
-import { registrarse } from '@/conexiones/gestion_usuarios';
+import { registrar_alumno } from '@/conexiones/gestion_usuarios';
 import { Alumno } from '@/components/types';
 import { useUserContext } from '@/context/UserContext';
 import { BotonLogin } from '@/components/botones';
@@ -72,7 +72,7 @@ export default function Signup() {
 
     if (isEmailValid && isNameValid && isPasswordValid && isPasswordConfirmValid ) {
       const user = new Alumno(lower_case_mail,name,password1);
-      const usuario_log = await registrarse(user);
+      const usuario_log = await registrar_alumno(user);
       if (usuario_log) login_app(usuario_log);
     }
     else {

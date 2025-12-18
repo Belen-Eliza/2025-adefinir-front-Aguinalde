@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 
 const mi_racha = async (id_alumno:number) => {
     

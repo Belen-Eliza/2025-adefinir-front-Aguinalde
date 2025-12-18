@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabase } from '../utils/supabase'
 import { cantidad_aprendidas } from './aprendidas';
 import { modulos_completados_por_alumno } from './modulos';
 import { mis_objetivos_completados } from './objetivos';

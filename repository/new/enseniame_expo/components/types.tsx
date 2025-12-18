@@ -45,15 +45,17 @@ abstract class Logged_User {
     hashed_password: string;
     id:number;
     is_prof: boolean;
-    institution: string;
+    avatar?:string
+    //institution: string;
 
-    constructor(mail:string,name: string,pass:string,id:number){
+    constructor(mail:string,name: string,pass:string,id:number,avatar?:string){
         this.mail=mail;
         this.username=name;
         this.hashed_password=pass;
         this.id=id;
         this.is_prof=false;
-        this.institution=""
+        this.avatar=avatar;
+        //this.institution=""
     }
     abstract goHome():void;
     abstract gotToModules():void;
@@ -62,11 +64,13 @@ abstract class Logged_User {
 class Logged_Profesor extends Logged_User {
     institution: string;
     is_prof: true;
+    is_admin:boolean;
 
-    constructor(mail:string,name: string,pass:string, institucion:string,id:number){
-        super(mail,name,pass,id);
+    constructor(mail:string,name: string,pass:string, institucion:string,id:number,is_admin:boolean,avatar?:string){
+        super(mail,name,pass,id,avatar);
         this.institution=institucion;
         this.is_prof=true;
+        this.is_admin=is_admin;
     }
 
     goHome(): void {
@@ -81,9 +85,17 @@ class Logged_Profesor extends Logged_User {
 }
 
 class Logged_Alumno extends Logged_User {
+    racha: number;
+    racha_maxima: number;
+    xp: number;
+    coins:number;
 
-    constructor(mail:string,name: string,pass:string,id:number){
-        super(mail,name,pass,id);
+    constructor(mail:string,name: string,pass:string,id:number,racha:number,racha_maxima:number,xp:number,coins:number,avatar?:string){
+        super(mail,name,pass,id,avatar);
+        this.racha=racha;
+        this.racha_maxima= racha_maxima;
+        this.xp=xp;
+        this.coins=coins;
     }
     goHome(): void {
             router.push('/tabs/HomeStudent');
