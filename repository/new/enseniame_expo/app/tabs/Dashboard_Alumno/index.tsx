@@ -262,11 +262,11 @@ export default function DashboardAlumnoScreen() {
             <Text style={styles.titleCursos}>Dashboard de Aprendizaje</Text>
             <GlobalProgress learned={progresoGlobal.learned} total={progresoGlobal.total} />
             <View style={{ marginTop: 12, alignItems: 'center' }}>
-              <Pressable onPress={() => router.navigate('/tabs/objetivos_activos')}>
+              <Pressable onPress={() => router.navigate('/tabs/Dashboard_Alumno/objetivos_activos')}>
                 <Text  style={{ color: '#0a7ea4', fontWeight: 'bold' }}>
                 Ver objetivos activos
               </Text></Pressable>
-              <Pressable onPress={() => router.navigate('/tabs/reporte_historico' )}>
+              <Pressable onPress={() => router.navigate('/tabs/Dashboard_Alumno/reporte_historico' )}>
                 <Text style={{ color: '#0a7ea4', fontWeight: 'bold', marginTop: 6 }}>
                 Ver reporte histórico
               </Text></Pressable>

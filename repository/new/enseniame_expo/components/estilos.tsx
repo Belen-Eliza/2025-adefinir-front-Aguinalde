@@ -19,4 +19,13 @@ export const estilos = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  thinGrayBottomBorder:{
+      borderBottomColor:"lightgray",
+      borderBottomWidth: 1
+    },
+  ver_debug: {
+    backgroundColor: "blue",
+    borderWidth: 3,
+    borderColor: "red"
+  }
 })

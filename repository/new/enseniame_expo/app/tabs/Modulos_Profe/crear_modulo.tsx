@@ -48,9 +48,9 @@ export default function CrearModuloScreen() {
     setLoading(true);
     try {
       if (isEdit && params.id) {
-        const exito = await editar_modulo(Number(params.id),nombre,descripcion,icon)
+        await editar_modulo(Number(params.id),nombre,descripcion,icon)
       } else {
-        const exito = await crear_modulo(nombre,descripcion,icon,contexto.user.id);
+        await crear_modulo(nombre,descripcion,icon,contexto.user.id);
       }
       contexto.user.gotToModules();
     } catch (e: any) {
@@ -135,14 +135,14 @@ export default function CrearModuloScreen() {
       </TouchableOpacity>
 
       <SmallPopupModal title="Seleccionar ícono" modalVisible={modalIconVisible} setVisible={setIconModalVisible}>
-        <View style={[styles.iconRow,estilos.centrado]}>
+        <View style={[estilos.centrado]}>
           <FlatList
             data={iconOptions}
             renderItem={renderIcons}
-            keyExtractor={(item) => item.toString()}
-            contentContainerStyle={[estilos.centrado,styles.iconRow,{flexWrap:"wrap"}]}
+            keyExtractor={(item) => item.toString()}            
             style={[{maxHeight:400}]}
-            numColumns={5}
+            numColumns={5}            
+            columnWrapperStyle={{marginHorizontal:10}}
           />
         </View>
           

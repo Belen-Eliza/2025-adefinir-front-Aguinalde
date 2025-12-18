@@ -1,90 +1,230 @@
-import React, { useCallback, useState } from "react";
-import { View, Text, Pressable, StyleSheet, FlatList, Modal, ScrollView } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, Pressable, StyleSheet, FlatList, Modal, ScrollView, TextInput, Touchable, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import {  Modulo } from "@/components/types";
-import { todos_los_modulos } from "@/conexiones/modulos";
+import {  mis_modulos_completos,  } from "@/conexiones/modulos";
 import { calificacionesModulo } from "@/conexiones/calificaciones";
 import Toast from "react-native-toast-message";
-import { AntDesign } from "@expo/vector-icons";
 import { modulosCalificados, promedio_reseñas } from "@/conexiones/calificaciones";
 import { ThemedText } from "@/components/ThemedText";
+import { useUserContext } from "@/context/UserContext";
+import { AntDesignStars } from "@/components/review";
+import { paleta } from "@/components/colores";
+import { error_alert } from "@/components/alert";
 
 interface ModuloCalificado extends Modulo {
-  promedio: number
+  promedio: number;
+  completado: boolean
 }
 
 export default function ModulosScreen() {
   const router = useRouter();
 
-  //const [modulos,setModulos] = useState<Modulo[]>();
-  const [modulos,setModulos] = useState<ModuloCalificado[]>();
+  const [modulos,setModulos] = useState<ModuloCalificado[]>([]);
+  const [filteredModulos, setFilteredModulos] = useState<ModuloCalificado[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [calificacionesPorModulo, setCalificacionesPorModulo] = useState<Record<number, any[]>>({});
-  const [promediosPorModulo, setPromediosPorModulo] = useState<Record<number, number>>({});
   const [comentariosModalVisible, setComentariosModalVisible] = useState(false);
-  const [comentariosSeleccionados, setComentariosSeleccionados] = useState<any[]>([]);
+  const [comentariosSeleccionados, setComentariosSeleccionados] = useState<any[]>([]);  
+  const [mostrar_completados,setMostrarCompletados] = useState(false);
+  const [mostrar_no_completados,setMostrarNoCompletados] = useState(false);
+  const [populares,setPopulares]= useState(false);
+  const [loading,setLoading] = useState(false);
+
+  const contexto = useUserContext();
 
   useFocusEffect(
       useCallback(() => {
-        fetch_modulos();
+        
+        fetch_modulos();        
+        setMostrarCompletados(false);
+        setPopulares(false);
+        setMostrarNoCompletados(false);
         return () => {};
       }, [])
-    );
+  );
+
+  useEffect(() => {
+      filterModulosBusqueda();
+    }, [searchQuery, modulos]);
 
   const fetch_modulos = async ()=>{
-    const m2 = await modulosCalificados();
+    try {
+      setLoading(true);
+      const m2 = await modulosCalificados();
+      const completados = await mis_modulos_completos(contexto.user.id);
+
+      const lo_complete = (id_modulo:number)=>{
+        let res = false;
+        completados.forEach(m=>{
+          if (m.id_modulo==id_modulo) res=true
+        });
+        return res
+      }
     
-    const res =m2?.map(e=>{        
-        let prom = promedio_reseñas(e.Calificaciones_Modulos)        
-        return {id: e.id, descripcion: e.descripcion,icon:e.icon,nombre:e.nombre,promedio:prom, autor:e.autor}
+      const res =m2?.map( e=>{        
+        let prom = promedio_reseñas(e.Calificaciones_Modulos);
+        fetchCalificaciones(e.id)
+        let completo = lo_complete(e.id);      
+        return {id: e.id, descripcion: e.descripcion,icon:e.icon,nombre:e.nombre,promedio:prom, autor:e.autor, completado:completo}
       });
-    setModulos(res || []);    
+      if (res ){
+        const ordenados = ordenarModulosAlfabetico(res);
+        setModulos(ordenados || []);
+        setFilteredModulos(ordenados || []);
+      }
+    } catch (error) {
+      console.error(error);
+      error_alert('No se pudieron cargar los módulos');
+    } finally{
+      setLoading(false)
+    }       
   }
 
-      {/** const fetchCalificaciones = async (id_modulo: number) => {
+  const fetchCalificaciones = async (id_modulo: number) => {
     try {
       const calificaciones = await calificacionesModulo(id_modulo) || [];
       setCalificacionesPorModulo(prev => ({ ...prev, [id_modulo]: calificaciones }));
-      // Calcula el promedio
-      const puntajes = calificaciones.map(c => c.puntaje);
-      const promedio = puntajes.length ? puntajes.reduce((a, b) => a + b, 0) / puntajes.length : 0;
-      setPromediosPorModulo(prev => ({ ...prev, [id_modulo]: promedio }));
+      
     } catch (e) {
-      setPromediosPorModulo(prev => ({ ...prev, [id_modulo]: 0 }));
+      console.error(e);
     }
-  };**/}
+  };
 
+  const ordenarModulosAlfabetico = (m : ModuloCalificado[])=>{
+    const ordered = m.sort(function (a, b) {
+      if (a.nombre < b.nombre) {
+        return -1;
+      }
+      if (a.nombre > b.nombre) {
+        return 1;
+      }
+      return 0;
+    })
+    return ordered
+  }
+  const ordenarModulosCalificacion = ()=>{
+    setLoading(true);
+    if (populares){
+      setPopulares(false);
+      setFilteredModulos(ordenarModulosAlfabetico(filteredModulos));
+    } else{
+      setPopulares(true);
+      const ordered = filteredModulos.sort(function (a, b) {
+        if (a.promedio < b.promedio) {
+          return 1;
+        }
+        if (a.promedio > b.promedio) {
+          return -1;
+        }
+        return 0;
+      })
+      setFilteredModulos(ordered);       
+    }    
+    setLoading(false);
+  }
+
+  const filterModulosBusqueda = () => {
+    var filtered = modulos.filter(m => 
+      m.nombre.toLowerCase().includes(searchQuery.toLowerCase()) 
+    );        
+    setFilteredModulos(filtered);  
+    return filtered  
+  };
+
+  const filterCompletados = ()=>{
+    setLoading(true);
+    setPopulares(false);
+    if (mostrar_completados) {
+      setMostrarCompletados(false);
+      filterModulosBusqueda();
+    } else{
+      setMostrarCompletados(true);
+      setMostrarNoCompletados(false);
+      let aux=filterModulosBusqueda();
+      const filtered = aux.filter(m=> m.completado);    
+      setFilteredModulos(filtered);   
+    }    
+    setLoading(false);   
+  }
+  const filterNoCompletados = ()=>{    
+    setLoading(true);
+    setPopulares(false);
+    if (mostrar_no_completados) {
+      setMostrarNoCompletados(false);
+      filterModulosBusqueda();
+    } else {
+      setMostrarCompletados(false);
+      setMostrarNoCompletados(true);
+      let aux=filterModulosBusqueda();
+      const filtered = aux.filter(m=> !m.completado);    
+      setFilteredModulos(filtered); 
+    }       
+    setLoading(false);       
+  }
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Mis módulos</Text>
+
+      <View style={styles.searchBarRowCursos}>
+        <Ionicons name="search" size={22} color="#20bfa9" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInputCursos}
+          placeholder="Buscar módulo..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#20bfa980"
+        />
+        <Text style={styles.countTextCursos}>{filteredModulos.length}</Text>
+      </View>
+      <View style={{flexDirection:"row"}}>
+        <TouchableOpacity style={[styles.filtros,
+        mostrar_completados ? {backgroundColor: paleta.dark_aqua}: {backgroundColor: paleta.aqua}]} 
+          onPress={filterCompletados}>
+          <ThemedText lightColor={mostrar_completados ? "white":"black"} type="defaultSemiBold">Completados</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.filtros,{backgroundColor: mostrar_no_completados ? paleta.dark_aqua:paleta.aqua}]} 
+          onPress={filterNoCompletados}>
+          <ThemedText lightColor={mostrar_no_completados ? "white":"black"} type="defaultSemiBold">No completados</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.filtros,{backgroundColor: populares ? paleta.dark_aqua:paleta.aqua}]} 
+          onPress={ordenarModulosCalificacion}>
+          <ThemedText type="defaultSemiBold" lightColor={populares ? "white":"black"}>Populares</ThemedText>
+        </TouchableOpacity>
+      </View>
+      {loading ?
+      (<View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={paleta.dark_aqua} />
+        </View>): (
       <FlatList
-        data={modulos}
+        data={filteredModulos}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{paddingBottom:80}}
 
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Ionicons name={item.icon} size={36} color="#20bfa9" />
+            <View style={{flexDirection:"row",justifyContent:"space-between",alignContent:"center"}}>
+              <Ionicons name={item.icon} size={36} color="#20bfa9" />
+              {item.completado &&  (<ThemedText>🎉 ¡Completado!</ThemedText>)}
+            </View>
+            
             <Text style={styles.cardTitle}>{item.nombre}</Text>
-            <Text style={styles.cardSubtitle}>
-              {/* {item.length} señas incluidas */}
-              {item.descripcion}
-            </Text>
-        {/* <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
-              { Promedio de estrellas }
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
-                {[...Array(5)].map((_, i) => (
-                  <AntDesign
-                    key={i}
-                    name={promediosPorModulo[item.id] > i ? "star" : "star"}
-                    size={20}
-                    color={promediosPorModulo[item.id] > i ? "#FFD700" : "#E0E0E0"}
-                  />
-                ))}
+            <Text style={styles.cardSubtitle}>  {item.descripcion}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between" }}>
+              {/* { Promedio de estrellas } */}
+              <View>
+                {item.promedio!=0 && (<AntDesignStars puntaje={item.promedio} color={paleta.soft_yellow}/>)}
+                <ThemedText lightColor="gray">
+                <ThemedText type="defaultSemiBold" lightColor="gray">Calificación: </ThemedText>
+                {item.promedio==0 ? <ThemedText>-</ThemedText> : <ThemedText>{item.promedio.toFixed(2)} / 5</ThemedText> }                
+              </ThemedText>
               </View>
-              { Botón para ver comentarios }
-              <Pressable
-                style={{ padding: 8, backgroundColor: "#20bfa9", borderRadius: 8 }}
+              
+              {/* { Botón para ver comentarios } */}
+              {item.promedio!=0 && (<Pressable
+                style={{ padding: 8, backgroundColor: paleta.strong_yellow, borderRadius: 8 }}
                 onPress={async () => {
                   if (!calificacionesPorModulo[item.id]) {
                     await fetchCalificaciones(item.id);
@@ -94,14 +234,11 @@ export default function ModulosScreen() {
                 }}
               >
                 <Text style={{ color: "#fff", fontWeight: "bold" }}>Ver comentarios</Text>
-              </Pressable> */}
+              </Pressable>)}
+              </View>
             <View>
                             
-              <ThemedText lightColor="gray">
-                <ThemedText type="defaultSemiBold" lightColor="gray">Calificación: </ThemedText>
-                {item.promedio==0 ? <ThemedText>-</ThemedText> : <ThemedText>{item.promedio.toFixed(2)} / 5</ThemedText> }
-                
-              </ThemedText>
+              
                 
             </View>
             <Pressable
@@ -113,6 +250,9 @@ export default function ModulosScreen() {
           </View>
         )}
       />
+        )
+    }
+      
       <Modal
         visible={comentariosModalVisible}
         animationType="slide"
@@ -180,6 +320,7 @@ const styles = StyleSheet.create({
     color: "#555",
     fontSize: 15,
     marginBottom: 12,
+    marginTop:10
   },
   button: {
     backgroundColor: "#20bfa9",
@@ -218,5 +359,57 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 16,
     color: "#222",
+  },
+  searchBarRowCursos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    marginHorizontal: 18,
+    marginBottom: 18,
+    paddingHorizontal: 18,
+    zIndex: 2,
+    shadowColor: '#20bfa9',
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 2,
+    borderColor: '#20bfa9',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInputCursos: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#20bfa9',
+    backgroundColor: 'transparent',
+    fontWeight: 'bold',
+    letterSpacing: 0.2,
+    fontFamily: 'System',
+  },
+  countTextCursos: {
+    color: '#20bfa9',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginLeft: 8,
+    backgroundColor: '#e6f7f2',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    fontFamily: 'System',
+  },
+  filtros: {
+    padding: 8,
+    borderRadius: 12,        
+    margin: 5,
+    marginBottom: 15
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e6f7f2',
   },
 });

@@ -133,8 +133,18 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
                 return;
             }
             if (user && user.length > 0) {
-                if (user[0].is_prof) setUser(new Logged_Profesor(user[0].mail,user[0].username,user[0].hashed_password,user[0].institution,id));
-                else setUser(new Logged_Alumno(user[0].mail,user[0].username,user[0].hashed_password,id))
+                // Normalize and coerce fields from Users to avoid display/type issues
+                const raw = user[0];
+                const isProf: boolean = (raw?.is_prof === true) || (raw?.is_prof === 'true') || (raw?.is_prof === 1);
+                const mailNorm: string = String(raw?.mail ?? '').trim().toLowerCase();
+                const usernameNorm: string = String(raw?.username ?? '').trim() || 'Alumno';
+                const passwordHash: string = String(raw?.hashed_password ?? '');
+                const institution: string | null = raw?.institution ? String(raw.institution).trim() : null;
+                if (isProf) {
+                    setUser(new Logged_Profesor(mailNorm, usernameNorm, passwordHash, institution ?? '', id));
+                } else {
+                    setUser(new Logged_Alumno(mailNorm, usernameNorm, passwordHash, id));
+                }
                 console.log(user)
             }
         }

@@ -1,9 +1,8 @@
-import { AppState } from 'react-native'
 import { supabase } from '../lib/supabase'
-import { Logged_Alumno, Logged_Profesor, Profesor, User } from '@/components/types'
+import { Logged_Alumno, Logged_Profesor, User } from '@/components/types'
 import { error_alert } from '@/components/alert';
-import { validateEmail } from '@/components/validaciones';
 import * as Crypto from 'expo-crypto';
+import { sumar_racha } from './racha';
 
 const hash = async (text: string) =>{
   const h = await Crypto.digestStringAsync(
@@ -25,7 +24,7 @@ const entrar = async (mail: string)=>{
         //inicializar entorno
         const usuario = user[0].is_prof ? new Logged_Profesor(user[0].mail,user[0].username,user[0].hashed_password,user[0].institution,user[0].id) :
                                          new Logged_Alumno(user[0].mail,user[0].username,user[0].hashed_password,user[0].id);
-                
+        
        return usuario      
     }
 }

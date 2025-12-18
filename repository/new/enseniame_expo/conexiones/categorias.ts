@@ -1,8 +1,4 @@
 import { supabase } from '../lib/supabase'
-import { Logged_Alumno, Logged_Profesor, Profesor, User } from '@/components/types'
-import { router } from 'expo-router';
-import { error_alert } from '@/components/alert';
-
 
 const crearNuevaCategoria = async (nombre:string) =>{
     

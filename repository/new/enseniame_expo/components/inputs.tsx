@@ -24,6 +24,7 @@ function IconTextInput (props:
                 value={props.value}
                 placeholder={props.placeholder}
                 placeholderTextColor="#999"
+                autoCapitalize="none"
             />
         </View>
     )

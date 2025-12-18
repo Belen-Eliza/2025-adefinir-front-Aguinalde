@@ -46,7 +46,6 @@ export default function Login() {
     if (isPasswordValid && isEmailValid) {
       //acceder a db
       const usuario = await ingresar(lower_case_mail,password);
-      console.log(usuario)
       if (usuario) login_app(usuario);
       setMail("");
       setPassword("");

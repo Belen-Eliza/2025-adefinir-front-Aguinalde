@@ -1,6 +1,5 @@
-import { AppState } from 'react-native'
 import { supabase } from '../lib/supabase'
-import { Profesor, Senia, Senia_Info, User } from '@/components/types'
+import { Senia_Info } from '@/components/types'
 import { error_alert } from '@/components/alert';
 
 const traer_tabla_videos = async () => {

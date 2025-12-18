@@ -17,6 +17,7 @@ export default function Layout(){
           }}>
             <Stack.Screen name='index' options={{headerShown:false}}/>
             <Stack.Screen name='modulo_detalle' options={{headerShown:false }}   />
+            <Stack.Screen name='lecciones' options={{headerShown:false }}   />
 
     </Stack>)
 }
