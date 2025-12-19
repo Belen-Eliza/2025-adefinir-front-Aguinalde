@@ -20,8 +20,8 @@ const visualizaciones_alumno = async (id:number)=>{
 const senias_aprendidas_alumno = async (id: number) =>{
     const { data, error } = await supabase
         .from('Alumno_Senia')
-        .select('senia_id, aprendida')
-        .eq('user_id', id);
+        .select('id_senia, aprendida')
+        .eq('id_alumno', id);
       if (error) throw error;
     if (data && data.length>0) return data
 }

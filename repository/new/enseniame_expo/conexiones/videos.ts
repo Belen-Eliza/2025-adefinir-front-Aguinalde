@@ -6,10 +6,7 @@ import { error_alert } from '@/components/alert';
 const traer_tabla_videos = async () => {
     try {
         const { data: videos, error } = await supabase.from('Senias').select('*');
-        if (error) {
-            console.error('Error:', error.message);
-            return;
-        }
+        if (error) throw error
         if (videos && videos.length >0){
             return videos
         }
@@ -22,7 +19,7 @@ const traer_tabla_videos = async () => {
 
 const buscarSenias = async () => {
     try {        
-        let { data, error } = await supabase.from('Senias').select(`*,  Users: Users!id_autor (*),  Categorias (nombre) `);        
+        let { data, error } = await supabase.from('Senias').select(`*,  Profesores(*,Users(*)),  Categorias (nombre) `);        
 
         if (error) throw error;
         if (data && data.length>0)  return data

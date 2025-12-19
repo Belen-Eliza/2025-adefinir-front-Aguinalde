@@ -20,11 +20,9 @@ const todos_los_modulos = async () =>{
 }
 
 const buscar_modulo = async (id:number) =>{
-    try {
-        
-        let { data: modulo, error } = await supabase.from('Modulos').select('*').eq('id',id);
-          
-        if (modulo && modulo.length>0) return modulo[0]
+    try {        
+        let { data: modulo, error } = await supabase.from('Modulos').select('*').eq('id',id).single();          
+        if (modulo ) return modulo
         if (error) throw new Error(String(error));
           
     } catch (error) {
@@ -36,7 +34,7 @@ const buscar_modulo = async (id:number) =>{
 const buscar_senias_modulo = async (id:number)=>{
     
     let {data, error} = await supabase.from('Modulo_Video')
-        .select("*, Senias(*, Users: Users!id_autor (*),  Categorias (nombre))")
+        .select("*, Senias(*, Profesores(*,Users(*)),  Categorias (nombre))")
         .eq("id_modulo",id);
     
     if (error) throw error
@@ -88,8 +86,8 @@ const progreso_por_categoria = async (id_alumno:number) =>{
             let { data: senias_aprendidas, error: errorSeniasApr } = await supabase
                 .from('Alumno_Senia')
                 .select('senia_id')
-                .eq('user_id', id_alumno)
-                .in('senia_id', ids_senias_categoria);
+                .eq('id_alumno', id_alumno)
+                .in('id_senia', ids_senias_categoria);
             
             if (errorSeniasApr) throw errorSeniasApr;
 
@@ -149,15 +147,8 @@ const editar_modulo = async (id: number,nombre:string,descripcion:string,icon: i
 const completar_modulo_alumno = async (id_alumno:number,id_modulo:number) =>{
     
     const completado = await alumno_completo_modulo(id_alumno,id_modulo);    
-    const s  = await buscar_senias_modulo(id_modulo); //id_video
-    const aprendidas = await senias_aprendidas_alumno(id_alumno); //senia_id
     
-    let  continuar = true;
-    s?.forEach(each=>{
-        if (aprendidas?.find(v=>v.senia_id==each.id_video)==undefined) continuar = false
-    });
-    
-    if (!completado && continuar){        
+    if (!completado ){        
         //verificar si existe el registro
         let { data, error } = await supabase
             .from('Alumno_Modulo')
@@ -168,7 +159,7 @@ const completar_modulo_alumno = async (id_alumno:number,id_modulo:number) =>{
         if (error) throw error;
 
         if (data && data.length>0) {
-            const { data:d,error } = await supabase
+            const { error } = await supabase
                 .from('Alumno_Modulo')
                 .update({ completado: true, fecha_completado:now() })
                 .eq('id_alumno', id_alumno)            

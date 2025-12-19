@@ -53,7 +53,8 @@ const traerReportesProfe = async (id_profe: number) => {
 
 const todosReportes = async () => {
     
-    let { data: Reportes, error } = await supabase.from('Reportes').select('*, Motivos_reporte(*), Senias (*, Users: Users!id_autor (*),  Categorias (nombre))');
+    let { data: Reportes, error } = await supabase.from('Reportes')
+        .select('*, Motivos_reporte(*), Senias (*, Profesores (*,Users(*)),  Categorias (nombre))');
     if (error) throw error
     return Reportes
 }
