@@ -11,7 +11,7 @@ import { modulos_completados_por_alumno, progreso_por_categoria } from '@/conexi
 import { Image } from 'expo-image';
 import Toast from 'react-native-toast-message';
 import { paleta } from '@/components/colores';
-import { mi_racha, perder_racha, sumar_racha } from '@/conexiones/racha';
+import {  perder_racha, sumar_racha } from '@/conexiones/racha';
 import { error_alert } from '@/components/alert';
 import { es_hoy, fue_ayer, now } from '@/components/validaciones';
 import { BotonLogin } from '@/components/botones';
@@ -42,6 +42,7 @@ export default function HomeStudent() {
   const [showModalRacha,setShowModalRacha] = useState(false);
   const fuego_racha = require("../../../assets/images/fire3.gif");
   const racha_perdida =require("../../../assets/images/disappointedBeetle.gif");
+  
 
   const [showModalAvatar,setShowModalAvatar] = useState(false);
   const [nuevo_avatar, setNuevoAvatar] = useState<String>();
@@ -134,28 +135,29 @@ export default function HomeStudent() {
         ganar_insignia_racha(contexto.user.id);
       }
       setUser(prev => ({ ...prev, racha: nuevaRacha || 0 })); */
-      const r = await mi_racha(contexto.user.id);
-      let racha = 1;
+      //const r = await mi_racha(contexto.user.id);
+      
       let cambio = false;
-      if (r) {
-        let ultimo_login =new Date(r.last_login);        
+      
+        let ultimo_login =new Date(contexto.user.getLastLogin());        
         if (fue_ayer(ultimo_login)) { 
           await sumar_racha(contexto.user.id);
-          racha= r.racha+1;
-          console.log("sumo racha",r.last_login)
+          contexto.user.sumarRacha();
+          console.log("sumo racha",ultimo_login)
           cambio=true;
         }
         else if (!es_hoy(ultimo_login)) {
           await perder_racha(contexto.user.id);
-          console.log("pierdo racha",r.last_login);
+          contexto.user.perderRacha()
+          console.log("pierdo racha",ultimo_login);
           cambio=true;
         }
-        else {
-          racha= r.racha;
+        else {          
           console.log("es hoy; no sumo ni pierdo")
         }        
-      }
-      setUser(prev => ({ ...prev, racha: racha || 0 }));
+
+      ganar_insignia_racha(contexto.user.id);
+      setUser(prev => ({ ...prev, racha: contexto.user.getRacha() || 0 }));
       setTimeout(()=>{setShowModalRacha(cambio);},400)
       
     } catch (error) {
@@ -633,7 +635,7 @@ const styles = StyleSheet.create({
 
 // Subcomponente para preview de misiones diarias
 function DailyMissionsPreview({ userId, router }: { userId: number; router: any }) {
-  const { missions, progressRatio, allCompleted } = useDailyMissions(userId);
+  const { missions, progressRatio, allCompleted } = {missions:[],progressRatio:0,allCompleted:false} //useDailyMissions(userId);
   const mostrar = missions.slice(0,2);
   return (
     <View style={styles.missionBox}>

@@ -61,7 +61,7 @@ const ingresar = async  (mail:string, contraseña: string) =>{
           const { data: alumno, error } = await supabase.from('Alumnos').select('*').eq('id', user.id).single();
           if (error) throw error
           return  new Logged_Alumno(user.mail,user.username,user.hashed_password,
-                  user.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,user.avatar);
+                  user.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,user.avatar);
         }
       }
     } else{
@@ -130,7 +130,7 @@ const registrar_alumno = async (user:User)=>{
                                       .select().single();
       if (error) throw error
       return new Logged_Alumno(user.mail,user.username,user.hashed_password,
-                  alumno.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,data.avatar);
+                  alumno.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,data.avatar);
     }
 
   } catch (error: any) {

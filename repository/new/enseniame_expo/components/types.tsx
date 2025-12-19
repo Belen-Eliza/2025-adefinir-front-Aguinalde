@@ -63,6 +63,15 @@ class Profesor extends User  {
      goHome(){};
      gotToModules(){};
      gotToProfile(){};
+     getRacha(){return 0}
+     getRachaMax(){return 0}
+     getXP(){return 0}
+     getCoins(){return 0}
+     getInstitucion(){return ""}
+     getIsAdmin(){return false}
+     getLastLogin(){return new Date()}
+     sumarRacha(){};
+     perderRacha(){};
 }
 class Logged_Profesor extends Logged_User {
     institution: string;
@@ -85,20 +94,29 @@ class Logged_Profesor extends Logged_User {
     gotToProfile():void{
         router.push('/tabs/perfil');
     }
+    getInstitucion(){
+        return this.institution
+    }
+     getIsAdmin(){
+        return this.is_admin
+    }
 }
 
 class Logged_Alumno extends Logged_User {
     racha: number;
     racha_maxima: number;
+    last_login:Date;
     xp: number;
     coins:number;
 
-    constructor(mail:string,name: string,pass:string,id:number,racha:number,racha_maxima:number,xp:number,coins:number,avatar?:string){
+    constructor(mail:string,name: string,pass:string,id:number,racha:number,racha_maxima:number,xp:number,
+                coins:number,last_login:Date,avatar?:string){
         super(mail,name,pass,id,avatar);
         this.racha=racha;
         this.racha_maxima= racha_maxima;
         this.xp=xp;
-        this.coins=coins;
+        this.coins=coins;        
+        this.last_login= new Date(last_login);
     }
     goHome(): void {
             router.push('/tabs/HomeStudent');
@@ -109,6 +127,27 @@ class Logged_Alumno extends Logged_User {
     gotToProfile():void{
         router.push('/tabs/PerfilAlumno');
     }
+    getRacha(){
+        return this.racha
+    }
+     getRachaMax(){
+        return this.racha_maxima
+    }
+     getXP(){
+        return this.xp
+    }
+     getCoins(){
+        return this.coins
+    }
+     getLastLogin(){
+        return this.last_login
+    }
+    sumarRacha(){
+        this.racha++
+    };
+    perderRacha(){
+        this.racha=1;
+    };
 }
 
 type icon_type = keyof typeof Ionicons.glyphMap;

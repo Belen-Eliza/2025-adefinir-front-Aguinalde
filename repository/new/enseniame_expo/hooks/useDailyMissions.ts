@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ensureDailyMissions, fetchDailyMissions, incrementMissionProgress, subscribeDailyMissions, Mission, fetchFullCompletionStreak } from '../conexiones/misiones';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../utils/supabase';
 
 export function useDailyMissions(userId?: number) {
   const [missions, setMissions] = useState<Mission[]>([]);
