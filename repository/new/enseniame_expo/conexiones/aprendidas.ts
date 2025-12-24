@@ -31,4 +31,37 @@ const cantidad_aprendidas = async (id_alumno:number) => {
     return 0
 }
 
-export {marcar_aprendida, marcar_no_aprendida, cantidad_aprendidas}
+const senias_alumno = async (id_alumno:number) => {
+    const { data, error } = await supabase
+        .from('Alumno_Senia') 
+        .select('id_senia, aprendida')
+        .eq('id_alumno', id_alumno);
+    if (error) throw error
+    return data
+}
+
+const mis_senias_dominadas= async (id_alumno:number) => {
+    const { data, error } = await supabase
+        .from('Senias') 
+        .select('*, Alumno_Senia(*)')
+        .eq('Alumno_Senia.id_alumno', id_alumno)
+        .eq("Alumno_Senia.aprendida",true);
+    if (error) throw error
+    return data
+}
+const mis_senias_pendientes= async (id_alumno:number) => {
+    //revisar
+    return []
+}
+const mis_senias_aprendiendo= async (id_alumno:number) => {
+    const { data, error } = await supabase
+        .from('Senias') 
+        .select('*, Alumno_Senia(*)')
+        .eq('Alumno_Senia.id_alumno', id_alumno)
+        .eq("Alumno_Senia.aprendida",false);
+    if (error) throw error
+    return data
+}
+
+export {marcar_aprendida, marcar_no_aprendida, cantidad_aprendidas,senias_alumno,
+    mis_senias_dominadas,mis_senias_aprendiendo,mis_senias_pendientes}

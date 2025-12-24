@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, Sa
 import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
 import { supabase } from '@/utils/supabase';
+import { mis_objetivos,mis_objetivos_completados } from '@/conexiones/objetivos';
+import { useFocusEffect } from 'expo-router';
 
 // Estructura de objetivo activo esperada en BD
 export type ObjetivoActivo = {
@@ -17,67 +19,42 @@ export type ObjetivoActivo = {
   updated_at?: string | null;
 };
 
+type Objetivo ={
+  id: number;
+  id_alumno: number;
+  titulo: string;
+  descripcion?: string | null;  
+  meta_total: number; // meta objetivo
+  valor_actual: number; // progreso actual
+  fecha_limite?: Date;
+  updated_at?: string | null;
+}
+
 export default function ObjetivosActivosScreen() {
   const { user } = useUserContext();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<ObjetivoActivo[]>([]);
+  const [items, setItems] = useState<Objetivo[]>([]);
 
   const fetchObjetivos = useCallback(async () => {
     if (!user?.id) return;
     setError(null);
     setLoading(true);
-    try {
-      // Traer todas las columnas disponibles para hacer el feature compatible con esquemas previos
-      const { data, error } = await supabase
-        .from('objetivos')
-        .select('*')
-        .eq('user_id', user.id);
-      if (error) throw error;
-
-      // Filtrar activos: usar 'estado' si existe, sinó usar 'completado'
-      const rows = ((data as any[]) || []).filter((r) => {
-        if (typeof r.estado !== 'undefined' && r.estado !== null) {
-          return String(r.estado).toLowerCase() !== 'completado';
+    try {      
+      const o = await mis_objetivos(user.id);
+      console.log(o);
+      //filtrar los que vencen en el futuro
+      const filtered = o?.filter(v=>{
+        if (v.fecha_limite){
+          const f = new Date(v.fecha_limite);
+          return f > new Date()
         }
-        if (typeof r.completado !== 'undefined') {
-          return !r.completado;
-        }
-        return true; // si no hay ninguna de las dos, se considera activo
-      });
-
-      const list: ObjetivoActivo[] = rows.map((r) => ({
-        id: Number(r.id),
-        user_id: Number(r.user_id),
-        titulo: String(r.titulo),
-        descripcion: r.descripcion ?? null,
-        tipo: r.tipo ?? null,
-        meta_total: Number(r.meta_total ?? 0),
-        valor_actual: Number(r.valor_actual ?? 0),
-        estado: (r.estado as any) ?? (r.completado ? 'completado' : 'activo'),
-        updated_at: r.updated_at ?? null,
-      }));
-
-      // Auto-completar si corresponde
-      const toComplete = list.filter((o) => (o.meta_total ?? 0) > 0 && o.valor_actual >= o.meta_total && o.estado !== 'completado');
-      if (toComplete.length) {
-        // Actualizamos en background, sin bloquear UI
-        try {
-          const ids = toComplete.map((o) => o.id);
-          // Intentar setear estado. Si falla por columna inexistente, intentar 'completado = true'
-          const { error: upErr } = await supabase.from('objetivos').update({ estado: 'completado' }).in('id', ids);
-          if (upErr) {
-            await supabase.from('objetivos').update({ completado: true }).in('id', ids);
-          }
-        } catch (e) {
-          // silencioso: no bloquea
-          console.warn('[objetivos_activos] no se pudo autocompletar:', (e as any)?.message);
-        }
-      }
-
-      setItems(list);
+        return true
+      })
+      setItems(filtered || []);
+      
     } catch (e: any) {
       console.error('[objetivos_activos] fetch error:', e?.message);
       setError('No se pudieron cargar tus objetivos activos. Verifica tu conexión.');
@@ -87,44 +64,18 @@ export default function ObjetivosActivosScreen() {
     }
   }, [user?.id]);
 
-  useEffect(() => {
-    fetchObjetivos();
-  }, [fetchObjetivos]);
+  useFocusEffect(
+    React.useCallback(() => {
+        fetchObjetivos()
+    }, [user?.id]));
 
-  // Suscripción en tiempo real a cambios relacionados
-  useEffect(() => {
-    if (!user?.id) return;
 
-    const channel = supabase
-      .channel(`rt-objetivos-activos-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'Alumno_Senia', filter: `user_id=eq.${user.id}` },
-        () => fetchObjetivos()
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'objetivos', filter: `user_id=eq.${user.id}` },
-        () => fetchObjetivos()
-      )
-      .subscribe();
-
-    return () => {
-      try { supabase.removeChannel(channel); } catch {}
-    };
-  }, [user?.id, fetchObjetivos]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchObjetivos();
-  };
-
-  const renderItem = ({ item }: { item: ObjetivoActivo }) => {
+  const renderItem = ({ item }: { item: Objetivo }) => {
     const total = item.meta_total || 0;
     const actual = Math.max(0, Math.min(item.valor_actual || 0, total || 0));
     const pct = total > 0 ? Math.min(100, Math.round((actual / total) * 100)) : 0;
 
-    const icon = (item.tipo || '').toLowerCase().includes('seña') ? 'hand-left' : 'trophy';
+    const icon =  'trophy';
 
     return (
       <View style={styles.card}>
@@ -161,8 +112,7 @@ export default function ObjetivosActivosScreen() {
       ) : (
         <FlatList
           data={items}
-          keyExtractor={(it) => String(it.id)}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          keyExtractor={(it) => String(it.id)}          
           ListHeaderComponent={() => (
             <View style={styles.headerBox}>
               <Text style={styles.title}>Objetivos activos</Text>

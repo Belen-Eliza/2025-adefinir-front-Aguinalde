@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, SectionList, RefreshControl, SafeAreaView, Modal, FlatList, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, SectionList, 
+  RefreshControl,  Modal, FlatList, TouchableOpacity, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
@@ -15,6 +16,8 @@ import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { error_alert } from '@/components/alert';
 import { getRanking } from '@/conexiones/calificaciones';
+import { mis_senias_aprendiendo, mis_senias_dominadas, mis_senias_pendientes, senias_alumno } from '@/conexiones/aprendidas';
+import { Senia } from '@/components/types';
 
 type DatosRanking ={
     id: number;
@@ -43,21 +46,25 @@ export default function DashboardAlumnoScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [relaciones, setRelaciones] = useState<RelacionModuloVideo[]>([]);
-  const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({}); 
+  //const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({}); 
+  const [senias_pendientes,setPendientes] = useState<Senia[]>();
+  const [senias_aprendiendo,setAprendiendo] = useState<Senia[]>();
+  const [senias_dominadas,setDominadas] = useState<Senia[]>();
   const [error, setError] = useState<string | null>(null);
   const [historial, setHistorial] = useState<HistorialRow[]>([]);
   
-  const [dataRanking,setDataRanking] = useState<DatosRanking[]>([])
+  const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);  
 
   const fetchData = async () => {
     setError(null);
     setLoading(true);
     try {
+      //????
       if (!user?.id) {
         setModulos([]);
-        setRelaciones([]);
-        setAprendidasMap({});
+        setRelaciones([]);        
         setHistorial([]);
+        router.dismissAll();
         return;
       }
       const { data: mods, error: modErr } = await supabase
@@ -70,20 +77,15 @@ export default function DashboardAlumnoScreen() {
         .from('Modulo_Video')
         .select('id_modulo, id_video');
       if (relErr) throw relErr;
-
-      const aprendidas: Record<number, boolean> = {};
+      
       try {
-        const { data: as, error: asErr } = await supabase
-          .from('Alumno_Senia') 
-          .select('senia_id, aprendida')
-          .eq('user_id', user.id);
-        if (!asErr && as) {
-          as.forEach((row: any) => {
-            aprendidas[row.senia_id] = !!row.aprendida;
-          });
-        } else if (asErr) {
-          console.warn('[dashboard] Alumno_Senia no disponible (aprendidasMap):', asErr?.message);
-        }
+        const seniasA = await mis_senias_aprendiendo(user.id);
+        const seniasD = await mis_senias_dominadas(user.id);
+        const seniasP = await mis_senias_pendientes(user.id);
+        setAprendiendo(seniasA || []);
+        setDominadas(seniasD || []);
+        setPendientes(seniasP || []);
+        
       } catch (e: any) {
         console.warn('[dashboard] Alumno_Senia no disponible (aprendidasMap try/catch):', e?.message);
       }
@@ -92,8 +94,8 @@ export default function DashboardAlumnoScreen() {
       try {
         const { data: hist, error: histErr } = await supabase
           .from('Alumno_Senia')
-          .select('senia_id, aprendida, created_at')
-          .eq('user_id', user.id)
+          .select('id_senia, aprendida, created_at')
+          .eq('id_alumno', user.id)
           .eq('aprendida', true)
           .order('created_at', { ascending: false });
         if (histErr) throw histErr;
@@ -133,8 +135,7 @@ export default function DashboardAlumnoScreen() {
       }
 
       setModulos(mods || []);
-      setRelaciones(rels || []);
-      setAprendidasMap(aprendidas);
+      setRelaciones(rels || []);      
       setHistorial(historialRows);
     } catch (e: any) {
       console.error('[dashboard] fetch error:', e?.message);
@@ -146,15 +147,17 @@ export default function DashboardAlumnoScreen() {
   };
 
   const fetchRanking = async () => {
-    setLoading(true);
-    try {
+    setLoading(true);    
+    try {      
       const d = await getRanking();
+      //filtrar los de calificación 0
+      const filtered = d.filter(v=>v.promedio!=0)
       //ordenar por mayor ranking
-      const ordered = d.sort(function(a,b){
+      const orderedAndFiltered = filtered.sort(function(a,b){
           return b.promedio-a.promedio
-      })
+      });
 
-      setDataRanking(ordered || [])
+      setDataRanking(orderedAndFiltered || [])
     } catch (error) {
         error_alert("No se pudo cargar el ranking");
         console.error(error)
@@ -207,7 +210,8 @@ export default function DashboardAlumnoScreen() {
     modulos.forEach((m) => {
       const senias = relsByModule.get(m.id) || [];
       const total = senias.length;
-      const learned = senias.reduce((acc, sid) => acc + (aprendidasMap[sid] ? 1 : 0), 0);
+      //revisar!!!
+      const learned = senias_aprendiendo?.length || 0 //senias.reduce((acc, sid) => acc + (aprendidasMap[sid] ? 1 : 0), 0);
       byModule.push({ id: m.id, nombre: m.nombre, total, learned });
     });
     // Ordenado por porcentaje completado; y luego nombre ascendente
@@ -219,7 +223,7 @@ export default function DashboardAlumnoScreen() {
       return a.nombre.localeCompare(b.nombre);
     });
     return byModule;
-  }, [modulos, relaciones, aprendidasMap]);
+  }, [modulos, relaciones, senias_aprendiendo]);
 
   const progresoGlobal = useMemo(() => {
     return progresoPorModulo.reduce(
@@ -249,7 +253,7 @@ export default function DashboardAlumnoScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <SectionList
         sections={sections}
         keyExtractor={(item, index) => (item?.id ? String(item.id) : `${item?.senia_id}-${item?.created_at || index}`)}
@@ -322,7 +326,7 @@ export default function DashboardAlumnoScreen() {
 
        
       <Toast/>
-    </SafeAreaView>
+    </View>
   );
 }
 

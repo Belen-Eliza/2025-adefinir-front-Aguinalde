@@ -3,17 +3,19 @@ import { supabase } from '../utils/supabase'
 
 const traerTodasCalificaciones = async () => {
     
-    let { data: Calificaciones_Modulos, error } = await supabase
-    .from('Calificaciones_Modulos')
-    .select('*');
+    let { data: Calificaciones_Modulos, error } = 
+        await supabase
+        .from('Calificaciones_Modulos')
+        .select('*');
     if (error) throw error
     return Calificaciones_Modulos
 }
 
 const calificacionesModulo = async (id_modulo:number) => {
-    let { data: calificaciones, error } = await supabase.from('Calificaciones_Modulos')
-                                            .select("*, Users(id,username)")
-                                            .eq("id_modulo",id_modulo);
+    let { data: calificaciones, error } = 
+        await supabase.from('Calificaciones_Modulos')
+        .select("*, Users(id,username)")
+        .eq("id_modulo",id_modulo);
     if (error) throw error
     if (calificaciones && calificaciones.length>0) return calificaciones
 }
@@ -26,6 +28,7 @@ const calificacionesProfe = async (id_profe:number) => {
 }
 
 const getRanking = async () => {
+    //revisar!!!
     // Buscar todos los profes, sus módulos y calificaciones    
     let { data: profes, error } = await supabase.from('Profesores') 
         .select('id, Users(*), Modulos(id, Calificaciones_Modulos(*))');        
@@ -41,9 +44,9 @@ const getRanking = async () => {
                     cant++
                 })
             });
-            if (cant!=0) return {id: profe.id, username: profe.Users[0].username, promedio: promedio / cant, cant_reviews:cant}
-            else return {id: profe.id,username: profe.Users[0].username, promedio:0, cant_reviews:0}
-        });
+            if (cant!=0) return {id: profe.id, username: profe.Users.username, promedio: promedio / cant, cant_reviews:cant}
+            else return {id: profe.id,username: profe.Users.username, promedio:0, cant_reviews:0}
+        });        
         return res
     } else {
         throw new Error("No hay datos de profesores");
