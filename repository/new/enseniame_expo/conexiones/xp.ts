@@ -29,4 +29,15 @@ const awardXPClient = async (userId: number, amount: number, reason?: string) =>
   if (error) throw error
 }
 
-export {fetchMyXP,}
+const miNivel = async (id_alumno:number) => {
+  
+  let { data: nivel, error } = await supabase
+    .from('Alumnos')
+    .select('nivel')
+    .eq("id",id_alumno)
+    .single();
+  if (error) throw error
+  return nivel
+}
+
+export {fetchMyXP,awardXPClient,miNivel}
