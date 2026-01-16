@@ -32,7 +32,12 @@ const sumar_racha= async (id_alumno:number) =>{
                 .eq('id', id_alumno);                
             if (error) throw error
         } 
-                        
+        //sumar el xp
+        const { error } = await supabase
+            .from('Alumnos')
+            .update({ xp: Alumno.xp + racha_nueva*2 })
+            .eq('id', id_alumno);                
+        if (error) throw error
     } 
 }
 

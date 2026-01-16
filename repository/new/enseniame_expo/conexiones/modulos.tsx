@@ -85,7 +85,7 @@ const progreso_por_categoria = async (id_alumno:number) =>{
             // Traer las señas aprendidas por el alumno en esa categoría
             let { data: senias_aprendidas, error: errorSeniasApr } = await supabase
                 .from('Alumno_Senia')
-                .select('senia_id')
+                .select('id_senia')
                 .eq('id_alumno', id_alumno)
                 .in('id_senia', ids_senias_categoria);
             

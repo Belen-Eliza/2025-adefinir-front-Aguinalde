@@ -101,60 +101,25 @@ export default function HomeStudent() {
   const { xp, level, delta, consumeDelta } = useXP(contexto.user.id);
 
   const fetch_racha = async () => {
-    try {
-      /* const r = await mi_racha(contexto.user.id);
-      let nuevaRacha = 1;
+    try {            
       let cambio = false;
-      if (r) {
-        const ultimoLogin = new Date(r.last_login);
-        const hoy = new Date();
-        const normalize = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const diffDias = Math.round((normalize(hoy).getTime() - normalize(ultimoLogin).getTime()) / 86400000);
-        if (diffDias === 1) {
-          const desbloquee = await desbloquee_un_avatar(r.racha + 1, r.racha_maxima);
-          setDesbloqueado(desbloquee);
-          await sumar_racha(contexto.user.id);
-          nuevaRacha = r.racha + 1;
-          cambio = true;
-          setStreakPopTrigger(t => t + 1);
-          setShowConfetti(true);
-          console.log('Racha incrementada. diffDias=1');
-        } else if (diffDias > 1) {
-          await perder_racha(contexto.user.id);
-          cambio = true;
-          nuevaRacha = 1;
-          console.log('Racha perdida. diffDias>', diffDias);
-        } else if (diffDias === 0) {
-          nuevaRacha = r.racha;
-          console.log('Racha se mantiene. diffDias=0');
-        }
-        else {
-          racha= r.racha;
-          console.log("es hoy; no sumo ni pierdo")
-        }      
-        ganar_insignia_racha(contexto.user.id);
+      
+      let ultimo_login =new Date(contexto.user.getLastLogin());        
+      if (fue_ayer(ultimo_login)) { 
+        await sumar_racha(contexto.user.id);
+        contexto.user.sumarRacha();
+        console.log("sumo racha",ultimo_login);
+        cambio=true;
       }
-      setUser(prev => ({ ...prev, racha: nuevaRacha || 0 })); */
-      //const r = await mi_racha(contexto.user.id);
-      
-      let cambio = false;
-      
-        let ultimo_login =new Date(contexto.user.getLastLogin());        
-        if (fue_ayer(ultimo_login)) { 
-          await sumar_racha(contexto.user.id);
-          contexto.user.sumarRacha();
-          console.log("sumo racha",ultimo_login)
-          cambio=true;
-        }
-        else if (!es_hoy(ultimo_login)) {
-          await perder_racha(contexto.user.id);
-          contexto.user.perderRacha()
-          console.log("pierdo racha",ultimo_login);
-          cambio=true;
-        }
-        else {          
-          console.log("es hoy; no sumo ni pierdo")
-        }        
+      else if (!es_hoy(ultimo_login)) {
+        await perder_racha(contexto.user.id);
+        contexto.user.perderRacha()
+        console.log("pierdo racha",ultimo_login);
+        cambio=true;
+      }
+      else {          
+        console.log("es hoy; no sumo ni pierdo")
+      }        
 
       ganar_insignia_racha(contexto.user.id);
       setUser(prev => ({ ...prev, racha: contexto.user.getRacha() || 0 }));
@@ -194,7 +159,7 @@ export default function HomeStudent() {
           <View style={[styles.card, styles.cardLeft]}> 
             <AnimatedFlame trigger={streakPopTrigger} />
             <Text style={styles.cardTitleCursos}>{user.racha} {user.racha ==1 ? 'día':'días'} de racha</Text>
-            <Text style={styles.xpInfo}>Nivel {level} • {xp} XP</Text>
+            <Text style={styles.xpInfo}>Nivel {level} • {contexto.user.getXP()} XP</Text>
             <XPGainPop amount={delta} onDone={consumeDelta} />
           </View>
           <Pressable style={[styles.card, styles.cardRight]} onPress={() => router.push('/tabs/Dashboard_Alumno')}>
