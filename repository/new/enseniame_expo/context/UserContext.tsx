@@ -28,7 +28,7 @@ export  const UserContext = createContext({
 });
 
 export const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0,0,0,0,0));
+    const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0,0,0,0,0,new Date()));
     
     const [isLoggedIn, setIsLoggedIn] = useState(false); 
 
@@ -89,8 +89,8 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
         //conectar a db, update
         try {
             const { data, error } = await supabase
-                .from('Users')
-                .update({ institution: i_nueva })
+                .from('Profesores')
+                .update({ institucion: i_nueva })
                 .eq('id', user.id)
                 .select();
 
@@ -115,7 +115,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
 
     const logout = async () => {
         setIsLoggedIn(false);
-        setUser(new Logged_Alumno("","","",0,0,0,0,0))
+        setUser(new Logged_Alumno("","","",0,0,0,0,0,new Date()))
         try {
             await  AsyncStorage.removeItem("token");
         } catch (error) {
@@ -126,15 +126,15 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
     const actualizar_info = async (id:number)=> {
         //bajar updates de db
         try{
-            const { data: user, error } = await supabase.from('Users').select('*').eq('id', id);
+            const { data: user, error } = await supabase.from('Users').select('*').eq('id', id).single();
 
             if (error) {
                 console.error('Error:', error.message);
                 return;
             }
-            if (user && user.length > 0) {
+            if (user ) {
                 // Normalize and coerce fields from Users to avoid display/type issues
-                const raw = user[0];
+                const raw = user;
                 const isProf: boolean = (raw?.is_prof === true) || (raw?.is_prof === 'true') || (raw?.is_prof === 1);
                 const mailNorm: string = String(raw?.mail ?? '').trim().toLowerCase();
                 const usernameNorm: string = String(raw?.username ?? '').trim() || 'Alumno';
@@ -142,7 +142,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
                 
                 if (isProf) {
                     const { data: profe, error } = await supabase.from('Profesores').select('*').eq('id', id).single();
-                    const institution: string  =  String(profe.institution).trim() ;
+                    const institution: string  =  String(profe.institucion).trim() ;
                     if (error) throw error
                     setUser(new Logged_Profesor(mailNorm, usernameNorm, passwordHash, institution ?? '', id,profe.is_admin));
                 } else {

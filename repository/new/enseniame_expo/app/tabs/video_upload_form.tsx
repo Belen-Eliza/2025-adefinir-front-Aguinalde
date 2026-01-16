@@ -43,7 +43,7 @@ export default function VideoUploadForm() {
 
   useFocusEffect(
       useCallback(() => {
-        //console.log('Tab Diccionario enfocada - Recargando señas...');
+        
         fetchCategories();
         return () => {
         };
