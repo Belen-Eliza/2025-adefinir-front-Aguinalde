@@ -14,7 +14,7 @@ const traerTodasCalificaciones = async () => {
 const calificacionesModulo = async (id_modulo:number) => {
     let { data: calificaciones, error } = 
         await supabase.from('Calificaciones_Modulos')
-        .select("*, Users(id,username)")
+        .select("*, Alumnos(Users(id,username))")
         .eq("id_modulo",id_modulo);
     if (error) throw error
     if (calificaciones && calificaciones.length>0) return calificaciones
