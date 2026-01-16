@@ -188,6 +188,7 @@ export default function VideoUploadForm() {
         setSelectedCategory(null);
       } catch (e: any) {
         error_alert('Error al subir: ' + (e?.message || e));
+        console.error(e)
       } finally {
         setSubiendo(false);
       }
