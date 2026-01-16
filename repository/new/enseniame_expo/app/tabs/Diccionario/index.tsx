@@ -46,8 +46,7 @@ export default function Diccionario() {
 
   const fetchSenias = async () => {
     try {
-      const data = await buscarSenias();
-      
+      const data = await buscarSenias();      
       setSenias(data || []);
       setFilteredSenias(data || []);
       
@@ -81,7 +80,7 @@ export default function Diccionario() {
   };
 
   const esMio = (senia: Senia_Info)=>{
-    return senia.Users?.id == contexto.user.id && contexto.user.is_prof
+    return senia.id_autor == contexto.user.id && contexto.user.is_prof
   }
 
   const eliminar_senia = (senia: Senia_Info) =>{
@@ -121,9 +120,9 @@ export default function Diccionario() {
         <View>
           <Text style={styles.significadoText}>{item.significado}</Text>
           <Text style={[styles.significadoText,{fontSize:12,marginTop:5}]}>{item.Categorias?.nombre}</Text>
-          {item.Users && esMio(item) ? 
-            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Users?.username} (Yo)</Text>:
-            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Users?.username}</Text> }
+          {item.Profesores && esMio(item) ? 
+            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Profesores.Users.username} (Yo)</Text>:
+            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Profesores?.Users.username}</Text> }
           
           
         </View>
@@ -215,7 +214,7 @@ export default function Diccionario() {
               </TouchableOpacity></> : null
           }
 
-          {selectedSenia && !esMio(selectedSenia) ?
+          {selectedSenia && !esMio(selectedSenia) && contexto.user.is_prof ?
             <TouchableOpacity style={[styles.iconButton,estilos.shadow]} onPress={()=>{reportar_senia(selectedSenia)}}   >  
               <Ionicons name="alert-circle-outline" color={paleta.dark_aqua} size={25} style={styles.icon} />
               <ThemedText type="subtitle" lightColor={paleta.dark_aqua} style={{flex:2}}>Reportar seña</ThemedText>

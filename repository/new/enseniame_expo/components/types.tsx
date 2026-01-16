@@ -162,7 +162,7 @@ interface Senia {
 
 interface Senia_Info {
     Categorias: {nombre:string} ,
-    Users: Logged_User| null,
+    Profesores: {Users: {username:string}} | null,
     id: number;
     significado: string;
     video_url: string;
@@ -176,6 +176,53 @@ interface Senia_Info {
     id: number;
     significado: string;
     video_url: string;
+}
+
+class Senia_Alumno {
+    info: Senia_Info;
+    estado:Estado_Senia;
+    constructor (info: Senia_Info,estado:Estado_Senia){
+        this.info=info;
+        this.estado =estado
+    }
+    cambiar_estado(data:string){
+        this.estado.cambiar_estado(data,this)
+    }
+    setEstado(estado_nuevo:Estado_Senia){
+        this.estado=estado_nuevo;
+    }
+    sumar_acierto(){
+        this.estado.sumar_acierto();
+    }
+}
+
+abstract class Estado_Senia {
+    abstract cambiar_estado(data:string,senia:Senia_Alumno):void
+    sumar_acierto(){}
+}
+class Estado_Pendiente extends Estado_Senia{
+    cambiar_estado(data: string, senia: Senia_Alumno): void {
+        senia.setEstado(new Estado_Aprendiendo(0));
+        //conectar con db
+    }    
+}
+class Estado_Aprendiendo extends Estado_Senia{
+    cant_aciertos:number;
+    constructor(cant_aciertos:number){
+        super();
+        this.cant_aciertos=cant_aciertos
+    }
+    cambiar_estado(data: string, senia: Senia_Alumno): void {
+        //revisar
+    }
+    sumar_acierto(){
+        this.cant_aciertos++
+    }
+}
+class Estado_Dominada extends Estado_Senia{
+    cambiar_estado(data: string, senia: Senia_Alumno): void {
+        //nada
+    }
 }
 
 interface Modulo {
