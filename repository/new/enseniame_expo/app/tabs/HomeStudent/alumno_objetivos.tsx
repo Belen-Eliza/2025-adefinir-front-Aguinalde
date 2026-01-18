@@ -263,6 +263,7 @@ export default function AlumnoObjetivosScreen() {
           mode={"date"}
           is24Hour={true}
           onChange={onChange}
+          minimumDate={new Date()}
         />               
 
         <View style={styles.rowBtns}>
