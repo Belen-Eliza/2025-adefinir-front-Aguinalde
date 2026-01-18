@@ -6,7 +6,7 @@ type Objetivo = {
   id: number;
   titulo: string;
   descripcion?: string | null;
-  fecha_limite?: string | null;
+  fecha_limite?: Date | null;
   completado: boolean;
 }
 

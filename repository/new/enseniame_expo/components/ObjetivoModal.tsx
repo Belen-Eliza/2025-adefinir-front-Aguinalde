@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert 
 import { Ionicons } from '@expo/vector-icons';
 import { SmallPopupModal } from '@/components/modals';
 import { paleta } from '@/components/colores';
+import { now } from './validaciones';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type Objetivo = {
   id?: number;
@@ -63,15 +65,18 @@ export default function ObjetivoModal({
       Alert.alert('Validación', 'El título no puede estar vacío');
       return;
     }
-
+    
+/* 
     const payload: Partial<Objetivo> & { id?: number } = {
       titulo: titulo.trim(),
       descripcion: descripcion.trim() || null,
       fecha_limite: fecha ? (ddmmyyyyToISO(fecha) || null) : null,
     };
+    
     if (initialData && initialData.id) payload.id = initialData.id;
 
-    await onSave(payload);
+    await onSave(payload); */
+    
   };
 
   return (
@@ -100,7 +105,7 @@ export default function ObjetivoModal({
         <TextInput
           value={fecha}
           onChangeText={handleFechaChange}
-          placeholder="31/12/2025"
+          placeholder={(new Date().getDate()+"/"+(new Date().getMonth()<9? "0":"")+(new Date().getMonth()+1)+"/"+new Date().getFullYear())}
           placeholderTextColor="#9aa0a6"
           style={styles.input}
           keyboardType="number-pad"
@@ -117,6 +122,7 @@ export default function ObjetivoModal({
             <Text style={styles.btnSaveText}>Guardar</Text>
           </TouchableOpacity>
         </View>
+        <View style={{height:200}}></View>
       </ScrollView>
     </SmallPopupModal>
   );
@@ -134,7 +140,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   textarea: { minHeight: 90, textAlignVertical: 'top' },
-  rowBtns: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 },
+  rowBtns: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30 },
   btn: {
     flexDirection: 'row',
     alignItems: 'center',

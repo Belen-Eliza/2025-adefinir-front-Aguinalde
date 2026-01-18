@@ -203,8 +203,8 @@ export default function HomeStudent() {
         </View>
 
         {/* Misiones Diarias Preview */}
-        <DailyMissionsPreview userId={contexto.user.id} router={router} />
-        <View style={{height:30}}></View>
+       {/*  <DailyMissionsPreview userId={contexto.user.id} router={router} /> */}
+        
       </ScrollView>
 
       {/* Modal para mostrar todas las categorías */}
