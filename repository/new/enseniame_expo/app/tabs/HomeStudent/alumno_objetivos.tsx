@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, 
 import { supabase } from '@/utils/supabase';
 import { useUserContext } from '@/context/UserContext';
 import ObjetivoCard from '@/components/ObjetivoCard';
-import ObjetivoModal from '@/components/ObjetivoModal';
 import { Ionicons } from '@expo/vector-icons';
 import { paleta } from '@/components/colores';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -154,7 +153,7 @@ export default function AlumnoObjetivosScreen() {
   const toggleComplete = async (o: Objetivo) => {
     try {
       setLoading(true);
-      const { error } = await supabase.from('objetivos').update({ completado: !o.completado }).eq('id', o.id);
+      const { error } = await supabase.from('Objetivos').update({ completado: !o.completado }).eq('id', o.id);
       if (error) throw error;
       await loadObjetivos();
       ganar_insignia_objetivos(user.id);
