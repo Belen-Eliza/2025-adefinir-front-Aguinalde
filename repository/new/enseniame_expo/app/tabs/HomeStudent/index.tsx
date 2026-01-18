@@ -97,8 +97,7 @@ export default function HomeStudent() {
       <ProgressBarAnimada progress={categoria.porcentaje} />
     </View>
   );
-
-  const { xp, level, delta, consumeDelta } = useXP(contexto.user.id);
+  
 
   const fetch_racha = async () => {
     try {            
@@ -157,14 +156,14 @@ export default function HomeStudent() {
         
         <View style={styles.stackCards}>
           <View style={[styles.card, styles.cardLeft]}> 
-            <AnimatedFlame trigger={streakPopTrigger} />
-            <Text style={styles.cardTitleCursos}>{user.racha} {user.racha ==1 ? 'día':'días'} de racha</Text>
-            <Text style={styles.xpInfo}>Nivel {level} • {contexto.user.getXP()} XP</Text>
-            <XPGainPop amount={delta} onDone={consumeDelta} />
+            <View style={estilos.centrado}><AnimatedFlame trigger={streakPopTrigger} /></View>
+            
+            <Text style={styles.cardTitleCursos}>{user.racha} {user.racha ==1 ? 'día':'días'} de racha</Text>                        
           </View>
-          <Pressable style={[styles.card, styles.cardRight]} onPress={() => router.push('/tabs/Dashboard_Alumno')}>
-            <Text style={styles.cardTitleCursos}>{user.modulosCompletados}</Text>
-            <Text style={styles.cardTitleCursos}>{user.modulosCompletados==1 ? "módulo completo":"módulos completos"}</Text>
+          <Pressable style={[styles.card, styles.cardRight]} onPress={() => router.push('/tabs/Dashboard_Alumno')}>            
+            <ThemedText style={[styles.cardTitleCursos,estilos.centrado,{marginTop:10,fontSize:25}]}>Nivel {contexto.user.getLevel()}</ThemedText>            
+            <ThemedText style={[styles.xpInfo,estilos.centrado]}>{contexto.user.getXP()} XP</ThemedText>
+            <Ionicons name='barbell' size={50} color={paleta.turquesa} style={estilos.centrado}/>
           </Pressable>
         </View>
 
@@ -205,6 +204,7 @@ export default function HomeStudent() {
 
         {/* Misiones Diarias Preview */}
         <DailyMissionsPreview userId={contexto.user.id} router={router} />
+        <View style={{height:30}}></View>
       </ScrollView>
 
       {/* Modal para mostrar todas las categorías */}
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   },
   xpInfo: {
     marginTop: 4,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#555'
   },

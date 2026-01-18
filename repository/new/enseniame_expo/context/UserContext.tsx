@@ -28,7 +28,7 @@ export  const UserContext = createContext({
 });
 
 export const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0,0,0,0,0,new Date()));
+    const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0,0,0,0,0,new Date(),0));
     
     const [isLoggedIn, setIsLoggedIn] = useState(false); 
 
@@ -115,7 +115,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
 
     const logout = async () => {
         setIsLoggedIn(false);
-        setUser(new Logged_Alumno("","","",0,0,0,0,0,new Date()))
+        setUser(new Logged_Alumno("","","",0,0,0,0,0,new Date(),0))
         try {
             await  AsyncStorage.removeItem("token");
         } catch (error) {
@@ -149,7 +149,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
                     const { data: alumno, error } = await supabase.from('Alumnos').select('*').eq('id', id).single();
                     if (error) throw error
                     setUser(new Logged_Alumno(mailNorm, usernameNorm, passwordHash, id,alumno.racha,
-                                            alumno.racha_maxima,alumno.xp,alumno.coins,user[0].avatar));
+                                            alumno.racha_maxima,alumno.xp,alumno.coins,alumno.nivel,user[0].avatar));
                 }
                 console.log(user)
             }

@@ -67,6 +67,7 @@ class Profesor extends User  {
      getRachaMax(){return 0}
      getXP(){return 0}
      getCoins(){return 0}
+     getLevel(){return 0}
      getInstitucion(){return ""}
      getIsAdmin(){return false}
      getLastLogin(){return new Date()}
@@ -108,16 +109,19 @@ class Logged_Alumno extends Logged_User {
     last_login:Date;
     xp: number;
     coins:number;
+    nivel: number;
 
     constructor(mail:string,name: string,pass:string,id:number,racha:number,racha_maxima:number,xp:number,
-                coins:number,last_login:Date,avatar?:string){
+                coins:number,last_login:Date,nivel:number,avatar?:string){
         super(mail,name,pass,id,avatar);
         this.racha=racha;
         this.racha_maxima= racha_maxima;
         this.xp=xp;
         this.coins=coins;        
         this.last_login= new Date(last_login);
+        this.nivel = nivel;
     }
+   
     goHome(): void {
             router.push('/tabs/HomeStudent');
     }
@@ -142,11 +146,15 @@ class Logged_Alumno extends Logged_User {
      getLastLogin(){
         return this.last_login
     }
+    getLevel(){
+        return this.nivel
+    }
     sumarRacha(){
         this.racha++
     };
     perderRacha(){
         this.racha=1;
+        this.last_login= new Date();        
     };
 }
 
