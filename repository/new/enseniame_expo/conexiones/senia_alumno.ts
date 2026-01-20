@@ -6,8 +6,17 @@ const traer_senias_practica = async (id_alumno:number) => {
     if (error) throw error
 
     if (data && data.length>0){
-        //armar los objetos
-        console.log(data)
+        //armar los objetos        
+        const s = data.map(e=>{
+            let estado = new Estado_Pendiente();
+            if (e.aprendida){                
+                estado = new Estado_Dominada()
+            } else {
+                estado = new Estado_Aprendiendo(e.cant_aciertos);
+            }
+            return new Senia_Alumno(e.Senias,estado)
+        })
+        return s
     }
     return []
 }
