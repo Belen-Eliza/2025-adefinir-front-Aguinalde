@@ -1,3 +1,4 @@
+import { marcar_aprendida } from "@/conexiones/aprendidas";
 import { sumar_acierto } from "@/conexiones/senia_alumno";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -214,6 +215,9 @@ class Estado_Pendiente extends Estado_Senia{
         senia.setEstado(new Estado_Aprendiendo(0));
         //conectar con db
     }    
+    toString(){
+        return "Pendiente"
+    }
 }
 class Estado_Aprendiendo extends Estado_Senia{
     cant_aciertos:number;
@@ -226,12 +230,22 @@ class Estado_Aprendiendo extends Estado_Senia{
     }
     sumar_acierto(id_alumno:number,id_senia:number){
         this.cant_aciertos++
-        sumar_acierto(id_alumno,id_senia)
+        sumar_acierto(id_alumno,id_senia);
+        if (this.cant_aciertos>=10){
+            //marcar como dominada
+            marcar_aprendida(id_senia,id_alumno)
+        }
+    }
+    toString(){
+        return "Aprendiendo"
     }
 }
 class Estado_Dominada extends Estado_Senia{
     cambiar_estado(data: string, senia: Senia_Alumno): void {
         //nada
+    }
+    toString(){
+        return "¡Dominada! 🎉"
     }
 }
 

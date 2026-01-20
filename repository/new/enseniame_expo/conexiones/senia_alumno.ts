@@ -38,5 +38,14 @@ const sumar_acierto = async (id_alumno:number,id_senia:number) => {
     }              
 }
 
+const marcar_dominada = async (id_alumno:number,id_senia:number) => {
+    const { error } = await supabase
+        .from('Alumno_Senia')
+        .update({ aprendida:true })
+        .eq("id_alumno",id_alumno)
+        .eq("id_senia",id_senia);
+    if (error) throw error
+}
 
-export {traer_senias_practica, sumar_acierto}
+
+export {traer_senias_practica, sumar_acierto,marcar_dominada}

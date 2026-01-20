@@ -1,6 +1,6 @@
 3 estados de señas:
 *Pendientes: no vistas
 *Aprendiendo: visualizadas. Los profesores ven la vista en sus videos
-*Dominadas: Varias marcadas como "supe"
+*Dominadas: 10 marcadas como "supe"
 
 Un módulo está completo cuando todas sus señas están "visualizadas".
