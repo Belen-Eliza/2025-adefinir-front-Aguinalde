@@ -12,8 +12,8 @@ export function AnimatedButton({ title, onPress, style, textStyle }: { title: st
   return (
     <Animated.View style={[animatedStyle, style]}> 
       <Pressable
-        onPress={() => { vibrate('success'); onPress(); }}
-        onPressIn={() => { scale.value = withSpring(0.98, { stiffness: 180, damping: 18 }); }}
+        onPress={() => { vibrate('success');  }}
+        onPressIn={() => { scale.value = withSpring(0.98, { stiffness: 180, damping: 18 }); onPress(); }}
         onPressOut={() => { scale.value = withSpring(1, { stiffness: 180, damping: 18 }); }}
         style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
       >

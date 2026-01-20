@@ -24,7 +24,8 @@ const fetchMyXP = async (user_id:number)=>{
 }
 const awardXPClient = async (userId: number, amount: number, reason?: string) => {
   //traer xp actual
-  const xp = await fetchMyXP(userId);
+  const {xp} = await fetchMyXP(userId);
+  console.log(xp)
   const {error} = await supabase.from("Alumnos").update({xp:Number(xp)+amount}).eq("id",userId);
   if (error) throw error
 }

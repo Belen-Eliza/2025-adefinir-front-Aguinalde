@@ -267,7 +267,7 @@ export default function HomeStudent() {
                       transition={0}
                     />
                   <XPCard borderColor={paleta.turquesa} bckColor={paleta.turquesa} textColor={'white'} 
-                    title={'XP ganado'} cant={user.racha*2} icon='barbell' iconColor={paleta.dark_aqua}/>
+                    title={'XP ganado'} cant={user.racha*2+""} icon='barbell' iconColor={paleta.dark_aqua}/>
                 <ThemedText style={[styles.title_racha]}>¡¡Tienes {user.racha} días de racha!!</ThemedText>
                 <ThemedText type='defaultSemiBold' lightColor={paleta.dark_aqua}>¡Sigue aprendiendo mañana para llegar a {user.racha+1}!</ThemedText>
                 <BotonLogin callback={cerrar_modal_racha} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />

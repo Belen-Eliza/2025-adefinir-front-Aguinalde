@@ -21,5 +21,22 @@ const traer_senias_practica = async (id_alumno:number) => {
     return []
 }
 
+const sumar_acierto = async (id_alumno:number,id_senia:number) => {
+    const {data:senia,error:error1} = await supabase.from("Alumno_Senia").select("cant_aciertos")
+        .eq("id_alumno",id_alumno)
+        .eq("id_senia",id_senia)
+        .single();
+    if (error1) throw error1
 
-export {traer_senias_practica}
+    if (senia){
+        const { data, error } = await supabase
+            .from('Alumno_Senia')
+            .update({ cant_aciertos: senia.cant_aciertos+1 })
+            .eq("id_alumno",id_alumno)
+            .eq("id_senia",id_senia);
+        if (error) throw error
+    }              
+}
+
+
+export {traer_senias_practica, sumar_acierto}

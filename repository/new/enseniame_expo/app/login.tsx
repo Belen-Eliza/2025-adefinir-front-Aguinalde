@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   container: { 
     flex: 1, 
-    backgroundColor: '#e6f7f26e',
+    backgroundColor: '#e6f7f287',
     height:"100%",
     width:"100%",
     position: "absolute",

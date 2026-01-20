@@ -1,3 +1,4 @@
+import { sumar_acierto } from "@/conexiones/senia_alumno";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
@@ -199,14 +200,14 @@ class Senia_Alumno {
     setEstado(estado_nuevo:Estado_Senia){
         this.estado=estado_nuevo;
     }
-    sumar_acierto(){
-        this.estado.sumar_acierto();
+    sumar_acierto(id_alumno:number){
+        this.estado.sumar_acierto(id_alumno,this.info.id);
     }
 }
 
 abstract class Estado_Senia {
     abstract cambiar_estado(data:string,senia:Senia_Alumno):void
-    sumar_acierto(){}
+    sumar_acierto(id_alumno:number,id_senia:number){}
 }
 class Estado_Pendiente extends Estado_Senia{
     cambiar_estado(data: string, senia: Senia_Alumno): void {
@@ -223,8 +224,9 @@ class Estado_Aprendiendo extends Estado_Senia{
     cambiar_estado(data: string, senia: Senia_Alumno): void {
         //revisar
     }
-    sumar_acierto(){
+    sumar_acierto(id_alumno:number,id_senia:number){
         this.cant_aciertos++
+        sumar_acierto(id_alumno,id_senia)
     }
 }
 class Estado_Dominada extends Estado_Senia{

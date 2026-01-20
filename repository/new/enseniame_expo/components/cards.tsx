@@ -4,7 +4,7 @@ import { estilos } from "./estilos"
 import { icon_type } from "./types"
 import { Ionicons } from "@expo/vector-icons"
 
-function XPCard (props: {borderColor:string,bckColor: string,textColor:string,title:string,cant:number,icon?: icon_type,iconColor?:string}){
+function XPCard (props: {borderColor:string,bckColor: string,textColor:string,title:string,cant:string,icon?: icon_type,iconColor?:string}){
     return (
         <View style={[styles.card,estilos.centrado,{borderColor:props.borderColor}]}>
             <View style={[styles.cardTitleContainer,estilos.centrado,{backgroundColor:props.bckColor}]}>

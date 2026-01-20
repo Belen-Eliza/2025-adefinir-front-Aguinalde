@@ -378,12 +378,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
+  
  progressTotal: { color: '#555', marginBottom: 8 },
   progressBar: { height: 12, backgroundColor: '#e53838ff', borderRadius: 8, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: '#20bfa9', borderRadius: 8 },
