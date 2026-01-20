@@ -256,5 +256,5 @@ type Avatar = {
 }
 
 export {User,Logged_User, Logged_Profesor, Alumno, Profesor, Logged_Alumno, Senia,  Senia_Info, Modulo, icon_type, Calificaciones,
-    Avatar
+    Avatar, Senia_Alumno, Estado_Aprendiendo,Estado_Dominada,Estado_Pendiente,Estado_Senia
 }

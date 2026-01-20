@@ -21,7 +21,7 @@ import { SuccessModal } from '@/components/animations/SuccessModal';
 import { estilos } from '@/components/estilos';
 import { useDailyMissions } from '@/hooks/useDailyMissions';
 import { MissionCard } from '@/components/missions/MissionCard';
-import { desbloquee_un_avatar, nuevo_avatar_desbloqueado } from '@/conexiones/avatars';
+import {  nuevo_avatar_desbloqueado } from '@/conexiones/avatars';
 import { Avatar } from '@/components/types';
 import { ThemedText } from '@/components/ThemedText';
 import { ganar_insignia_racha } from '@/conexiones/insignias';
@@ -189,7 +189,7 @@ export default function HomeStudent() {
           </View>
         </View>
         
-        <AnimatedButton title="Practicar ahora" onPress={() => router.push('/tabs/Dashboard_Alumno')} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
+        <AnimatedButton title="Practicar ahora" onPress={() => router.push('/tabs/HomeStudent/practica')} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
 
         <View style={styles.shortcutsRow}>
           <Pressable style={styles.shortcutCardCursos} onPress={() => router.push('/tabs/leaderboard_grupo')}>

@@ -80,7 +80,7 @@ export default function Leccion (){
           const fue_aprendida =(senia_id:number)=>{
             let res = false;
             aprendidas?.forEach(each=>{
-              if (each.senia_id==senia_id && each.aprendida) {
+              if (each.id_senia==senia_id && each.aprendida) {
                 setCantAprendidas(prev=>prev+=1);
                 res= true;
               }
