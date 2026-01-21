@@ -47,5 +47,26 @@ const marcar_dominada = async (id_alumno:number,id_senia:number) => {
     if (error) throw error
 }
 
+const getEstado = async (id_alumno:number,id_senia:number) => {
+    const {data,error} = await supabase
+        .from("Alumno_Senia")
+        .select("*")
+        .eq("id_alumno",id_alumno)
+        .eq("id_senia",id_senia)
+        .single();
+    if (error) throw error
 
-export {traer_senias_practica, sumar_acierto,marcar_dominada}
+    if (data ){              
+        let estado = new Estado_Pendiente();
+        if (data.aprendida){                
+            estado = new Estado_Dominada();
+        } else {
+            estado = new Estado_Aprendiendo(data.cant_aciertos);
+        }
+        return estado                
+    }
+    return new Estado_Pendiente();
+}
+
+
+export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado}

@@ -148,8 +148,10 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
                 } else {
                     const { data: alumno, error } = await supabase.from('Alumnos').select('*').eq('id', id).single();
                     if (error) throw error
-                    setUser(new Logged_Alumno(mailNorm, usernameNorm, passwordHash, id,alumno.racha,
-                                            alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,alumno.nivel,raw.avatar));
+                    const nuevo =new Logged_Alumno(mailNorm, usernameNorm, passwordHash, id,alumno.racha,
+                                            alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,alumno.nivel,raw.avatar)
+                    setUser(nuevo);
+                    console.log(nuevo)
                 }
                 console.log(user)
             }

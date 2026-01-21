@@ -122,7 +122,7 @@ export default function HomeStudent() {
 
       ganar_insignia_racha(contexto.user.id);
       setUser(prev => ({ ...prev, racha: contexto.user.getRacha() || 0 }));
-      setTimeout(()=>{setShowModalRacha(cambio);},400)
+      setTimeout(()=>{setShowModalRacha(cambio);},400);      
       
     } catch (error) {
       console.error(error);

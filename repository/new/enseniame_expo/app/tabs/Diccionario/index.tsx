@@ -18,6 +18,7 @@ import { useUserContext } from '@/context/UserContext';
 import { router } from 'expo-router';
 import { SmallPopupModal } from '@/components/modals';
 import Toast from 'react-native-toast-message';
+import { getEstado } from '@/conexiones/senia_alumno';
 
 export default function Diccionario() {
   const [senias, setSenias] = useState<Senia_Info[]>([]);
@@ -111,7 +112,8 @@ export default function Diccionario() {
     <Pressable 
       style={styles.listItem}
       onPress={async () => {
-        let estado= new Estado_Pendiente()
+        let estado = new Estado_Pendiente();
+        if (!contexto.user.is_prof) estado= await getEstado(contexto.user.id,item.id)
         let s = new Senia_Alumno(item,estado)
         setSelectedSenia(s);
         setModalVisible(true);
@@ -186,20 +188,26 @@ export default function Diccionario() {
               <ThemedText type='defaultSemiBold'>Categoría:</ThemedText> {''}
               <ThemedText>{selectedSenia.info.Categorias.nombre}</ThemedText>
             </ThemedText>   
+            {!contexto.user.is_prof && (
+            <ThemedText style={{margin:10}}>
+              <ThemedText type='defaultSemiBold'>Estado:</ThemedText> {''}
+              <ThemedText>{selectedSenia.estado.toString()}</ThemedText>
+            </ThemedText>  
+            )}
             </>
           )}
           
-          {selectedSenia && selectedSenia.info.Users && esMio(selectedSenia.info) ?
+          {selectedSenia && selectedSenia.info.Profesores && esMio(selectedSenia.info) ?
           <ThemedText style={{margin:10}}>
             <ThemedText type='defaultSemiBold'>Autor:</ThemedText> {''}
-            <ThemedText>{selectedSenia.info.Users.username} (Yo)</ThemedText> {''}
+            <ThemedText>{selectedSenia.info.Profesores.Users.username} (Yo)</ThemedText> {''}
           </ThemedText>
             :null
           }
-          {selectedSenia && selectedSenia.info.Users && !esMio(selectedSenia.info) ?
+          {selectedSenia && selectedSenia.info.Profesores && !esMio(selectedSenia.info) ?
             <ThemedText style={{margin:10}}>
               <ThemedText type='defaultSemiBold'>Autor:</ThemedText> {''}
-              <ThemedText>{selectedSenia.info.Users.username} </ThemedText> {''}
+              <ThemedText>{selectedSenia.info.Profesores.Users.username} </ThemedText> {''}
             </ThemedText>                    
             :null
           }
