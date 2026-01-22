@@ -27,6 +27,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ganar_insignia_racha } from '@/conexiones/insignias';
 import { XPCard } from '@/components/cards';
 import type { Mission } from '@/conexiones/misiones';
+import { miNivel } from '@/conexiones/xp';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -36,6 +37,7 @@ export default function HomeStudent() {
     nombre: contexto.user.username,
     racha: 0,
     modulosCompletados: 0,
+    level:0
   });  
   const [progresoCategorias, setProgresoCategorias] = useState<Array<any>>([]);
 
@@ -59,6 +61,7 @@ export default function HomeStudent() {
         };
 
         fetchModulosCompletados();
+        fetch_misc();
         fetch_racha();
           return () => {};
         }, [])
@@ -129,8 +132,6 @@ export default function HomeStudent() {
       error_alert("Ocurrió un error al cargar la racha");
     }    
 
-    //debug!!!!!!!
-    //setShowModalRacha(true)
   };
 
   const cerrar_modal_racha = async () => {
@@ -149,6 +150,11 @@ export default function HomeStudent() {
     }
   }
 
+  const fetch_misc = async () => {
+    const level = await miNivel(contexto.user.id);
+    setUser(prev => ({ ...prev, level: level?.nivel || 0 }));
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -161,7 +167,7 @@ export default function HomeStudent() {
             <Text style={styles.cardTitleCursos}>{user.racha} {user.racha ==1 ? 'día':'días'} de racha</Text>                        
           </View>
           <Pressable style={[styles.card, styles.cardRight]} onPress={() => router.push('/tabs/Dashboard_Alumno')}>            
-            <ThemedText style={[styles.cardTitleCursos,estilos.centrado,{marginTop:10,fontSize:25}]}>Nivel {contexto.user.getLevel()}</ThemedText>            
+            <ThemedText style={[styles.cardTitleCursos,estilos.centrado,{marginTop:10,fontSize:25}]}>Nivel {user.level}</ThemedText>            
             <ThemedText style={[styles.xpInfo,estilos.centrado]}>{contexto.user.getXP()} XP</ThemedText>
             <Ionicons name='barbell' size={50} color={paleta.turquesa} style={estilos.centrado}/>
           </Pressable>

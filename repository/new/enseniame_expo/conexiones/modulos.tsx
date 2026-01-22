@@ -1,9 +1,7 @@
 import { supabase } from '../utils/supabase'
-import { icon_type, Logged_Alumno, Logged_Profesor, Modulo, Profesor, User } from '@/components/types'
-import { router } from 'expo-router';
+import { icon_type } from '@/components/types'
 import { error_alert } from '@/components/alert';
 import { now } from '@/components/validaciones';
-import { senias_aprendidas_alumno } from './visualizaciones';
 
 const todos_los_modulos = async () =>{
     try {
@@ -87,6 +85,7 @@ const progreso_por_categoria = async (id_alumno:number) =>{
                 .from('Alumno_Senia')
                 .select('id_senia')
                 .eq('id_alumno', id_alumno)
+                .eq("aprendida",true)
                 .in('id_senia', ids_senias_categoria);
             
             if (errorSeniasApr) throw errorSeniasApr;
@@ -209,8 +208,7 @@ const sumar_descripcion_senia_modulo = async (id_modulo:number,id_senia:number,d
         .eq('id_modulo', id_modulo)
         .eq("id_video",id_senia)
         .select()
-    if (error) throw error;
-    console.log(data)
+    if (error) throw error;    
 }
 
 
