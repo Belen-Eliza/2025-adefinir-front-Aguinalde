@@ -5,8 +5,10 @@ import { useUserContext } from '@/context/UserContext';
 import { supabase } from '@/utils/supabase';
 import { SmallPopupModal } from '@/components/modals';
 import { useFocusEffect } from 'expo-router';
-import { mis_senias_dominadas } from '@/conexiones/aprendidas';
+import { mis_senias_dominadas, senias_aprendidas_reporte } from '@/conexiones/aprendidas';
 import { mis_modulos_completos, mis_modulos_completos_info } from '@/conexiones/modulos';
+import { error_alert, success_alert } from '@/components/alert';
+import { crear_objetivo_mensual, mi_objetivo_mensual } from '@/conexiones/objetivos';
 
 type Mensual = { label: string; anio: number; mes: number; cantidad: number };
 type ModuloCompleto = { id: number; nombre: string; fecha: string };
@@ -16,8 +18,7 @@ type ObjetivoPersonal = { id?: number; user_id: number; mes: number;
 
 export default function ReporteHistoricoScreen() {
   const { user } = useUserContext();
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);  
   const [error, setError] = useState<string | null>(null);
 
   const [series, setSeries] = useState<Mensual[]>([]);
@@ -33,52 +34,37 @@ export default function ReporteHistoricoScreen() {
 
   useFocusEffect(
     useCallback(() =>{
-      fetch_senias_aprendidas();
-      fetch_modulos_completos();
+      try {
+        setLoading(true);
+        fetchAll();
+        fetch_modulos_completos();
 
-      //objetivo mensual
+      } catch (error) {
+        console.error("[Reporte Histórico: ",error);
+        error_alert("No se pudo cargar tu progreso");
+      } finally {
+        setLoading(false);
+      }      
     },[])
   )
 
-  const fetch_senias_aprendidas = async () => {
-    const s = await mis_senias_dominadas(user.id);
-    console.log(s);
-  }
-
   const fetch_modulos_completos = async () => {
-    const m = await mis_modulos_completos_info(user.id);
-    console.log(m);
+    const m = await mis_modulos_completos_info(user.id);    
+    let modules = m.map(each=>{
+      return {id: each.id_modulo,nombre:each.Modulos.nombre,fecha:each.fecha_completado}
+    });
+    setModulosCompletados(modules || []);   
   }
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = async () => {
     if (!user?.id) return;
     setLoading(true);
     setError(null);
     try {
-      // 1) Señás aprendidas por mes
-      // Intentar seleccionar con updated_at; si no existe la columna, reintentar sin ella
-      let aprendidas: any[] = [];
-      {
-        const tryWithUpd = await supabase
-          .from('Alumno_Senia')
-          .select('id_senia, aprendida, created_at, updated_at')
-          .eq('user_id', user.id)
-          .eq('aprendida', true)
-          .order('created_at', { ascending: true });
-        if (tryWithUpd.error) {
-          const tryWithoutUpd = await supabase
-            .from('Alumno_Senia')
-            .select('id_senia, aprendida, created_at')
-            .eq('id_alumno', user.id)
-            .eq('aprendida', true)
-            .order('created_at', { ascending: true });
-          if (tryWithoutUpd.error) throw tryWithoutUpd.error;
-          aprendidas = tryWithoutUpd.data || [];
-        } else {
-          aprendidas = tryWithUpd.data || [];
-        }
-      }
-
+      // 1) Señas aprendidas por mes
+      
+      let aprendidas: any[] = await senias_aprendidas_reporte(user.id);
+        
       // Agrupar por mes/año
       const map = new Map<string, number>();
       (aprendidas || []).forEach((r: any) => {
@@ -101,66 +87,11 @@ export default function ReporteHistoricoScreen() {
       }
       setSeries(puntos);
 
-      // 2) Módulos completados (todos sus videos aprendidos)
-      const { data: mods, error: modErr } = await supabase
-        .from('Modulos')
-        .select('id, nombre');
-      if (modErr) throw modErr;
-      const { data: rels, error: relErr } = await supabase
-        .from('Modulo_Video')
-        .select('id_modulo, id_video');
-      if (relErr) throw relErr;
-
-      // Mapear aprendidas por senia_id -> created_at
-      const aprendidaFecha = new Map<number, string>();
-      (aprendidas || []).forEach((r: any) => {
-        const sid = Number(r.senia_id);
-        const prev = aprendidaFecha.get(sid);
-        const ca = String(r.updated_at || r.created_at);
-        // quedarnos con la fecha más reciente (o primera)
-        if (!prev || new Date(ca) > new Date(prev)) aprendidaFecha.set(sid, ca);
-      });
-
-      // Calcular completados: todos los videos del módulo aprendidos
-      const vidsPorModulo = new Map<number, number[]>();
-      (rels || []).forEach((r: any) => {
-        const arr = vidsPorModulo.get(Number(r.id_modulo)) || [];
-        arr.push(Number(r.id_video));
-        vidsPorModulo.set(Number(r.id_modulo), arr);
-      });
-
-      const completados: ModuloCompleto[] = [];
-      (mods || []).forEach((m: any) => {
-        const vids = vidsPorModulo.get(Number(m.id)) || [];
-        if (vids.length === 0) return;
-        const allLearned = vids.every((v) => aprendidaFecha.has(v));
-        if (allLearned) {
-          // fecha finalización = max(created_at de las señas del módulo)
-          let maxDate = '';
-          vids.forEach((v) => {
-            const d = aprendidaFecha.get(v) || '';
-            if (!maxDate || (d && new Date(d) > new Date(maxDate))) maxDate = d;
-          });
-          completados.push({ id: Number(m.id), nombre: String(m.nombre), fecha: maxDate });
-        }
-      });
-      // ordenar por fecha desc
-      completados.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-      setModulosCompletados(completados);
-
       // 3) Objetivo mensual del usuario (tabla objetivos_personales)
       try {
-        const { data: objs, error: objErr } = await supabase
-          .from('objetivos_personales')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('mes', mesActual)
-          .eq('anio', anioActual)
-          .order('updated_at', { ascending: false })
-          .limit(1);
-        if (objErr) throw objErr;
+        const objective = await mi_objetivo_mensual(user.id);
 
-        const obj = Array.isArray(objs) && objs.length > 0 ? objs[0] : null;
+        const obj = Array.isArray(objective) && objective.length > 0 ? objective[0] : null;
         const progreso = puntos.find((p) => p.anio === anioActual && p.mes === mesActual)?.cantidad || 0;
         if (obj) {
           const comp = Number(obj.meta_mensual) > 0 && progreso >= Number(obj.meta_mensual);
@@ -177,7 +108,7 @@ export default function ReporteHistoricoScreen() {
           // actualizar en background si cambió progreso/completado
           try {
             await supabase
-              .from('objetivos_personales')
+              .from('Objetivos_Mensuales')
               .update({ progreso_actual: progreso, completado: comp })
               .eq('id', obj.id);
           } catch {}
@@ -195,24 +126,10 @@ export default function ReporteHistoricoScreen() {
       console.error('[reporte] fetch error:', e?.message);
       setError('No se pudo cargar el reporte.');
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setLoading(false);      
     }
-  }, [user?.id]);
-
-  useEffect(() => { fetchAll(); }, [fetchAll]);
-
-  // Realtime: nuevas señas aprendidas refrescan
-  useEffect(() => {
-    if (!user?.id) return;
-    const ch = supabase
-      .channel(`rt-reporte-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'Alumno_Senia', filter: `user_id=eq.${user.id}` }, () => fetchAll())
-      .subscribe();
-    return () => { try { supabase.removeChannel(ch); } catch {} };
-  }, [user?.id, fetchAll]);
-
-  const onRefresh = () => { setRefreshing(true); fetchAll(); };
+  }
+  
 
   const openObjetivoModal = () => {
     setMetaInput(objetivo?.meta_mensual ? String(objetivo.meta_mensual) : '');
@@ -226,22 +143,18 @@ export default function ReporteHistoricoScreen() {
     const comp = meta > 0 && progreso >= meta;
     try {
       // Upsert asegura creación/actualización en una sola operación (evita conflictos por UNIQUE)
-      const { data, error } = await supabase
-        .from('objetivos_personales')
-        .upsert({ user_id: user.id, mes: mesActual, anio: anioActual, meta_mensual: meta, progreso_actual: progreso, completado: comp }, { onConflict: 'user_id,mes,anio' })
-        .select()
-        .single();
-      if (error) throw error;
+      const data = await crear_objetivo_mensual(user.id,meta,progreso,comp);
       if (data) {
-        setObjetivo({ id: data.id, user_id: user.id, mes: mesActual, anio: anioActual, meta_mensual: meta, progreso_actual: progreso, completado: comp });
+        setObjetivo({ id: data.id, user_id: user.id, mes: mesActual, 
+          anio: anioActual, meta_mensual: meta, progreso_actual: progreso, completado: comp });
       }
       setModalObjetivo(false);
       // refresh objetivo
       fetchAll();
-      Alert.alert('Objetivo guardado', 'Tu objetivo mensual fue guardado correctamente.');
+      success_alert("Tu objetivo mensual fue guardado correctamente.")      
     } catch (e: any) {
       console.error('[reporte] save objetivo error:', e?.message);
-      Alert.alert('Error', 'No se pudo guardar tu objetivo. Verifica tu conexión o permisos.');
+      error_alert("No se pudo guardar tu objetivo.")      
     }
   };
 
@@ -280,8 +193,7 @@ export default function ReporteHistoricoScreen() {
       ) : (
         <FlatList
           data={modulosCompletados}
-          keyExtractor={(it) => String(it.id)}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          keyExtractor={(it) => String(it.id)}          
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={() => (
             <View style={styles.headerBox}>

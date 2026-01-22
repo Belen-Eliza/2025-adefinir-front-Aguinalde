@@ -203,7 +203,7 @@ const mis_modulos_completos = async (id_alumno:number) => {
 const mis_modulos_completos_info = async (id_alumno:number) => {
     let { data, error } = await supabase
         .from('Alumno_Modulo')
-        .select('*,Modulo(*)')
+        .select('*,Modulos(*)')
         .eq('id_alumno', id_alumno)            
         .eq('completado', true);
         

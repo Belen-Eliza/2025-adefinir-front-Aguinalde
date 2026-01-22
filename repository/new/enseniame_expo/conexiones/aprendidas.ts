@@ -130,6 +130,17 @@ const mis_senias_aprendiendo= async (id_alumno:number) => {
     return data
 }
 
+const senias_aprendidas_reporte = async (id_alumno:number) => {
+    const {data,error} = await supabase
+        .from('Alumno_Senia')
+        .select('id_senia, aprendida, created_at')
+        .eq('id_alumno', id_alumno)
+        .eq('aprendida', true)
+        .order('created_at', { ascending: true });
+        if (error) throw error;
+    return data
+}
+
 const sumar_acierto = async (id_alumno:number,id_senia:number) => {
     const {data:senia,error:error1} = await supabase.from("Alumno_Senia").select("cant_aciertos")
         .eq("id_alumno",id_alumno)
@@ -150,4 +161,4 @@ const sumar_acierto = async (id_alumno:number,id_senia:number) => {
 
 
 export {marcar_aprendida, marcar_no_aprendida, cantidad_aprendidas,senias_alumno, marcar_aprendiendo,marcar_pendiente,
-    mis_senias_dominadas,mis_senias_aprendiendo,mis_senias_pendientes,sumar_acierto}
+    mis_senias_dominadas,mis_senias_aprendiendo,mis_senias_pendientes,sumar_acierto,senias_aprendidas_reporte}
