@@ -86,12 +86,15 @@ export default function ModuloDetalleScreen() {
 
   const fetch_senias = async ()=>{
     try {
+      setLoading(true)
       const s = await  traer_senias_modulo(contexto.user.id,Number(id));            
       setSenias(s || []);
 
     } catch (error) {
-      error_alert("No se pudo cargar tu progreso");
+      error_alert("No se pudo cargar las señas");
       console.error(error)
+    }finally{
+      setLoading(false)
     }
     
   }
