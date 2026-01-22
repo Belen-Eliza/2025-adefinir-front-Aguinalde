@@ -99,8 +99,7 @@ export default function Perfil (){
 
     const handleInstitutionChange = (text:any) =>{
       setI(text);
-      setErrorI(text ? '' : 'El nombre de la institución no puede estar vacío');
-      console.log("escribir algo")
+      setErrorI(text ? '' : 'El nombre de la institución no puede estar vacío');      
     }
 
     const salir = ()=>{
@@ -145,7 +144,7 @@ export default function Perfil (){
         if (institucion!=undefined){
             if (institucion !== '') {
                 contexto.cambiar_institucion(institucion);
-                setI(undefined);
+                exito=true;
             } else error_alert("La institución no puede estar vacía");
         }
         
@@ -234,7 +233,7 @@ export default function Perfil (){
                     <TouchableOpacity onPress={()=>{setInstModalVisible(true)}} style={[styles.infoContainer]}>
                       <ThemedText >Institución</ThemedText>
                       <View style={{flexDirection:"row"}}>
-                        <ThemedText lightColor='gray'>{contexto.user.institution}</ThemedText>
+                        <ThemedText lightColor='gray'>{contexto.user.getInstitucion()}</ThemedText>
                         <MaterialIcons name="keyboard-arrow-right" size={24} color="lightgray" />
                       </View>
                     </TouchableOpacity> : null
@@ -309,7 +308,7 @@ export default function Perfil (){
                 bck_color="white"
                 onChange={handleInstitutionChange}
                 keyboardType='default'
-                placeholder={contexto.user.institution} />
+                placeholder={contexto.user.getInstitucion()} />
                 { errorI ? <ThemedText type='error'>{errorI}</ThemedText>:null}
 
                 <BotonLogin callback={confirmar} textColor='black' text='Guardar cambios' bckColor={paleta.strong_yellow}/>

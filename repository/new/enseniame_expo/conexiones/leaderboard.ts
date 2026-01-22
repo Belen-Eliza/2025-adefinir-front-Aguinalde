@@ -137,9 +137,9 @@ export async function fetchGroupLeaderboard(period: PeriodType, groupId: number,
 
     let aprendidasQuery = supabase
       .from('Alumno_Senia')
-      .select('user_id, created_at')
+      .select('id_alumno, created_at')
       .eq('aprendida', true)
-      .in('user_id', userIds);
+      .in('id_alumno', userIds);
     if (from) aprendidasQuery = aprendidasQuery.gte('created_at', from);
     const { data: aprendidas } = await aprendidasQuery;
     const signsCount = new Map<number, number>();

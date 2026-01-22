@@ -21,12 +21,13 @@ import { SuccessModal } from '@/components/animations/SuccessModal';
 import { estilos } from '@/components/estilos';
 import { useDailyMissions } from '@/hooks/useDailyMissions';
 import { MissionCard } from '@/components/missions/MissionCard';
-import { desbloquee_un_avatar, nuevo_avatar_desbloqueado } from '@/conexiones/avatars';
+import {  nuevo_avatar_desbloqueado } from '@/conexiones/avatars';
 import { Avatar } from '@/components/types';
 import { ThemedText } from '@/components/ThemedText';
 import { ganar_insignia_racha } from '@/conexiones/insignias';
 import { XPCard } from '@/components/cards';
 import type { Mission } from '@/conexiones/misiones';
+import { miNivel } from '@/conexiones/xp';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -36,6 +37,7 @@ export default function HomeStudent() {
     nombre: contexto.user.username,
     racha: 0,
     modulosCompletados: 0,
+    level:0
   });  
   const [progresoCategorias, setProgresoCategorias] = useState<Array<any>>([]);
 
@@ -59,6 +61,7 @@ export default function HomeStudent() {
         };
 
         fetchModulosCompletados();
+        fetch_misc();
         fetch_racha();
           return () => {};
         }, [])
@@ -97,76 +100,38 @@ export default function HomeStudent() {
       <ProgressBarAnimada progress={categoria.porcentaje} />
     </View>
   );
-
-  const { xp, level, delta, consumeDelta } = useXP(contexto.user.id);
+  
 
   const fetch_racha = async () => {
-    try {
-      /* const r = await mi_racha(contexto.user.id);
-      let nuevaRacha = 1;
+    try {            
       let cambio = false;
-      if (r) {
-        const ultimoLogin = new Date(r.last_login);
-        const hoy = new Date();
-        const normalize = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const diffDias = Math.round((normalize(hoy).getTime() - normalize(ultimoLogin).getTime()) / 86400000);
-        if (diffDias === 1) {
-          const desbloquee = await desbloquee_un_avatar(r.racha + 1, r.racha_maxima);
-          setDesbloqueado(desbloquee);
-          await sumar_racha(contexto.user.id);
-          nuevaRacha = r.racha + 1;
-          cambio = true;
-          setStreakPopTrigger(t => t + 1);
-          setShowConfetti(true);
-          console.log('Racha incrementada. diffDias=1');
-        } else if (diffDias > 1) {
-          await perder_racha(contexto.user.id);
-          cambio = true;
-          nuevaRacha = 1;
-          console.log('Racha perdida. diffDias>', diffDias);
-        } else if (diffDias === 0) {
-          nuevaRacha = r.racha;
-          console.log('Racha se mantiene. diffDias=0');
-        }
-        else {
-          racha= r.racha;
-          console.log("es hoy; no sumo ni pierdo")
-        }      
-        ganar_insignia_racha(contexto.user.id);
+      
+      let ultimo_login =new Date(contexto.user.getLastLogin());        
+      if (fue_ayer(ultimo_login)) { 
+        await sumar_racha(contexto.user.id);
+        contexto.user.sumarRacha();
+        console.log("sumo racha",ultimo_login);
+        cambio=true;
       }
-      setUser(prev => ({ ...prev, racha: nuevaRacha || 0 })); */
-      //const r = await mi_racha(contexto.user.id);
-      
-      let cambio = false;
-      
-        let ultimo_login =new Date(contexto.user.getLastLogin());        
-        if (fue_ayer(ultimo_login)) { 
-          await sumar_racha(contexto.user.id);
-          contexto.user.sumarRacha();
-          console.log("sumo racha",ultimo_login)
-          cambio=true;
-        }
-        else if (!es_hoy(ultimo_login)) {
-          await perder_racha(contexto.user.id);
-          contexto.user.perderRacha()
-          console.log("pierdo racha",ultimo_login);
-          cambio=true;
-        }
-        else {          
-          console.log("es hoy; no sumo ni pierdo")
-        }        
+      else if (!es_hoy(ultimo_login)) {
+        await perder_racha(contexto.user.id);
+        contexto.user.perderRacha()
+        console.log("pierdo racha",ultimo_login);
+        cambio=true;
+      }
+      else {          
+        console.log("es hoy; no sumo ni pierdo")
+      }        
 
       ganar_insignia_racha(contexto.user.id);
       setUser(prev => ({ ...prev, racha: contexto.user.getRacha() || 0 }));
-      setTimeout(()=>{setShowModalRacha(cambio);},400)
+      setTimeout(()=>{setShowModalRacha(cambio);},400);      
       
     } catch (error) {
       console.error(error);
       error_alert("Ocurrió un error al cargar la racha");
     }    
 
-    //debug!!!!!!!
-    //setShowModalRacha(true)
   };
 
   const cerrar_modal_racha = async () => {
@@ -185,6 +150,11 @@ export default function HomeStudent() {
     }
   }
 
+  const fetch_misc = async () => {
+    const level = await miNivel(contexto.user.id);
+    setUser(prev => ({ ...prev, level: level?.nivel || 0 }));
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -192,14 +162,14 @@ export default function HomeStudent() {
         
         <View style={styles.stackCards}>
           <View style={[styles.card, styles.cardLeft]}> 
-            <AnimatedFlame trigger={streakPopTrigger} />
-            <Text style={styles.cardTitleCursos}>{user.racha} {user.racha ==1 ? 'día':'días'} de racha</Text>
-            <Text style={styles.xpInfo}>Nivel {level} • {xp} XP</Text>
-            <XPGainPop amount={delta} onDone={consumeDelta} />
+            <View style={estilos.centrado}><AnimatedFlame trigger={streakPopTrigger} /></View>
+            
+            <Text style={styles.cardTitleCursos}>{user.racha} {user.racha ==1 ? 'día':'días'} de racha</Text>                        
           </View>
-          <Pressable style={[styles.card, styles.cardRight]} onPress={() => router.push('/tabs/Dashboard_Alumno')}>
-            <Text style={styles.cardTitleCursos}>{user.modulosCompletados}</Text>
-            <Text style={styles.cardTitleCursos}>{user.modulosCompletados==1 ? "módulo completo":"módulos completos"}</Text>
+          <Pressable style={[styles.card, styles.cardRight]} onPress={() => router.push('/tabs/Dashboard_Alumno')}>            
+            <ThemedText style={[styles.cardTitleCursos,estilos.centrado,{marginTop:10,fontSize:25}]}>Nivel {user.level}</ThemedText>            
+            <ThemedText style={[styles.xpInfo,estilos.centrado]}>{contexto.user.getXP()} XP</ThemedText>
+            <Ionicons name='barbell' size={50} color={paleta.turquesa} style={estilos.centrado}/>
           </Pressable>
         </View>
 
@@ -225,7 +195,7 @@ export default function HomeStudent() {
           </View>
         </View>
         
-        <AnimatedButton title="Practicar ahora" onPress={() => router.push('/tabs/Dashboard_Alumno')} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
+        <AnimatedButton title="Practicar ahora" onPress={() => router.push('/tabs/HomeStudent/practica')} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
 
         <View style={styles.shortcutsRow}>
           <Pressable style={styles.shortcutCardCursos} onPress={() => router.push('/tabs/leaderboard_grupo')}>
@@ -239,7 +209,8 @@ export default function HomeStudent() {
         </View>
 
         {/* Misiones Diarias Preview */}
-        <DailyMissionsPreview userId={contexto.user.id} router={router} />
+       {/*  <DailyMissionsPreview userId={contexto.user.id} router={router} /> */}
+        
       </ScrollView>
 
       {/* Modal para mostrar todas las categorías */}
@@ -302,7 +273,7 @@ export default function HomeStudent() {
                       transition={0}
                     />
                   <XPCard borderColor={paleta.turquesa} bckColor={paleta.turquesa} textColor={'white'} 
-                    title={'XP ganado'} cant={user.racha*2} icon='barbell' iconColor={paleta.dark_aqua}/>
+                    title={'XP ganado'} cant={user.racha*2+""} icon='barbell' iconColor={paleta.dark_aqua}/>
                 <ThemedText style={[styles.title_racha]}>¡¡Tienes {user.racha} días de racha!!</ThemedText>
                 <ThemedText type='defaultSemiBold' lightColor={paleta.dark_aqua}>¡Sigue aprendiendo mañana para llegar a {user.racha+1}!</ThemedText>
                 <BotonLogin callback={cerrar_modal_racha} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
@@ -442,7 +413,7 @@ const styles = StyleSheet.create({
   },
   xpInfo: {
     marginTop: 4,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#555'
   },

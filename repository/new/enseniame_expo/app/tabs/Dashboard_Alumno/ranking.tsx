@@ -24,23 +24,25 @@ export default function RankingProfes (){
     const [dataRanking,setDataRanking] = useState<DatosRanking[]>()    
 
     useFocusEffect(
-        useCallback(() => {
-          fetchRanking();
-          return () => {
-          };
-        }, [])
+      useCallback(() => {
+        fetchRanking();
+        return () => {
+        };
+      }, [])
     );
 
     const fetchRanking = async () => {
       setLoading(true);
       try {
           const d = await getRanking();
+          //filtrar los de calificación 0
+          const filtered = d.filter(v=>v.promedio!=0)
           //ordenar por mayor ranking
-          const ordered = d.sort(function(a,b){
+          const orderedAndFiltered = filtered.sort(function(a,b){
               return b.promedio-a.promedio
-          })
+          });
 
-          setDataRanking(ordered || [])
+          setDataRanking(orderedAndFiltered || [])
       } catch (error) {
           error_alert("No se pudo cargar el ranking");
           console.error(error)
@@ -49,12 +51,12 @@ export default function RankingProfes (){
       }
   }
     if (loading) {
-          return (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={paleta.dark_aqua} />
-            </View>
-          );
-        }
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={paleta.dark_aqua} />
+        </View>
+      );
+    }
     return (
         <View style={styles.container}>
             <View style={styles.modalHeader}>

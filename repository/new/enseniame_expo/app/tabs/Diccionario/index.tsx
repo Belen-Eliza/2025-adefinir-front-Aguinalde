@@ -8,7 +8,7 @@ import {
 import { Checkbox } from 'expo-checkbox';
 import { Ionicons } from '@expo/vector-icons';
 import VideoPlayer from '@/components/VideoPlayer';
-import {  Senia_Info } from '@/components/types';
+import {  Estado_Pendiente, Senia_Alumno, Senia_Info } from '@/components/types';
 import { error_alert } from '@/components/alert';
 import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
@@ -18,6 +18,7 @@ import { useUserContext } from '@/context/UserContext';
 import { router } from 'expo-router';
 import { SmallPopupModal } from '@/components/modals';
 import Toast from 'react-native-toast-message';
+import { getEstado } from '@/conexiones/senia_alumno';
 
 export default function Diccionario() {
   const [senias, setSenias] = useState<Senia_Info[]>([]);
@@ -25,7 +26,7 @@ export default function Diccionario() {
   const [searchQuery, setSearchQuery] = useState('');
   
   const [loading, setLoading] = useState(true);
-  const [selectedSenia, setSelectedSenia] = useState<Senia_Info | null>(null);
+  const [selectedSenia, setSelectedSenia] = useState<Senia_Alumno | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
   const [mostrarPropios, setmostrarPropios] = useState(false);
@@ -46,8 +47,7 @@ export default function Diccionario() {
 
   const fetchSenias = async () => {
     try {
-      const data = await buscarSenias();
-      
+      const data = await buscarSenias();      
       setSenias(data || []);
       setFilteredSenias(data || []);
       
@@ -81,7 +81,7 @@ export default function Diccionario() {
   };
 
   const esMio = (senia: Senia_Info)=>{
-    return senia.Users?.id == contexto.user.id && contexto.user.is_prof
+    return senia.id_autor == contexto.user.id && contexto.user.is_prof
   }
 
   const eliminar_senia = (senia: Senia_Info) =>{
@@ -112,7 +112,10 @@ export default function Diccionario() {
     <Pressable 
       style={styles.listItem}
       onPress={async () => {
-        setSelectedSenia(item);
+        let estado = new Estado_Pendiente();
+        if (!contexto.user.is_prof) estado= await getEstado(contexto.user.id,item.id)
+        let s = new Senia_Alumno(item,estado)
+        setSelectedSenia(s);
         setModalVisible(true);
         }
       }
@@ -121,9 +124,9 @@ export default function Diccionario() {
         <View>
           <Text style={styles.significadoText}>{item.significado}</Text>
           <Text style={[styles.significadoText,{fontSize:12,marginTop:5}]}>{item.Categorias?.nombre}</Text>
-          {item.Users && esMio(item) ? 
-            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Users?.username} (Yo)</Text>:
-            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Users?.username}</Text> }
+          {item.Profesores && esMio(item) ? 
+            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Profesores.Users.username} (Yo)</Text>:
+            <Text style={[styles.significadoText,{fontSize:12,marginTop:5,color:paleta.strong_yellow}]}>{item.Profesores?.Users.username}</Text> }
           
           
         </View>
@@ -174,49 +177,57 @@ export default function Diccionario() {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
 
-        <SmallPopupModal title={selectedSenia?.significado} modalVisible={modalVisible} setVisible={setModalVisible}>
+        <SmallPopupModal title={selectedSenia?.info.significado} modalVisible={modalVisible} setVisible={setModalVisible}>
           {selectedSenia && (
             <>
             <VideoPlayer 
-              uri={selectedSenia.video_url}
+              uri={selectedSenia.info.video_url}
               style={styles.video}
             />
             <ThemedText style={{margin:10}}>
               <ThemedText type='defaultSemiBold'>Categoría:</ThemedText> {''}
-              <ThemedText>{selectedSenia.Categorias.nombre}</ThemedText>
+              <ThemedText>{selectedSenia.info.Categorias.nombre}</ThemedText>
             </ThemedText>   
+            
             </>
           )}
           
-          {selectedSenia && selectedSenia.Users && esMio(selectedSenia) ?
+          {selectedSenia && selectedSenia.info.Profesores && esMio(selectedSenia.info) ?
           <ThemedText style={{margin:10}}>
             <ThemedText type='defaultSemiBold'>Autor:</ThemedText> {''}
-            <ThemedText>{selectedSenia.Users.username} (Yo)</ThemedText> {''}
+            <ThemedText>{selectedSenia.info.Profesores.Users.username} (Yo)</ThemedText> {''}
           </ThemedText>
             :null
           }
-          {selectedSenia && selectedSenia.Users && !esMio(selectedSenia) ?
+          {selectedSenia && selectedSenia.info.Profesores && !esMio(selectedSenia.info) ?
             <ThemedText style={{margin:10}}>
               <ThemedText type='defaultSemiBold'>Autor:</ThemedText> {''}
-              <ThemedText>{selectedSenia.Users.username} </ThemedText> {''}
+              <ThemedText>{selectedSenia.info.Profesores.Users.username} </ThemedText> {''}
             </ThemedText>                    
             :null
           }
 
-          {selectedSenia && esMio(selectedSenia) ?
+          {selectedSenia && !contexto.user.is_prof && (
+            <ThemedText style={{margin:10}}>
+              <ThemedText type='defaultSemiBold'>Estado:</ThemedText> {''}
+              <ThemedText>{selectedSenia.estado.toString()}</ThemedText>
+            </ThemedText>  
+            )}
+
+          {selectedSenia && esMio(selectedSenia.info) ?
             <>
-              <TouchableOpacity style={[styles.iconButton,estilos.shadow]} onPress={()=>{editar_senia(selectedSenia)}}   >  
+              <TouchableOpacity style={[styles.iconButton,estilos.shadow]} onPress={()=>{editar_senia(selectedSenia.info)}}   >  
                 <Ionicons name="create" color={paleta.dark_aqua} size={25} style={styles.icon} />
                 <ThemedText type="subtitle" lightColor={paleta.dark_aqua} style={{flex:2}}>Editar seña</ThemedText>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconButton,estilos.shadow,{backgroundColor:"red"}]} onPress={()=>{eliminar_senia(selectedSenia)}}   >  
+              <TouchableOpacity style={[styles.iconButton,estilos.shadow,{backgroundColor:"red"}]} onPress={()=>{eliminar_senia(selectedSenia.info)}}   >  
                 <Ionicons name="trash-bin-outline" color='white' size={25} style={styles.icon} />
                 <ThemedText type="subtitle" lightColor='white' style={{flex:2}}>Eliminar seña</ThemedText>
               </TouchableOpacity></> : null
           }
 
-          {selectedSenia && !esMio(selectedSenia) ?
-            <TouchableOpacity style={[styles.iconButton,estilos.shadow]} onPress={()=>{reportar_senia(selectedSenia)}}   >  
+          {selectedSenia && !esMio(selectedSenia.info) && contexto.user.is_prof ?
+            <TouchableOpacity style={[styles.iconButton,estilos.shadow]} onPress={()=>{reportar_senia(selectedSenia.info)}}   >  
               <Ionicons name="alert-circle-outline" color={paleta.dark_aqua} size={25} style={styles.icon} />
               <ThemedText type="subtitle" lightColor={paleta.dark_aqua} style={{flex:2}}>Reportar seña</ThemedText>
             </TouchableOpacity>: null

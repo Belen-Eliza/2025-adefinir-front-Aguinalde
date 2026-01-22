@@ -1,21 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert, SafeAreaView, TextInput, ScrollView } from 'react-native';
 import { supabase } from '@/utils/supabase';
 import { useUserContext } from '@/context/UserContext';
 import ObjetivoCard from '@/components/ObjetivoCard';
-import ObjetivoModal from '@/components/ObjetivoModal';
 import { Ionicons } from '@expo/vector-icons';
 import { paleta } from '@/components/colores';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { ganar_insignia_objetivos } from '@/conexiones/insignias';
+import { useFocusEffect } from 'expo-router';
+import { actualizar_objetivo, crear_objetivo, mis_objetivos } from '@/conexiones/objetivos';
+import { SmallPopupModal } from '@/components/modals';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type Objetivo = {
   id: number;
   titulo: string;
+  meta_total:number;
+  valor_actual:number;
   descripcion?: string | null;
-  fecha_limite?: string | null;
-  completado: boolean;
-  user_id?: number;
+  fecha_limite?: Date | null;
+  completado: boolean;  
 }
 
 export default function AlumnoObjetivosScreen() {
@@ -28,32 +32,34 @@ export default function AlumnoObjetivosScreen() {
   const [editing, setEditing] = useState<Objetivo | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Reload when the logged user changes (fixes empty list after login)
-  useEffect(() => {
-    if ((user as any)?.id && (user as any).id !== 0) {
-      loadObjetivos();
-    }
-  }, [(user as any)?.id]);
+  const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [fecha, setFecha] = useState(new Date());  
+
+  useFocusEffect(
+    useCallback(() => {
+      loadObjetivos()
+    },[])
+        )
 
   async function loadObjetivos() {
     try {
       setLoading(true);
       setError(null);
-      const uid = (user as any)?.id;
+      const uid = user.id;
       console.log('[Objetivos] Loading for user id:', uid);
-      const { data, error } = await supabase
-        .from('objetivos')
-        .select('*')
-        .eq('user_id', uid);
+      const o = await mis_objetivos(uid);
 
       if (error) throw error;
-      const list: Objetivo[] = (data || []).map((r: any) => ({
+      const list: Objetivo[] = (o || []).map((r: any) => ({
         id: r.id,
         titulo: r.titulo,
         descripcion: r.descripcion,
-        fecha_limite: r.fecha_limite,
+        fecha_limite: new Date( r.fecha_limite),
         completado: r.completado,
         user_id: r.user_id,
+        meta_total:r.meta_total,
+        valor_actual: r.valor_actual
       }));
 
       // sort by fecha_limite (closest first). nulls last
@@ -64,8 +70,8 @@ export default function AlumnoObjetivosScreen() {
         return new Date(a.fecha_limite).getTime() - new Date(b.fecha_limite).getTime();
       });
 
-  console.log('[Objetivos] Loaded count:', list.length);
-  setObjetivos(list);
+      console.log('[Objetivos] Loaded count:', list.length);
+      setObjetivos(list);
     } catch (err: any) {
       console.error(err);
       setError('Error cargando objetivos');
@@ -74,19 +80,18 @@ export default function AlumnoObjetivosScreen() {
     }
   }
 
-  const onRefresh = async () => {
-    try {
-      setRefreshing(true);
-      await loadObjetivos();
-    } finally {
-      setRefreshing(false);
-    }
-  };
 
   const openCreate = () => {
-    setEditing(null);
+    setEditing(null);    
+    borrarCambios()
     setModalVisible(true);
   };
+
+  const borrarCambios = ()=>{
+    setDescripcion("");
+    setTitulo("");
+    setFecha(new Date())
+  }
 
   const openEdit = (o: Objetivo) => {
     if (o.completado) {
@@ -94,27 +99,21 @@ export default function AlumnoObjetivosScreen() {
       return;
     }
     setEditing(o);
+    setDescripcion(o.descripcion || "");
+    setTitulo(o.titulo);
+    setFecha(o.fecha_limite || new Date())
     setModalVisible(true);
   };
 
-  const handleSave = async (payload: Partial<Objetivo> & { id?: number }) => {
+  const handleSave = async () => {
     try {
       setLoading(true);
-      if (payload.id) {
+      if (editing) {
         // update
-        const { data, error } = await supabase
-          .from('objetivos')
-          .update({ titulo: payload.titulo, descripcion: payload.descripcion, fecha_limite: payload.fecha_limite })
-          .eq('id', payload.id)
-          .select();
-        if (error) throw error;
+        await actualizar_objetivo(editing.id,titulo,descripcion,fecha);
       } else {
         // create
-        const { data, error } = await supabase
-          .from('objetivos')
-          .insert([{ titulo: payload.titulo, descripcion: payload.descripcion, fecha_limite: payload.fecha_limite, completado: false, user_id: (user as any).id }])
-          .select();
-        if (error) throw error;
+        await crear_objetivo(user.id,titulo,descripcion,fecha);
       }
       setModalVisible(false);
       await loadObjetivos();
@@ -140,7 +139,7 @@ export default function AlumnoObjetivosScreen() {
   const confirmDelete = async (o: Objetivo) => {
     try {
       setLoading(true);
-      const { error } = await supabase.from('objetivos').delete().eq('id', o.id);
+      const { error } = await supabase.from('Objetivos').delete().eq('id', o.id);
       if (error) throw error;
       await loadObjetivos();
     } catch (err) {
@@ -154,7 +153,7 @@ export default function AlumnoObjetivosScreen() {
   const toggleComplete = async (o: Objetivo) => {
     try {
       setLoading(true);
-      const { error } = await supabase.from('objetivos').update({ completado: !o.completado }).eq('id', o.id);
+      const { error } = await supabase.from('Objetivos').update({ completado: !o.completado }).eq('id', o.id);
       if (error) throw error;
       await loadObjetivos();
       ganar_insignia_objetivos(user.id);
@@ -164,6 +163,11 @@ export default function AlumnoObjetivosScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onChange = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate;    
+    setFecha(currentDate);
   };
 
   return (
@@ -211,8 +215,7 @@ export default function AlumnoObjetivosScreen() {
             onToggle={() => toggleComplete(item)}
           />
         )}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
+        refreshing={refreshing}        
         ListEmptyComponent={
           <View style={{ alignItems: 'center', marginTop: 40 }}>
             <Text style={styles.empty}>No tienes objetivos aún</Text>
@@ -228,12 +231,53 @@ export default function AlumnoObjetivosScreen() {
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
 
-      <ObjetivoModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSave={handleSave}
-        initialData={editing || undefined}
-      />
+      
+      <SmallPopupModal title={editing ? 'Editar objetivo' : 'Nuevo objetivo'} modalVisible={modalVisible} setVisible={(v) => setModalVisible(false)}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <Text style={styles.label}>Título *</Text>
+        <TextInput
+          value={titulo}
+          onChangeText={setTitulo}
+          placeholder="Título"
+          placeholderTextColor="#9aa0a6"
+          style={styles.input}
+        />
+
+        <Text style={styles.label}>Descripción</Text>
+        <TextInput
+          value={descripcion}
+          onChangeText={setDescripcion}
+          placeholder="Descripción (opcional)"
+          placeholderTextColor="#9aa0a6"
+          style={[styles.input, styles.textarea]}
+          multiline
+        />
+
+        <Text style={styles.label}>Fecha límite:</Text>
+        
+        <DateTimePicker
+          
+          testID="dateTimePicker"
+          value={fecha}
+          mode={"date"}
+          is24Hour={true}
+          onChange={onChange}
+          minimumDate={new Date()}
+        />               
+
+        <View style={styles.rowBtns}>
+          <TouchableOpacity style={[styles.btn, styles.cancel]} onPress={()=>setModalVisible(false)}>
+            <Ionicons name="close" size={18} color="#222" />
+            <Text style={styles.btnCancelText}>Cancelar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.btn, styles.save]} onPress={handleSave}>
+            <Ionicons name="save" size={18} color="#fff" />
+            <Text style={styles.btnSaveText}>Guardar</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{height:200}}></View>
+      </ScrollView>
+    </SmallPopupModal>
     </SafeAreaView>
   );
 }
@@ -280,4 +324,29 @@ const styles = StyleSheet.create({
     elevation: 4,
     zIndex: 5,
   },
+  content: { paddingBottom: 24 },
+  label: { marginTop: 8, fontSize: 13, color: '#333', marginBottom: 6 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+  },
+  textarea: { minHeight: 90, textAlignVertical: 'top' },
+  rowBtns: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30 },
+  btn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginLeft: 10,
+  },
+  cancel: { backgroundColor: '#f1f1f1' },
+  save: { backgroundColor: '#20bfa9' },
+  btnCancelText: { color: '#222', fontWeight: '600' },
+  btnSaveText: { color: '#fff', fontWeight: '700' },
 });

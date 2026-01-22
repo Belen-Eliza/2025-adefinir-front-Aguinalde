@@ -1,6 +1,7 @@
 import { Pressable,  TextInput,  View,
   StyleSheet,  ScrollView,  AppState, 
-  TouchableOpacity, KeyboardAvoidingView,  Platform
+  TouchableOpacity, KeyboardAvoidingView,  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useState } from "react";
@@ -33,6 +34,7 @@ export default function Login() {
   const [mail, setMail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading,setLoading]= useState(false)
 
   const {login_app} = useUserContext();
 
@@ -43,12 +45,20 @@ export default function Login() {
     const isEmailValid = validateEmail(lower_case_mail).status;
     const isPasswordValid = validatePassword(password).status;
     if (isPasswordValid && isEmailValid) {
-      //acceder a db
+      try {
+        //acceder a db
+      setLoading(true)
       const usuario = await ingresar(lower_case_mail,password);
       if (usuario) login_app(usuario);
       setMail("");
       setPassword("");
       setShowPassword(false);
+      } catch (error) {
+        console.error(error);
+        error_alert("Ocurrió un error")
+      } finally {
+        setLoading(false)
+      }            
     } else {
       error_alert("Complete todos los campos para continuar");  
     }
@@ -57,6 +67,11 @@ export default function Login() {
     <View
       style={styles.mainView}
     >
+      {loading && (
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}> 
+          <ActivityIndicator size="large" color="#20bfa9" />          
+        </View>
+      )}
        <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{flex: 1}}
@@ -155,6 +170,15 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0)',
   },
-  
+  container: { 
+    flex: 1, 
+    backgroundColor: '#e6f7f287',
+    height:"100%",
+    width:"100%",
+    position: "absolute",
+    top:0 ,
+    zIndex: 9999,
+    elevation:5 
+   },
 })
 

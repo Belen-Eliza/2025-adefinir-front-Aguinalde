@@ -79,7 +79,8 @@ export default function DetalleModuloScreen() {
       const calificaciones =await calificacionesModulo(Number(id));
       setCalificacionesModulo(calificaciones || []);
     } catch (e) {
-      Alert.alert('Error', 'No se pudieron cargar las señas del módulo');
+      error_alert( 'No se pudieron cargar las señas del módulo');
+      console.error(e)
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -129,11 +130,11 @@ export default function DetalleModuloScreen() {
       .insert([{ id_modulo: id, id_video: senia.id }]);
     setAgregando(false);
     if (error) {
-      Alert.alert('Error', 'No se pudo agregar la seña');
+      error_alert( 'No se pudo agregar la seña');
     } else {
       setSearch("");
       fetchSeniasModulo();
-      Alert.alert('Seña agregada', 'La seña fue agregada al módulo correctamente.');
+      success_alert( 'La seña fue agregada al módulo correctamente.');
     }
   };
 

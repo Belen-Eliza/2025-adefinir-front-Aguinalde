@@ -11,10 +11,10 @@ import { estilos } from '@/components/estilos';
 import { Image } from 'expo-image';
 import { cambiar_mi_avatar, my_avatar, todos_avatares } from '@/conexiones/avatars';
 import { mi_racha } from '@/conexiones/racha';
-import { useXP } from '@/components/animations/useXP';
 import { mis_modulos_completos } from '@/conexiones/modulos';
 import { Avatar } from '@/components/types';
-import { mis_insignias, mis_insignias_ganadas, todas_insignias } from '@/conexiones/insignias';
+import { mis_insignias } from '@/conexiones/insignias';
+import { miNivel } from '@/conexiones/xp';
 
 type Insignia = {
   id: number;
@@ -25,62 +25,66 @@ type Insignia = {
 
 export default function Perfil (){
   const [racha,setRacha] = useState(0);
+  const [exp,setXP] = useState(0);
+  const [nivel,setNivel]= useState(1); 
   const [modulos_completos,setModulos] = useState(0);
   const [pfp,setPfp]=useState<Avatar>();
   const [avatares,setAvatares] = useState<Avatar[]>();
   const [insignias,setInsignias] = useState<Insignia[]>();
   const [loading,setLoading] = useState(false);
-
-  const insignia = require("../../../assets/images/insignia.png");
     
   const contexto = useUserContext();   
-  const { xp, level, delta, consumeDelta } = useXP(contexto.user.id);
 
-    useFocusEffect(
-      useCallback(() => {
-        const fetchData = async () => {
-          setLoading(true)
-          try {
-            const p = await my_avatar(contexto.user.id);
-            const img = require("../../../assets/images/pfp.jpg");
-            
-            if (p.Avatar) {setPfp(p.Avatar)}
-            else setPfp({image_url:img,id:1,racha_desbloquear:1});
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        setLoading(true)
+        try {
+          const p = await my_avatar(contexto.user.id);
+          const img = require("../../../assets/images/pfp.jpg");
+          
+          if (p.Avatar) {setPfp(p.Avatar)}
+          else setPfp({image_url:img,id:1,racha_desbloquear:1});
 
-            const a = await todos_avatares();            
-            const r = await mi_racha(contexto.user.id);
-            let avatares_desbloqueados =a;
-            
-            if (a && a.length>0) {
-              avatares_desbloqueados = desbloqueados(a,r.racha_maxima);
-              //primero los últimos que desbloqueaste
-              avatares_desbloqueados.sort(function(a,b){
-                if (a.racha_desbloquear > b.racha_desbloquear){
-                  return -1
-                } if (a.racha_desbloquear < b.racha_desbloquear){
-                  return 1
-                } return 0
-              })
-            }            
-            setAvatares(avatares_desbloqueados || []);  
-            setRacha(r.racha);
-            
-            const m= await mis_modulos_completos(contexto.user.id);
-            if (m && m.length>0) setModulos(m.length);
-
-            const i = await mis_insignias(contexto.user.id);
-            setInsignias(i || []);                  
-
-            setLoading(false)
-          } catch (error) {
-            console.error(error);
-            error_alert("No se pudo cargar tu perfil");
+          const a = await todos_avatares();            
+          const r = await mi_racha(contexto.user.id);
+          const level = await miNivel(contexto.user.id);
+          
+          if (level) setNivel(level.nivel)
+          const xp = contexto.user.getXP();
+          setXP(xp);
+          let avatares_desbloqueados =a;
+          
+          if (a && a.length>0) {
+            avatares_desbloqueados = desbloqueados(a,r.racha_maxima);
+            //primero los últimos que desbloqueaste
+            avatares_desbloqueados.sort(function(a,b){
+              if (a.racha_desbloquear > b.racha_desbloquear){
+                return -1
+              } if (a.racha_desbloquear < b.racha_desbloquear){
+                return 1
+              } return 0
+            })
           }            
-        };
-        fetchData();
-        return () => {};
-      }, [])
-    );
+          setAvatares(avatares_desbloqueados || []);  
+          setRacha(r.racha);
+          
+          const m= await mis_modulos_completos(contexto.user.id);      
+          if (m && m.length>0) setModulos(m.length);
+
+          const i = await mis_insignias(contexto.user.id);
+          setInsignias(i || []);                  
+
+          setLoading(false)
+        } catch (error) {
+          console.error(error);
+          error_alert("No se pudo cargar tu perfil");
+        }            
+      };
+      fetchData();
+      return () => {};
+    }, [])
+  );
 
   const cambiar_avatar = async (a:Avatar) => {
     try {
@@ -146,11 +150,11 @@ export default function Perfil (){
               /> 
 
               <View style={styles.stats}>
-                <ThemedText type='bold'>{xp}</ThemedText>
+                <ThemedText type='bold'>{exp}</ThemedText>
                 <ThemedText>XP</ThemedText>
               </View>
               <View style={styles.stats}>
-                <ThemedText type='bold'>{level}</ThemedText>
+                <ThemedText type='bold'>{nivel}</ThemedText>
                 <ThemedText>nivel</ThemedText>
               </View>
               
@@ -187,7 +191,11 @@ export default function Perfil (){
                 keyExtractor={(item) => item.id.toString()}
                 style={[{maxHeight:220}]}
                 data={insignias?.slice(0,2)}
-                renderItem={renderInsignia}                
+                renderItem={renderInsignia}    
+                ListEmptyComponent={()=>(
+                <View style={{padding:20}}>
+                  <ThemedText style={[styles.subtitle,estilos.centrado]}>No has ganado ninguna insignia aún.</ThemedText>
+                </View>)}            
               />             
               
             </View>

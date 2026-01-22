@@ -2,7 +2,7 @@ import React, { useCallback,  useState } from "react";
 import { View, Text, Pressable, StyleSheet, TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import {  Modulo } from "@/components/types";
-import { buscar_modulo } from "@/conexiones/modulos";
+import { alumno_completo_modulo, buscar_modulo } from "@/conexiones/modulos";
 import { ThemedText } from "@/components/ThemedText";
 import { Image } from 'expo-image';
 import { paleta, paleta_colores } from "@/components/colores";
@@ -14,7 +14,6 @@ import { alumno_ya_califico_modulo, calificarModulo } from "@/conexiones/calific
 import { estilos } from "@/components/estilos";
 import { AntDesign } from "@expo/vector-icons";
 import { BotonLogin } from "@/components/botones";
-import { ganar_insignia_modulo } from "@/conexiones/insignias";
 
 export default function ModuloCompletado (){
      const { id=0 } = useLocalSearchParams<{ id: string }>();
@@ -26,6 +25,7 @@ export default function ModuloCompletado (){
       const [comentario, setComentario] = useState("");
       const [showCalificacionModal, setShowCalificacionModal] = useState(false);
       const [yaCalificado, setYaCalificado] = useState(false);
+      const [completado,setCompletado] = useState(false);
 
       const contexto = useUserContext();
       const aplausos = require("../../../../assets/images/aplausos.gif");
@@ -46,8 +46,10 @@ export default function ModuloCompletado (){
 
           const calificado = await alumno_ya_califico_modulo(contexto.user.id,Number(id));
           setYaCalificado(calificado);  
-          
-          ganar_insignia_modulo(contexto.user.id);
+
+          const hecho = await alumno_completo_modulo(contexto.user.id,Number(id));
+          setCompletado(hecho)
+                    
         } catch (error) {
             error_alert("No se pudo cargar el módulo");
             console.error(error)
@@ -78,7 +80,7 @@ export default function ModuloCompletado (){
       return (
         <View style={styles.container}>
             <Text style={styles.title}> ¡¡Felicidades!!</Text>
-            <Text style={[styles.cardTitle,estilos.centrado]}>Completaste el módulo {modulo?.nombre}</Text>
+            <Text style={[styles.cardTitle,estilos.centrado]}>Completaste la lección {modulo?.nombre}</Text>
             <Image
               style={[styles.image,estilos.centrado]}
               source={aplausos}
@@ -87,7 +89,7 @@ export default function ModuloCompletado (){
             />
             
            
-            {!yaCalificado && (
+            {!yaCalificado && completado && (
             <>            
             <Pressable style={estilos.centrado} onPress={()=>setShowCalificacionModal(true)}>
               <ThemedText lightColor={paleta.strong_yellow} type="defaultSemiBold"  style={estilos.centrado}>¿Deseas dejar una calificación?</ThemedText>

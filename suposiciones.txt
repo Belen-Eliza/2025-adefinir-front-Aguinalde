@@ -1,0 +1,8 @@
+3 estados de señas:
+*Pendientes: no vistas
+*Aprendiendo: visualizadas. Los profesores ven la vista en sus videos
+*Dominadas: 10 marcadas como "supe"
+
+Un módulo está completo cuando todas sus señas están "dominadas".
+Se puede pasar de pendientes a aprendiendo y viceversa, pero no se puede revertir una dominada.
+En la práctica interactiva, mostrar aprendiendo y dominadas
