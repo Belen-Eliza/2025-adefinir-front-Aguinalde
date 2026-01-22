@@ -158,7 +158,5 @@ const sumar_acierto = async (id_alumno:number,id_senia:number) => {
     }              
 }
 
-
-
 export {marcar_aprendida, marcar_no_aprendida, cantidad_aprendidas,senias_alumno, marcar_aprendiendo,marcar_pendiente,
     mis_senias_dominadas,mis_senias_aprendiendo,mis_senias_pendientes,sumar_acierto,senias_aprendidas_reporte}

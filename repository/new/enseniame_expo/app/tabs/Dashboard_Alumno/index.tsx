@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, SectionList, 
   RefreshControl,  Modal, FlatList, TouchableOpacity, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -16,8 +16,9 @@ import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { error_alert } from '@/components/alert';
 import { getRanking } from '@/conexiones/calificaciones';
-import { mis_senias_aprendiendo, mis_senias_dominadas, mis_senias_pendientes, senias_alumno } from '@/conexiones/aprendidas';
+import { mis_senias_aprendiendo, mis_senias_dominadas, mis_senias_pendientes, senias_alumno, senias_aprendidas_reporte } from '@/conexiones/aprendidas';
 import { Senia } from '@/components/types';
+import { senias_historial } from '@/conexiones/dashboard';
 
 type DatosRanking ={
     id: number;
@@ -28,7 +29,7 @@ type DatosRanking ={
 
 type Modulo = { id: number; nombre: string };
 type RelacionModuloVideo = { id_modulo: number; id_video: number };
-type HistorialRow = { senia_id: number; aprendida: boolean; created_at: string; modulo_nombre: string; senia_nombre: string };
+type HistorialRow = { senia_id: number; created_at: string; modulo_nombre: string; senia_nombre: string };
 
 type SectionType = 'modules' | 'history' | 'ranking';
 
@@ -54,6 +55,29 @@ export default function DashboardAlumnoScreen() {
   const [historial, setHistorial] = useState<HistorialRow[]>([]);
   
   const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);  
+
+  useFocusEffect(
+    useCallback(() => {
+      try {
+        setLoading(true);
+        fetchHistorial();
+        fetchRanking();
+      } catch (error) {
+        error_alert("No se pudo generar el reporte.");
+        console.error("[Dashboard]: ",error);
+      } finally {
+        setLoading(false);
+      }
+      return () => {
+      };
+    }, [])
+  );
+
+  const fetchHistorial = async () => {
+    const h = await senias_historial(user.id);
+    console.log(h)
+
+  }
 
   const fetchData = async () => {
     setError(null);
@@ -82,6 +106,7 @@ export default function DashboardAlumnoScreen() {
         const seniasA = await mis_senias_aprendiendo(user.id);
         const seniasD = await mis_senias_dominadas(user.id);
         const seniasP = await mis_senias_pendientes(user.id);
+        
         setAprendiendo(seniasA || []);
         setDominadas(seniasD || []);
         setPendientes(seniasP || []);
@@ -92,13 +117,7 @@ export default function DashboardAlumnoScreen() {
 
       let historialRows: HistorialRow[] = [];
       try {
-        const { data: hist, error: histErr } = await supabase
-          .from('Alumno_Senia')
-          .select('id_senia, aprendida, created_at')
-          .eq('id_alumno', user.id)
-          .eq('aprendida', true)
-          .order('created_at', { ascending: false });
-        if (histErr) throw histErr;
+        const hist = await senias_aprendidas_reporte(user.id);
 
         if (hist && hist.length) {
           const { data: senias, error: seniaErr } = await supabase
@@ -191,13 +210,7 @@ export default function DashboardAlumnoScreen() {
     };
   }, [user?.id]);
 
-  // Recargar datos cada vez que la pantalla recibe foco (cuando se entra en la página)
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchRanking();
-      fetchData();
-    }, [user?.id])
-  );
+ 
 
   const progresoPorModulo = useMemo(() => {
     const byModule: Array<{ id: number; nombre: string; total: number; learned: number }> = [];
