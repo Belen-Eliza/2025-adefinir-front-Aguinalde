@@ -1,5 +1,10 @@
 import { supabase } from '../utils/supabase'
 import { Senia_Alumno,Estado_Aprendiendo,Estado_Dominada,Estado_Pendiente,Estado_Senia } from '@/components/types'
+type Senia_Modulo ={
+  senia: Senia_Alumno;    
+  descripcion?: string;
+  aprendida:boolean
+}
 
 const traer_senias_practica = async (id_alumno:number) => {
     const {data,error} = await supabase.from("Alumno_Senia").select("*, Senias(*)").eq("id_alumno",id_alumno);
@@ -68,5 +73,23 @@ const getEstado = async (id_alumno:number,id_senia:number) => {
     return new Estado_Pendiente();
 }
 
+const traer_senias_modulo = async (id_alumno:number,id_modulo:number) => {
+    const {data,error} = await supabase
+        .from("Modulo_Video")
+        .select("*,  Senias(*, Profesores(Users(username)), Categorias(nombre))")        
+        .eq("id_modulo",id_modulo)
 
-export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado}
+    if (error) throw error
+    let res: Senia_Modulo[]= []
+    if (data && data.length>0){        
+        data.forEach(async each=>{
+            let estado = await getEstado(id_alumno,each.id_video);
+            let s =new Senia_Alumno(each.Senias,estado);
+            res.push({senia:s,descripcion:each.descripcion,aprendida:s.estado.dominada()})
+        })
+    }
+    return res
+}
+
+
+export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado,traer_senias_modulo}

@@ -197,8 +197,8 @@ class Senia_Alumno {
         this.info=info;
         this.estado =estado
     }
-    cambiar_estado(data:string){
-        this.estado.cambiar_estado(data,this)
+    cambiar_estado(){
+        this.estado.cambiar_estado(this)
     }
     setEstado(estado_nuevo:Estado_Senia){
         this.estado=estado_nuevo;
@@ -209,11 +209,23 @@ class Senia_Alumno {
 }
 
 abstract class Estado_Senia {
-    abstract cambiar_estado(data:string,senia:Senia_Alumno):void
+    abstract cambiar_estado(senia:Senia_Alumno):void
     sumar_acierto(id_alumno:number,id_senia:number){}
+    abstract display_checkmark(): "flex" | "none"
+    abstract esta_aprendiendo(): boolean
+    abstract dominada(): boolean
 }
 class Estado_Pendiente extends Estado_Senia{
-    cambiar_estado(data: string, senia: Senia_Alumno): void {
+    dominada(): boolean {
+        return false
+    }
+    esta_aprendiendo(): boolean {
+        return false
+    }
+    display_checkmark(): "flex" | "none" {
+        return "none"
+    }
+    cambiar_estado( senia: Senia_Alumno): void {
         senia.setEstado(new Estado_Aprendiendo(0));
         //conectar con db
     }    
@@ -227,8 +239,9 @@ class Estado_Aprendiendo extends Estado_Senia{
         super();
         this.cant_aciertos=cant_aciertos
     }
-    cambiar_estado(data: string, senia: Senia_Alumno): void {
-        //revisar
+    cambiar_estado( senia: Senia_Alumno): void {
+        senia.setEstado(new Estado_Pendiente());
+        //db
     }
     sumar_acierto(id_alumno:number,id_senia:number){
         this.cant_aciertos++
@@ -241,13 +254,32 @@ class Estado_Aprendiendo extends Estado_Senia{
     toString(){
         return "Aprendiendo"
     }
+    display_checkmark(): "flex" | "none" {
+        return "none"
+    }
+    esta_aprendiendo(): boolean {
+        return true
+    }
+    dominada(): boolean {
+        return false
+    }
 }
 class Estado_Dominada extends Estado_Senia{
-    cambiar_estado(data: string, senia: Senia_Alumno): void {
+    cambiar_estado( senia: Senia_Alumno): void {
         //nada
+        alert("No se puede cambiar el estado de una seña dominada.")
     }
     toString(){
         return "¡Dominada! 🎉"
+    }
+    display_checkmark(): "flex" | "none" {
+        return "flex"
+    }
+    esta_aprendiendo(): boolean {
+        return false
+    }
+    dominada(): boolean {
+        return true
     }
 }
 

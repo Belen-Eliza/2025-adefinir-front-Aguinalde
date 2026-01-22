@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, FlatList,  TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
-import { Senia_Info, Modulo } from "@/components/types";
+import { Senia_Info, Modulo, Senia_Alumno } from "@/components/types";
 import { alumno_completo_modulo, buscar_modulo, buscar_senias_modulo, completar_modulo_alumno } from "@/conexiones/modulos";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -20,13 +20,13 @@ import { estilos } from "@/components/estilos";
 import { get_antiguedad } from "@/components/validaciones";
 import { AntDesign } from "@expo/vector-icons";
 import { ganar_insignia_senia } from "@/conexiones/insignias";
+import { getEstado, traer_senias_modulo } from "@/conexiones/senia_alumno";
 
 
-type Senia_Aprendida ={
-  senia: Senia_Info;
-  vista: boolean;
-  aprendida: boolean;
-  descripcion?: string
+type Senia_Modulo ={
+  senia: Senia_Alumno;    
+  descripcion?: string;
+  aprendida:boolean
 }
 type Calificaciones = {
   id_alumno: number;
@@ -43,13 +43,13 @@ export default function ModuloDetalleScreen() {
   if (id==0) router.back();
   const [modulo,setModulo] = useState<Modulo | undefined>();
   const [completado,setCompletado] =useState(false);
-  const [senias,setSenias] = useState<Senia_Aprendida[]>();
+  const [senias,setSenias] = useState<Senia_Modulo[]>();
   const [cant_aprendidas, setCantAprendidas] = useState(0);
   const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({});
   const [calificaciones_modulo,setCalificacionesModulo] = useState<Calificaciones[]>()
 
   const [loading, setLoading] = useState(true);
-  const [selectedSenia, setSelectedSenia] = useState<Senia_Aprendida | null>(null);
+  const [selectedSenia, setSelectedSenia] = useState<Senia_Modulo | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [showCalificacionModal, setShowCalificacionModal] = useState(false);
   const [puntaje, setPuntaje] = useState(0);
@@ -86,40 +86,8 @@ export default function ModuloDetalleScreen() {
 
   const fetch_senias = async ()=>{
     try {
-      const s = await  buscar_senias_modulo(Number(id));      
-      const vistas = await visualizaciones_alumno(contexto.user.id);
-      const aprendidas = await senias_aprendidas_alumno(contexto.user.id);
-
-      const fue_vista = (senia_id:number)=>{
-        let res = false;
-        vistas?.forEach(each=>{
-          if (each.senia==senia_id) res= true
-        });
-        return res
-      }
-
-      const fue_aprendida =(senia_id:number)=>{
-        let res = false;
-        aprendidas?.forEach(each=>{
-          if (each.id_senia==senia_id && each.aprendida) {
-            res= true;
-            setCantAprendidas(prev=>prev+=1);            
-          }
-        });
-        return res
-      }
-
-      const senias_vistas = s?.map(each=>{
-        let vista = fue_vista(each.Senias.id);
-        return {senia:each.Senias, vista:vista, descripcion:each.descripcion}
-      });
-
-      const senias_vistas_aprendidas =senias_vistas?.map(each=>{
-        let aprendida = fue_aprendida(each.senia.id);
-        return {senia:each.senia, vista:each.vista,aprendida:aprendida,descripcion:each.descripcion}
-      });
-
-      setSenias(senias_vistas_aprendidas || []);
+      const s = await  traer_senias_modulo(contexto.user.id,Number(id));            
+      setSenias(s || []);
 
     } catch (error) {
       error_alert("No se pudo cargar tu progreso");
@@ -144,77 +112,22 @@ export default function ModuloDetalleScreen() {
   }
 
 
-  const toggle_visualizada = async (item: Senia_Aprendida)=>{
+  const toggle_visualizada = async (item: Senia_Modulo)=>{
     setSelectedSenia(item);
     setModalVisible(true);
     //sumar visualización de la seña
-    if (!item.vista){
-      alumno_ver_senia(contexto.user.id,item.senia.id)
-        .catch(reason=>{
-          error_alert("No se pudo guardar tu progreso");
-          console.error(reason);
-        })
-        .then(()=>{
-          item.vista= true
-        })        
-    }
+    await alumno_ver_senia(contexto.user.id,item.senia.info.id)
   }
 
-  const toggleAprendida = async (info_senia: Senia_Aprendida, value: boolean) => {    
-    if (value) {
-      marcar_aprendida(info_senia.senia.id,contexto.user.id)
-        .catch(reason =>{
-          console.error(reason);
-          error_alert("No se pudo actualizar el estado")
-        })
-        .then(async ()=>{
-          success_alert('Marcada como aprendida' );
-          info_senia.aprendida= value;
-          setAprendidasMap((prev) => ({ ...prev, [info_senia.senia.id]: value }));
-          setCantAprendidas((prev) => (prev+=1));  
-          //si aprendiste todas, completar el módulo:
-          if (!completado && todas_aprendidas()){
-            try {
-              setModalVisible(false);
-              await completar_modulo_alumno(contexto.user.id,Number(id));
-              //router.push({ pathname: '/tabs/Modulos_Alumno/lecciones/completado', params: { id: id } })
-            } catch (error) {
-              console.error(error);
-              error_alert("No se pudo guardar tu progreso.");
-            }
-          }
-          
-        })
-      ganar_insignia_senia(contexto.user.id);
-    } else if (!completado) {
-      marcar_no_aprendida(info_senia.senia.id,contexto.user.id)
-        .catch(reason=>{
-          console.error(reason);
-          error_alert("No se pudo actualizar el estado");
-        })
-        .then(()=>{
-          success_alert( 'Marcada como no aprendida');
-          info_senia.aprendida= value;
-          setCantAprendidas((prev) => (prev-=1));   
-          setAprendidasMap((prev) => ({ ...prev, [info_senia.senia.id]: value }));
-        })
-    } else {
-      alert("No puedes marcar como no aprendida una seña en un módulo completado");
-    }  
-  }
-
-  const todas_aprendidas = ()=>{    
-    let res = true;
-    if (senias){
-      senias.forEach(s=>{
-        if (!s.aprendida) res = false
-      })
-    } else {
-      res=false;
-    }
-    return res
-  }
-  
+  const toggle_pendiente = async (item:Senia_Modulo) => {
+    try {
+      item.senia.cambiar_estado();
+      setModalVisible(false);
+      success_alert(item.senia.estado.esta_aprendiendo()? "Seña marcada como aprendiendo" : "Seña marcada como pendiente" );
+    } catch (error) {
+      error_alert("No se pudo guardar tu progreso");
+    }    
+  }  
   const promedio_reseñas = ()=>{
     let promedio =0;
     calificaciones_modulo?.forEach(each=>{
@@ -237,14 +150,6 @@ export default function ModuloDetalleScreen() {
     }
   };
 
-  // Cuando cambian las señas aprendidas, verifica si debe mostrar el modal
-  useEffect(() => {
-    if (!yaCalificado && senias && senias.length > 0 && senias.every(s => s.aprendida)) {
-      setShowCalificacionModal(true);
-    } else {
-      setShowCalificacionModal(false);
-    }
-  }, [senias, yaCalificado]);
 
   const enviarCalificacion = async () => {
     try {
@@ -305,13 +210,13 @@ export default function ModuloDetalleScreen() {
       
       <FlatList      
         data={senias ? senias : []}
-        keyExtractor={(item) => item.senia.id.toString()}
+        keyExtractor={(item) => item.senia.info.id.toString()}
         ListFooterComponent={<View style={{marginVertical:28}}></View>}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={{flexDirection:"row", alignContent: "space-around", justifyContent:"space-between"}}>
-              <Text style={styles.cardTitle}>{item.senia.significado}</Text>
-              {item.aprendida  && <Ionicons name="checkmark-circle" color={paleta.strong_yellow} size={25}  />}
+              <Text style={styles.cardTitle}>{item.senia.info.significado}</Text>
+              <Ionicons style={{display:item.senia.estado.display_checkmark()}} name="checkmark-circle" color={paleta.strong_yellow} size={25}  />
             </View>
            
             <Pressable
@@ -325,25 +230,25 @@ export default function ModuloDetalleScreen() {
         )}
       />      
 
-        <SmallPopupModal title={selectedSenia?.senia.significado} modalVisible={modalVisible} setVisible={setModalVisible}>
+        <SmallPopupModal title={selectedSenia?.senia.info.significado} modalVisible={modalVisible} setVisible={setModalVisible}>
           {selectedSenia && (
             <VideoPlayer 
-              uri={selectedSenia.senia.video_url}
+              uri={selectedSenia.senia.info.video_url}
               style={styles.video}
             />
           )}
-          {selectedSenia && selectedSenia.senia.Categorias ?
+          {selectedSenia && selectedSenia.senia.info.Categorias ?
           <ThemedText style={{margin:10}}>
             <ThemedText type='defaultSemiBold'>Categoría:</ThemedText> {''}
-            <ThemedText>{selectedSenia.senia.Categorias.nombre}</ThemedText>
+            <ThemedText>{selectedSenia.senia.info.Categorias.nombre}</ThemedText>
           </ThemedText>
             :null
           }
           
-          {selectedSenia && selectedSenia.senia.Users  ?
+          {selectedSenia && selectedSenia.senia.info.Profesores  ?
           <ThemedText style={{margin:10}}>
             <ThemedText type='defaultSemiBold'>Autor:</ThemedText> {''}
-            <ThemedText>{selectedSenia.senia.Users.username} </ThemedText> {''}
+            <ThemedText>{selectedSenia.senia.info.Profesores.Users.username} </ThemedText> {''}
           </ThemedText>
             :null
           }
@@ -360,12 +265,12 @@ export default function ModuloDetalleScreen() {
           {selectedSenia && (
             <View style={styles.row}>
               <Checkbox
-                value={selectedSenia.aprendida}
-                onValueChange={(v) => toggleAprendida(selectedSenia, v)}
-                color={selectedSenia.aprendida ? '#20bfa9' : undefined}
-                style={styles.checkbox}
+                value={selectedSenia.senia.estado.esta_aprendiendo()}
+                onValueChange={(v) => toggle_pendiente(selectedSenia)}
+                color={selectedSenia.senia.estado.esta_aprendiendo() ? '#20bfa9' : undefined}
+                style={[styles.checkbox,{display:selectedSenia.aprendida? "none":"flex"}]}
               />
-              <Text style={styles.checkboxLabel}>Aprendida</Text>
+              <Text style={styles.checkboxLabel}>{selectedSenia.senia.estado.toString()}</Text>
             </View>
           )}
         </SmallPopupModal>

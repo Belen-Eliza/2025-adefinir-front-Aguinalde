@@ -32,43 +32,25 @@ const now= ()=>{
 }
 
 const alumno_ver_senia = async (user_id:number,senia_id:number)=>{
-    
+    //verificar si el registro existe
     const { data, error } = await supabase
         .from('Visualizaciones_Senias')
-        .insert([
-            { alumno: user_id, senia: senia_id },
-        ])
-        .select();
+        .select("*")
+        .eq("alumno",user_id)
+        .eq("senia",senia_id)
+        .maybeSingle()
 
     if (error) throw error;
+    if (!data){
+        const {  error:error2 } = await supabase
+            .from('Visualizaciones_Senias')
+            .insert([
+                { alumno: user_id, senia: senia_id },
+            ])
+            .select();
 
-    
-    try {
-        if (data && data.length>0){
-            // verificar si eso completa el módulo
-            const {data:modulo, error} = await supabase.from("Modulos").select('id, Modulo_Video!inner (*)').eq('Modulo_Video.id_video',senia_id);
-            if (error) throw error
-            if (modulo && modulo.length>0){
-                let id_modulo =modulo[0].id;
-                let completo = await modulo_completo(id_modulo, user_id)
-                if (completo){
-                    //sumar a tabla de módulo_alumno
-                    const {  error } = await supabase
-                        .from('Alumno_Modulo')
-                        .insert([
-                            { id_modulo: id_modulo, id_alumno: user_id, completado: true, fecha_completado: now()},
-                        ])
-                        
-                    if (error) throw error
-                    
-                }
-            }
-        }
-        
-    } catch (error) {
-        
-    }
-   
+        if (error2) throw error2;
+    }    
 }
 
 const modulo_completo = async (id_modulo:number, user_id: number)=>{
