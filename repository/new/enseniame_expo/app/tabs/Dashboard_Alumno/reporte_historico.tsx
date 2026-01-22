@@ -39,15 +39,15 @@ export default function ReporteHistoricoScreen() {
       {
         const tryWithUpd = await supabase
           .from('Alumno_Senia')
-          .select('senia_id, aprendida, created_at, updated_at')
+          .select('id_senia, aprendida, created_at, updated_at')
           .eq('user_id', user.id)
           .eq('aprendida', true)
           .order('created_at', { ascending: true });
         if (tryWithUpd.error) {
           const tryWithoutUpd = await supabase
             .from('Alumno_Senia')
-            .select('senia_id, aprendida, created_at')
-            .eq('user_id', user.id)
+            .select('id_senia, aprendida, created_at')
+            .eq('id_alumno', user.id)
             .eq('aprendida', true)
             .order('created_at', { ascending: true });
           if (tryWithoutUpd.error) throw tryWithoutUpd.error;
