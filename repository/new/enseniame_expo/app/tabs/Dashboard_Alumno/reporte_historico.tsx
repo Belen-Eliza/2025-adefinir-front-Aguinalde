@@ -4,9 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
 import { supabase } from '@/utils/supabase';
 import { SmallPopupModal } from '@/components/modals';
+import { useFocusEffect } from 'expo-router';
+import { mis_senias_dominadas } from '@/conexiones/aprendidas';
+import { mis_modulos_completos, mis_modulos_completos_info } from '@/conexiones/modulos';
 
 type Mensual = { label: string; anio: number; mes: number; cantidad: number };
-type ModComp = { id: number; nombre: string; fecha: string };
+type ModuloCompleto = { id: number; nombre: string; fecha: string };
 type ObjetivoPersonal = { id?: number; user_id: number; mes: number; 
                           anio: number; meta_mensual: number; 
                           progreso_actual: number; completado: boolean };
@@ -18,7 +21,7 @@ export default function ReporteHistoricoScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const [series, setSeries] = useState<Mensual[]>([]);
-  const [modulosCompletados, setModulosCompletados] = useState<ModComp[]>([]);
+  const [modulosCompletados, setModulosCompletados] = useState<ModuloCompleto[]>([]);
 
   const [objetivo, setObjetivo] = useState<ObjetivoPersonal | null>(null);
   const [modalObjetivo, setModalObjetivo] = useState(false);
@@ -27,6 +30,25 @@ export default function ReporteHistoricoScreen() {
   const ahora = new Date();
   const mesActual = ahora.getMonth() + 1; // 1..12
   const anioActual = ahora.getFullYear();
+
+  useFocusEffect(
+    useCallback(() =>{
+      fetch_senias_aprendidas();
+      fetch_modulos_completos();
+
+      //objetivo mensual
+    },[])
+  )
+
+  const fetch_senias_aprendidas = async () => {
+    const s = await mis_senias_dominadas(user.id);
+    console.log(s);
+  }
+
+  const fetch_modulos_completos = async () => {
+    const m = await mis_modulos_completos_info(user.id);
+    console.log(m);
+  }
 
   const fetchAll = useCallback(async () => {
     if (!user?.id) return;
@@ -107,7 +129,7 @@ export default function ReporteHistoricoScreen() {
         vidsPorModulo.set(Number(r.id_modulo), arr);
       });
 
-      const completados: ModComp[] = [];
+      const completados: ModuloCompleto[] = [];
       (mods || []).forEach((m: any) => {
         const vids = vidsPorModulo.get(Number(m.id)) || [];
         if (vids.length === 0) return;
