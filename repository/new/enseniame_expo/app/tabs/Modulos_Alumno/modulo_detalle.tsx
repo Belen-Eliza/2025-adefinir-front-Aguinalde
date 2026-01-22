@@ -88,10 +88,19 @@ export default function ModuloDetalleScreen() {
     try {
       setLoading(true)
       const s = await  traer_senias_modulo(contexto.user.id,Number(id));            
-      setSenias(s || []);
+      const ordenadas = s.sort(function (a, b) {
+      if (a.senia.info.significado < b.senia.info.significado) {
+        return -1;
+      }
+      if (a.senia.info.significado > b.senia.info.significado) {
+        return 1;
+      }
+      return 0;
+    })              
+      setSenias(ordenadas || []);
 
     } catch (error) {
-      error_alert("No se pudo cargar las señas");
+      error_alert("No se pudieron cargar las señas");
       console.error(error)
     }finally{
       setLoading(false)
@@ -124,7 +133,7 @@ export default function ModuloDetalleScreen() {
 
   const toggle_pendiente = async (item:Senia_Modulo) => {
     try {
-      item.senia.cambiar_estado();
+      item.senia.cambiar_estado(contexto.user.id);
       setModalVisible(false);
       success_alert(item.senia.estado.esta_aprendiendo()? "Seña marcada como aprendiendo" : "Seña marcada como pendiente" );
     } catch (error) {

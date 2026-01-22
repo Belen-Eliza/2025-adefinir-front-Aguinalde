@@ -11,6 +11,7 @@ type Senia_Modulo ={
 type Senia_Leccion ={
   senia: Senia_Alumno;    
   descripcion?: string;
+  aprendiendo: boolean;
 }
 
 const traer_senias_practica = async (id_alumno:number) => {
@@ -100,14 +101,12 @@ const traer_senias_modulo = async (id_alumno:number,id_modulo:number) => {
 
 const traer_senias_leccion = async (id_alumno:number,id_modulo:number) => {
     const senias_modulo = await buscar_senias_modulo(id_modulo);
-    const senias_al = await senias_alumno(id_alumno);
-    console.log(senias_modulo);
-    console.log(senias_al);
+    const senias_al = await senias_alumno(id_alumno);    
     let res: Senia_Leccion[] = [];
     senias_modulo?.forEach(s=>{
         let estado = getEstadoSync(s.id_video,senias_al);
         let senia = new Senia_Alumno(s.Senias,estado);
-        res.push({senia:senia,descripcion:s.descripcion})
+        res.push({senia:senia,descripcion:s.descripcion,aprendiendo:estado.esta_aprendiendo()})
     })
     return res
 }

@@ -10,6 +10,26 @@ const marcar_aprendida = async (id_senia:number, id_alumno:number)=>{
     if (error) throw error;
 }
 
+const marcar_aprendiendo = async (id_senia:number, id_alumno:number)=>{
+    const { error } = await supabase
+        .from('Alumno_Senia')
+        .upsert(
+        [{ id_alumno: id_alumno, id_senia: id_senia, aprendida: false, cant_aciertos:0 }],
+        { onConflict: 'id_alumno,id_senia' }
+        )
+    if (error) throw error;
+}
+
+const marcar_pendiente = async (id_senia:number, id_alumno:number)=>{
+        
+    const { error } = await supabase
+        .from('Alumno_Senia')
+        .delete()
+        .eq('id_senia', id_senia)
+        .eq('id_alumno',id_alumno)
+    if (error) throw error;
+}
+
 const marcar_no_aprendida = async (id_senia:number, id_alumno:number)=>{
     const { error } = await supabase
           .from('Alumno_Senia')
@@ -80,5 +100,7 @@ const sumar_acierto = async (id_alumno:number,id_senia:number) => {
     }              
 }
 
-export {marcar_aprendida, marcar_no_aprendida, cantidad_aprendidas,senias_alumno,
+
+
+export {marcar_aprendida, marcar_no_aprendida, cantidad_aprendidas,senias_alumno, marcar_aprendiendo,marcar_pendiente,
     mis_senias_dominadas,mis_senias_aprendiendo,mis_senias_pendientes,sumar_acierto}

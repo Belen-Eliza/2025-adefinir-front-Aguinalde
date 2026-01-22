@@ -19,15 +19,14 @@ import { traer_senias_leccion, traer_senias_modulo } from "@/conexiones/senia_al
 type Senia_Leccion ={
   senia: Senia_Alumno;    
   descripcion?: string;
+  aprendiendo: boolean;
 }
 
 export default function Leccion (){
   const { id=0 } = useLocalSearchParams<{ id: string }>();
   if (id==0) router.back();
-  const [modulo,setModulo] = useState<Modulo>();
-  const [completado,setCompletado] =useState(false);
-  const [senias,setSenias] = useState<Senia_Leccion[]>([]);
-  const [cant_aprendidas, setCantAprendidas] = useState(0);
+  const [modulo,setModulo] = useState<Modulo>();  
+  const [senias,setSenias] = useState<Senia_Leccion[]>([]);  
   const [loading, setLoading] = useState(true);
   const [selectedSenia, setSelectedSenia] = useState<Senia_Leccion | null>(null);
   const [currentIndex,setIndex]=useState(0);
@@ -49,9 +48,6 @@ export default function Leccion (){
         const m = await buscar_modulo(Number(id));
         setModulo(m || {id:0,descripcion:"",nombre:"",autor:0,icon: "paw"});
 
-        const c = await alumno_completo_modulo(contexto.user.id,Number(id));            
-        setCompletado(c);
-        
       } catch (error) {
         error_alert("No se pudo cargar el módulo");
         console.error(error);
@@ -63,9 +59,18 @@ export default function Leccion (){
   const fetch_senias = async ()=>{
     try {
       setLoading(true)
-      const s = await  traer_senias_leccion(contexto.user.id,Number(id));               
-      setSenias(s || []);
-      setSelectedSenia(s[0])
+      const s = await  traer_senias_leccion(contexto.user.id,Number(id)); 
+      const ordenadas = s.sort(function (a, b) {
+      if (a.senia.info.significado < b.senia.info.significado) {
+        return -1;
+      }
+      if (a.senia.info.significado > b.senia.info.significado) {
+        return 1;
+      }
+      return 0;
+    })              
+      setSenias(ordenadas || []);
+      setSelectedSenia(ordenadas[0])
     } catch (error) {
       error_alert("No se pudo cargar las señas");
       console.error(error)
@@ -96,14 +101,15 @@ export default function Leccion (){
       }
     }
 
-    const toggle_pendiente = async (item:Senia_Leccion) => {
-        try {
-          item.senia.cambiar_estado();          
-          success_alert(item.senia.estado.esta_aprendiendo()? "Seña marcada como aprendiendo" : "Seña marcada como pendiente" );
-        } catch (error) {
-          error_alert("No se pudo guardar tu progreso");
-        }    
-      }  
+    const toggle_pendiente = async (item:Senia_Leccion,value:boolean) => {
+      try {
+        item.senia.cambiar_estado(contexto.user.id);          
+        item.aprendiendo=value;
+        success_alert(item.senia.estado.esta_aprendiendo()? "Seña marcada como aprendiendo" : "Seña marcada como pendiente" );
+      } catch (error) {
+        error_alert("No se pudo guardar tu progreso");
+      }    
+    }  
 
     if (loading) {
       return (
@@ -157,9 +163,9 @@ export default function Leccion (){
                           {selectedSenia && (
                             <View style={{flexDirection:"row",alignContent:"center",justifyContent:"center"}}>
                               <Checkbox
-                                value={selectedSenia.senia.estado.esta_aprendiendo()}
-                                onValueChange={(v) => toggle_pendiente(selectedSenia)}
-                                color={selectedSenia.senia.estado.esta_aprendiendo() ? '#20bfa9' : undefined}
+                                value={selectedSenia.aprendiendo}
+                                onValueChange={(v) => toggle_pendiente(selectedSenia,v)}
+                                color={selectedSenia.aprendiendo ? '#20bfa9' : undefined}
                                 style={[styles.checkbox,{display:selectedSenia.senia.estado.dominada()? "none":"flex"}]}
                               />
                               <Text style={styles.checkboxLabel}>{selectedSenia.senia.estado.toString()}</Text>

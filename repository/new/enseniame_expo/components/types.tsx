@@ -1,4 +1,4 @@
-import { marcar_aprendida } from "@/conexiones/aprendidas";
+import { marcar_aprendida, marcar_aprendiendo, marcar_pendiente } from "@/conexiones/aprendidas";
 import { sumar_acierto } from "@/conexiones/aprendidas";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -197,8 +197,8 @@ class Senia_Alumno {
         this.info=info;
         this.estado =estado
     }
-    cambiar_estado(){
-        this.estado.cambiar_estado(this)
+    cambiar_estado(id_alumno:number){
+        this.estado.cambiar_estado(this,id_alumno)
     }
     setEstado(estado_nuevo:Estado_Senia){
         this.estado=estado_nuevo;
@@ -209,7 +209,7 @@ class Senia_Alumno {
 }
 
 abstract class Estado_Senia {
-    abstract cambiar_estado(senia:Senia_Alumno):void
+    abstract cambiar_estado(senia:Senia_Alumno,id_alumno:number):void
     sumar_acierto(id_alumno:number,id_senia:number){}
     abstract display_checkmark(): "flex" | "none"
     abstract esta_aprendiendo(): boolean
@@ -225,9 +225,10 @@ class Estado_Pendiente extends Estado_Senia{
     display_checkmark(): "flex" | "none" {
         return "none"
     }
-    cambiar_estado( senia: Senia_Alumno): void {
+    cambiar_estado( senia: Senia_Alumno,id_alumno:number): void {
         senia.setEstado(new Estado_Aprendiendo(0));
         //conectar con db
+        marcar_aprendiendo(senia.info.id,id_alumno)
     }    
     toString(){
         return "Pendiente"
@@ -239,9 +240,10 @@ class Estado_Aprendiendo extends Estado_Senia{
         super();
         this.cant_aciertos=cant_aciertos
     }
-    cambiar_estado( senia: Senia_Alumno): void {
+    cambiar_estado( senia: Senia_Alumno,id_alumno:number): void {
         senia.setEstado(new Estado_Pendiente());
         //db
+        marcar_pendiente(senia.info.id,id_alumno)
     }
     sumar_acierto(id_alumno:number,id_senia:number){
         this.cant_aciertos++
