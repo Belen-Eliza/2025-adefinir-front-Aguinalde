@@ -188,12 +188,7 @@ export default function Diccionario() {
               <ThemedText type='defaultSemiBold'>Categoría:</ThemedText> {''}
               <ThemedText>{selectedSenia.info.Categorias.nombre}</ThemedText>
             </ThemedText>   
-            {!contexto.user.is_prof && (
-            <ThemedText style={{margin:10}}>
-              <ThemedText type='defaultSemiBold'>Estado:</ThemedText> {''}
-              <ThemedText>{selectedSenia.estado.toString()}</ThemedText>
-            </ThemedText>  
-            )}
+            
             </>
           )}
           
@@ -211,6 +206,13 @@ export default function Diccionario() {
             </ThemedText>                    
             :null
           }
+
+          {selectedSenia && !contexto.user.is_prof && (
+            <ThemedText style={{margin:10}}>
+              <ThemedText type='defaultSemiBold'>Estado:</ThemedText> {''}
+              <ThemedText>{selectedSenia.estado.toString()}</ThemedText>
+            </ThemedText>  
+            )}
 
           {selectedSenia && esMio(selectedSenia.info) ?
             <>

@@ -30,7 +30,7 @@ type Senia_Aprendida ={
 }
 type Calificaciones = {
   id_alumno: number;
-  Users?: {username:string, id:number};
+  Alumnos?: {Users: {username:string, id:number}};
   id_modulo: number;
   puntaje: number;
   comentario? : string;
@@ -73,7 +73,7 @@ export default function ModuloDetalleScreen() {
     try {
       const m = await buscar_modulo(Number(id));
       setModulo(m || []);
-      const calificaciones =await calificacionesModulo(Number(id));
+      const calificaciones =await calificacionesModulo(Number(id));      
       setCalificacionesModulo(calificaciones || []);
 
       const c = await alumno_completo_modulo(contexto.user.id,Number(id));            
@@ -101,7 +101,7 @@ export default function ModuloDetalleScreen() {
       const fue_aprendida =(senia_id:number)=>{
         let res = false;
         aprendidas?.forEach(each=>{
-          if (each.senia_id==senia_id && each.aprendida) {
+          if (each.id_senia==senia_id && each.aprendida) {
             res= true;
             setCantAprendidas(prev=>prev+=1);            
           }
@@ -413,7 +413,7 @@ export default function ModuloDetalleScreen() {
           </View>
         </Modal>
 
-                <SmallPopupModal title={"Reseñas "} modalVisible={modalCalificaciones}  setVisible={setModalCalificaciones}>
+          <SmallPopupModal title={"Reseñas "} modalVisible={modalCalificaciones}  setVisible={setModalCalificaciones}>
             {calificaciones_modulo && calificaciones_modulo.length>0 ?
             <View>
 
@@ -426,8 +426,8 @@ export default function ModuloDetalleScreen() {
                     <RatingStars color={paleta.strong_yellow} puntaje={item.puntaje} />
                     <ThemedText>
                       <ThemedText lightColor="gray">{get_antiguedad(item.created_at)}</ThemedText>{' - '}
-                      <ThemedText lightColor="gray">{item.Users? item.Users.username: "Anónimo"}</ThemedText>
-                      {item.Users && item.Users.id==contexto.user.id ? 
+                      <ThemedText lightColor="gray">{item.Alumnos? item.Alumnos.Users.username: "Anónimo"}</ThemedText>
+                      {item.Alumnos && item.Alumnos.Users.id==contexto.user.id ? 
                         <ThemedText lightColor="gray">  (Yo)</ThemedText>:null
                       }
                     </ThemedText>

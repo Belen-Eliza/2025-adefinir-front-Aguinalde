@@ -1,5 +1,5 @@
 import { marcar_aprendida } from "@/conexiones/aprendidas";
-import { sumar_acierto } from "@/conexiones/senia_alumno";
+import { sumar_acierto } from "@/conexiones/aprendidas";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 

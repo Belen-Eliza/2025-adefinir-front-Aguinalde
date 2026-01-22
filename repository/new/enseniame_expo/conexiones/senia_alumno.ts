@@ -53,7 +53,7 @@ const getEstado = async (id_alumno:number,id_senia:number) => {
         .select("*")
         .eq("id_alumno",id_alumno)
         .eq("id_senia",id_senia)
-        .single();
+        .maybeSingle();
     if (error) throw error
 
     if (data ){              
