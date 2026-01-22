@@ -14,18 +14,11 @@ import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
 import { marcar_aprendida, marcar_no_aprendida } from "@/conexiones/aprendidas";
 import { estilos } from "@/components/estilos";
-import { traer_senias_modulo } from "@/conexiones/senia_alumno";
+import { traer_senias_leccion, traer_senias_modulo } from "@/conexiones/senia_alumno";
 
-type Senia_Aprendida ={
-  senia: Senia_Info;
-  vista: boolean;
-  aprendida: boolean;
-  descripcion?: string
-}
-type Senia_Modulo ={
+type Senia_Leccion ={
   senia: Senia_Alumno;    
   descripcion?: string;
-  aprendida:boolean
 }
 
 export default function Leccion (){
@@ -33,10 +26,10 @@ export default function Leccion (){
   if (id==0) router.back();
   const [modulo,setModulo] = useState<Modulo>();
   const [completado,setCompletado] =useState(false);
-  const [senias,setSenias] = useState<Senia_Modulo[]>([]);
+  const [senias,setSenias] = useState<Senia_Leccion[]>([]);
   const [cant_aprendidas, setCantAprendidas] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [selectedSenia, setSelectedSenia] = useState<Senia_Modulo | null>(null);
+  const [selectedSenia, setSelectedSenia] = useState<Senia_Leccion | null>(null);
   const [currentIndex,setIndex]=useState(0);
 
   const contexto = useUserContext();
@@ -70,9 +63,9 @@ export default function Leccion (){
   const fetch_senias = async ()=>{
     try {
       setLoading(true)
-      const s = await  traer_senias_modulo(contexto.user.id,Number(id));            
+      const s = await  traer_senias_leccion(contexto.user.id,Number(id));               
       setSenias(s || []);
-
+      setSelectedSenia(s[0])
     } catch (error) {
       error_alert("No se pudo cargar las señas");
       console.error(error)
@@ -103,7 +96,7 @@ export default function Leccion (){
       }
     }
 
-    const toggle_pendiente = async (item:Senia_Modulo) => {
+    const toggle_pendiente = async (item:Senia_Leccion) => {
         try {
           item.senia.cambiar_estado();          
           success_alert(item.senia.estado.esta_aprendiendo()? "Seña marcada como aprendiendo" : "Seña marcada como pendiente" );
@@ -167,7 +160,7 @@ export default function Leccion (){
                                 value={selectedSenia.senia.estado.esta_aprendiendo()}
                                 onValueChange={(v) => toggle_pendiente(selectedSenia)}
                                 color={selectedSenia.senia.estado.esta_aprendiendo() ? '#20bfa9' : undefined}
-                                style={[styles.checkbox,{display:selectedSenia.aprendida? "none":"flex"}]}
+                                style={[styles.checkbox,{display:selectedSenia.senia.estado.dominada()? "none":"flex"}]}
                               />
                               <Text style={styles.checkboxLabel}>{selectedSenia.senia.estado.toString()}</Text>
                             </View>

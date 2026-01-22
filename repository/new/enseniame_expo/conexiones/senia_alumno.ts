@@ -1,9 +1,16 @@
 import { supabase } from '../utils/supabase'
 import { Senia_Alumno,Estado_Aprendiendo,Estado_Dominada,Estado_Pendiente,Estado_Senia } from '@/components/types'
+import { buscar_senias_modulo } from './modulos';
+import { senias_alumno } from './aprendidas';
+
 type Senia_Modulo ={
   senia: Senia_Alumno;    
   descripcion?: string;
   aprendida:boolean
+}
+type Senia_Leccion ={
+  senia: Senia_Alumno;    
+  descripcion?: string;
 }
 
 const traer_senias_practica = async (id_alumno:number) => {
@@ -91,5 +98,30 @@ const traer_senias_modulo = async (id_alumno:number,id_modulo:number) => {
     return res
 }
 
+const traer_senias_leccion = async (id_alumno:number,id_modulo:number) => {
+    const senias_modulo = await buscar_senias_modulo(id_modulo);
+    const senias_al = await senias_alumno(id_alumno);
+    console.log(senias_modulo);
+    console.log(senias_al);
+    let res: Senia_Leccion[] = [];
+    senias_modulo?.forEach(s=>{
+        let estado = getEstadoSync(s.id_video,senias_al);
+        let senia = new Senia_Alumno(s.Senias,estado);
+        res.push({senia:senia,descripcion:s.descripcion})
+    })
+    return res
+}
 
-export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado,traer_senias_modulo}
+const getEstadoSync = (id_senia:number,senias: {id_senia:number,aprendida:boolean,cant_aciertos:number}[])=>{
+    let e = new Estado_Pendiente();
+    let aux =senias.find(v=>v.id_senia==id_senia);
+    if (aux){
+        if (aux.aprendida) e = new Estado_Dominada();
+        else e= new Estado_Aprendiendo(aux.cant_aciertos)
+    }
+
+    return e
+}
+
+
+export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado,traer_senias_modulo,traer_senias_leccion}

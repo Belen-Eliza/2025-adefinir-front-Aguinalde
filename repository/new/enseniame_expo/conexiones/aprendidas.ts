@@ -34,7 +34,7 @@ const cantidad_aprendidas = async (id_alumno:number) => {
 const senias_alumno = async (id_alumno:number) => {
     const { data, error } = await supabase
         .from('Alumno_Senia') 
-        .select('id_senia, aprendida')
+        .select('*')
         .eq('id_alumno', id_alumno);
     if (error) throw error
     return data
