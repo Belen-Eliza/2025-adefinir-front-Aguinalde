@@ -1,20 +1,19 @@
 import React, { useCallback, useState } from "react";
 import { View, Text, Pressable, StyleSheet,  ActivityIndicator,  } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
-import { Senia_Info, Modulo, Senia_Alumno } from "@/components/types";
-import { alumno_completo_modulo, buscar_modulo, buscar_senias_modulo, completar_modulo_alumno } from "@/conexiones/modulos";
+import {  Modulo, Senia_Alumno } from "@/components/types";
+import {  buscar_modulo,  } from "@/conexiones/modulos";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import VideoPlayer from "@/components/VideoPlayer";
 import { paleta, paleta_colores } from "@/components/colores";
 import { useUserContext } from "@/context/UserContext";
 import Toast from "react-native-toast-message";
-import { alumno_ver_senia, senias_aprendidas_alumno, visualizaciones_alumno } from "@/conexiones/visualizaciones";
+import { alumno_ver_senia,} from "@/conexiones/visualizaciones";
 import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
-import { marcar_aprendida, marcar_no_aprendida } from "@/conexiones/aprendidas";
 import { estilos } from "@/components/estilos";
-import { traer_senias_leccion, traer_senias_modulo } from "@/conexiones/senia_alumno";
+import { traer_senias_leccion } from "@/conexiones/senia_alumno";
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -103,8 +102,10 @@ export default function Leccion (){
 
     const toggle_pendiente = async (item:Senia_Leccion,value:boolean) => {
       try {
-        item.senia.cambiar_estado(contexto.user.id);          
-        item.aprendiendo=value;
+        item.senia.cambiar_estado(contexto.user.id);         
+        if (selectedSenia) {
+          setSelectedSenia({senia:selectedSenia.senia,aprendiendo:value,descripcion:selectedSenia.descripcion})
+        }                               
         success_alert(item.senia.estado.esta_aprendiendo()? "Seña marcada como aprendiendo" : "Seña marcada como pendiente" );
       } catch (error) {
         error_alert("No se pudo guardar tu progreso");
