@@ -178,7 +178,7 @@ export default function DashboardAlumnoScreen() {
           section.type === 'modules' ? (
             <>
             <Text style={styles.emptyText}>
-              {section.data.length === 0 ? (<Text style={styles.emptyText}>'No hay módulos disponibles.'</Text>)  : 
+              {section.data.length === 0 ? (<Text style={styles.emptyText}>No hay módulos disponibles.</Text>)  : 
               <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>setShow(true)}>
               <ThemedText type='defaultSemiBold' lightColor='white'>Ver todos</ThemedText>
             </TouchableOpacity>}

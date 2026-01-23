@@ -89,7 +89,7 @@ export default function Detalle_Insignias () {
 
   const renderInsignia = ({ item }: { item: Insignia }) =>( 
       <TouchableOpacity onPress={async ()=>{
-        let c = await cuantos_ganaron_insignia(item.id)
+        let c = await cuantos_ganaron_insignia(item.id);
         setSelectedInsignia({id:item.id,descripcion:item.descripcion,ganada:item.ganada,cant_personas:c,nombre:item.nombre,image_url:item.image_url,motivo:item.motivo});
         setShowModalI(true)}} style={[styles.dataInsignia,estilos.centrado]}>
         <Image

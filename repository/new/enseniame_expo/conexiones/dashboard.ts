@@ -78,13 +78,16 @@ const mi_progreso_x_modulo = async (id_alumno:number) => {
 
     //todas las señas aprendidas
     let mis_senias_d = await senias_aprendidas_reporte(id_alumno);    
-    if (Modulos && Modulos.length>0 && mis_senias_d && mis_senias_d.length>0 && Modulo_Video && Modulo_Video.length>0){    
+    if (Modulos && Modulos.length>0  && Modulo_Video && Modulo_Video.length>0){    
                   
         Modulos.forEach( m=>{            
             //todas las señas del módulo            
             let senias_modulo = Modulo_Video.filter(each => each.id_modulo==m.id);
-            //las que fueron aprendidas           
-            let aux= senias_modulo.filter(each=>mis_senias_d.find(mis_s=>mis_s.id_senia==each.id_video)!=undefined)            
+            //las que fueron aprendidas    
+            let aux=[]   
+            if ( mis_senias_d && mis_senias_d.length>0)  {
+                aux= senias_modulo.filter(each=>mis_senias_d.find(mis_s=>mis_s.id_senia==each.id_video)!=undefined)        
+            }
             res.push({id:m.id,nombre:m.nombre,total:m.Modulo_Video[0].count,learned:aux.length})
         })
     }    
