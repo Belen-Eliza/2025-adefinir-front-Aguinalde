@@ -1,23 +1,23 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback,  useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, SectionList, 
-  RefreshControl,  Modal, FlatList, TouchableOpacity, Pressable } from 'react-native';
+  RefreshControl, TouchableOpacity, Pressable, 
+  ScrollView} from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
-import { supabase } from '@/utils/supabase';
 import ProgressCard from '@/components/ProgressCard';
 import GlobalProgress from '@/components/GlobalProgress';
 import HistorialItem from '@/components/HistorialItem';
 import { useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ThemedText';
-import { RatingStars, RatingCard } from '@/components/review';
+import {  RatingCard } from '@/components/review';
 import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { error_alert } from '@/components/alert';
 import { getRanking } from '@/conexiones/calificaciones';
-import { mis_senias_aprendiendo, mis_senias_dominadas, mis_senias_pendientes, senias_alumno } from '@/conexiones/aprendidas';
-import { Senia } from '@/components/types';
+import { mi_progreso_global, mi_progreso_x_modulo, senias_aprendiendo_dash, senias_historial } from '@/conexiones/dashboard';
+import { SmallPopupModal } from '@/components/modals';
+import { ProgressBarAnimada } from '@/components/animations/ProgressBarAnimada';
 
 type DatosRanking ={
     id: number;
@@ -26,11 +26,11 @@ type DatosRanking ={
     cant_reviews: number
 }
 
-type Modulo = { id: number; nombre: string };
-type RelacionModuloVideo = { id_modulo: number; id_video: number };
-type HistorialRow = { senia_id: number; aprendida: boolean; created_at: string; modulo_nombre: string; senia_nombre: string };
+type HistorialRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string };
+type ProgresoGlobal = {learned:number,total:number}
+type ProgresoPorModulo ={ id: number; nombre: string; total: number; learned: number }
 
-type SectionType = 'modules' | 'history' | 'ranking';
+type SectionType = 'modules' | 'history' | 'ranking' | 'aprendiendo';
 
 type DashboardSection = {
   title: string;
@@ -44,107 +44,59 @@ export default function DashboardAlumnoScreen() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modulos, setModulos] = useState<Modulo[]>([]);
-  const [relaciones, setRelaciones] = useState<RelacionModuloVideo[]>([]);
-  //const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({}); 
-  const [senias_pendientes,setPendientes] = useState<Senia[]>();
-  const [senias_aprendiendo,setAprendiendo] = useState<Senia[]>();
-  const [senias_dominadas,setDominadas] = useState<Senia[]>();
-  const [error, setError] = useState<string | null>(null);
-  const [historial, setHistorial] = useState<HistorialRow[]>([]);
+  const [historial, setHistorial] = useState<HistorialRow[]>([]);  
+  const [seniasAprendiendo,setAprendiendo] = useState<HistorialRow[]>([]); 
+  const [progresoGlobal,setProgresoGlobal] = useState<ProgresoGlobal>({learned:0,total:0});
+  const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);
+  const [progresoPorModulo,setProgresoPorModulo]= useState<ProgresoPorModulo[]>([]);
+
+  const [showModal,setShow]=useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      try {              
+        fetchHistorial();
+        fetchProgresoGlobal();
+        fetchProgresoModulo();
+        fetchRanking();
+      } catch (error) {
+        error_alert("No se pudo generar el reporte.");
+        console.error("[Dashboard]: ",error);
+      } 
+      return () => {
+      };
+    }, [])
+  );
+
+  const fetchHistorial = async () => {
+    const h = await senias_historial(user.id);    
+    setHistorial(h || []);
+
+    /* const a = await senias_aprendiendo_dash(user.id);
+    console.log(a)
+    setAprendiendo(a ); */
+  }
+
+  const fetchProgresoGlobal = async () => {
+    const p = await mi_progreso_global(user.id);
+    setProgresoGlobal(p);    
+  }
   
-  const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);  
-
-  const fetchData = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      //????
-      if (!user?.id) {
-        setModulos([]);
-        setRelaciones([]);        
-        setHistorial([]);
-        router.dismissAll();
-        return;
+  const fetchProgresoModulo = async () => {
+    const pm= await mi_progreso_x_modulo(user.id);
+    //ordenar por mayor porcentaje    
+    pm.sort(function (a, b) {
+      if (a.learned/a.total < b.learned/b.total) {
+        return 1;
       }
-      const { data: mods, error: modErr } = await supabase
-        .from('Modulos')
-        .select('id, nombre')
-        .order('id', { ascending: true });
-      if (modErr) throw modErr;
-
-      const { data: rels, error: relErr } = await supabase
-        .from('Modulo_Video')
-        .select('id_modulo, id_video');
-      if (relErr) throw relErr;
-      
-      try {
-        const seniasA = await mis_senias_aprendiendo(user.id);
-        const seniasD = await mis_senias_dominadas(user.id);
-        const seniasP = await mis_senias_pendientes(user.id);
-        setAprendiendo(seniasA || []);
-        setDominadas(seniasD || []);
-        setPendientes(seniasP || []);
-        
-      } catch (e: any) {
-        console.warn('[dashboard] Alumno_Senia no disponible (aprendidasMap try/catch):', e?.message);
+      if (a.learned/a.total > b.learned/b.total) {
+        return -1;
       }
+      return 0;
+    })
 
-      let historialRows: HistorialRow[] = [];
-      try {
-        const { data: hist, error: histErr } = await supabase
-          .from('Alumno_Senia')
-          .select('id_senia, aprendida, created_at')
-          .eq('id_alumno', user.id)
-          .eq('aprendida', true)
-          .order('created_at', { ascending: false });
-        if (histErr) throw histErr;
-
-        if (hist && hist.length) {
-          const { data: senias, error: seniaErr } = await supabase
-            .from('Senias')
-            .select('id, significado');
-          if (seniaErr) throw seniaErr;
-
-          const { data: relsAll, error: relsAllErr } = await supabase
-            .from('Modulo_Video')
-            .select('id_modulo, id_video');
-          if (relsAllErr) throw relsAllErr;
-
-          const seniaNombreMap = new Map<number, string>();
-          senias?.forEach((s: any) => seniaNombreMap.set(Number(s.id), String(s.significado)));
-          const moduloNombreMap = new Map<number, string>();
-          (mods || []).forEach((m) => moduloNombreMap.set(m.id, m.nombre));
-          const videoToModulo = new Map<number, number>();
-          relsAll?.forEach((r: any) => videoToModulo.set(Number(r.id_video), Number(r.id_modulo)));
-
-          historialRows = hist.map((h: any) => {
-            const seniaId = Number(h.senia_id);
-            const moduloId = videoToModulo.get(seniaId);
-            return {
-              senia_id: seniaId,
-              aprendida: !!h.aprendida,
-              created_at: h.created_at,
-              modulo_nombre: moduloId ? (moduloNombreMap.get(moduloId) || 'Módulo') : 'Módulo',
-              senia_nombre: seniaNombreMap.get(seniaId) || 'Seña',
-            } as HistorialRow;
-          });
-        }
-      } catch (e: any) {
-        console.warn('[dashboard] Historial no disponible:', e?.message);
-      }
-
-      setModulos(mods || []);
-      setRelaciones(rels || []);      
-      setHistorial(historialRows);
-    } catch (e: any) {
-      console.error('[dashboard] fetch error:', e?.message);
-      setError('Ocurrió un problema al cargar algunos datos. Parte del contenido puede no estar disponible.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+    setProgresoPorModulo(pm);
+  }
 
   const fetchRanking = async () => {
     setLoading(true);    
@@ -163,93 +115,31 @@ export default function DashboardAlumnoScreen() {
         console.error(error)
     } finally{
         setLoading(false);
+        setRefreshing(false)
     }
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, [user?.id]);
-
-  // Suscripción en tiempo real a cambios del historial/aprendidas
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel(`rt-alumno-senia-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'Alumno_Senia', filter: `user_id=eq.${user.id}` },
-        (_payload: any) => {
-          // Ante INSERT/UPDATE/DELETE, refrescar datos; el filtro ya limita al usuario actual
-          fetchData();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      try { supabase.removeChannel(channel); } catch {}
-    };
-  }, [user?.id]);
-
-  // Recargar datos cada vez que la pantalla recibe foco (cuando se entra en la página)
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchRanking();
-      fetchData();
-    }, [user?.id])
-  );
-
-  const progresoPorModulo = useMemo(() => {
-    const byModule: Array<{ id: number; nombre: string; total: number; learned: number }> = [];
-    const relsByModule = new Map<number, number[]>();
-    relaciones.forEach((r) => {
-      const arr = relsByModule.get(r.id_modulo) || [];
-      arr.push(r.id_video);
-      relsByModule.set(r.id_modulo, arr);
-    });
-    modulos.forEach((m) => {
-      const senias = relsByModule.get(m.id) || [];
-      const total = senias.length;
-      //revisar!!!
-      const learned = senias_aprendiendo?.length || 0 //senias.reduce((acc, sid) => acc + (aprendidasMap[sid] ? 1 : 0), 0);
-      byModule.push({ id: m.id, nombre: m.nombre, total, learned });
-    });
-    // Ordenado por porcentaje completado; y luego nombre ascendente
-    byModule.sort((a, b) => {
-      const pa = a.total ? a.learned / a.total : 0;
-      const pb = b.total ? b.learned / b.total : 0;
-      if (pb !== pa) return pb - pa;
-      if (b.learned !== a.learned) return b.learned - a.learned;
-      return a.nombre.localeCompare(b.nombre);
-    });
-    return byModule;
-  }, [modulos, relaciones, senias_aprendiendo]);
-
-  const progresoGlobal = useMemo(() => {
-    return progresoPorModulo.reduce(
-      (acc, m) => ({ total: acc.total + m.total, learned: acc.learned + m.learned }),
-      { total: 0, learned: 0 }
-    );
-  }, [progresoPorModulo]);
-
+  } 
+ 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchData();
+    fetchHistorial();
+    fetchProgresoGlobal();
+    fetchProgresoModulo();
+    fetchRanking();    
   };
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}> 
-        <ActivityIndicator size="large" color="#20bfa9" />
-        <Text style={{ marginTop: 12, color: '#555' }}>Cargando progreso…</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={paleta.dark_aqua} />
       </View>
     );
   }
 
   const sections: DashboardSection[] = [
-    { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo },
-    { title: 'Historial de señas aprendidas', type: 'history', data: historial.slice(0, 3) },
-    {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)}
+    { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo.slice(0, 3) },
+    { title: 'Señas dominadas recientemente', type: 'history', data: historial.slice(0, 3) },
+    {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)},
+    {title: "Señas a dominar", type:"aprendiendo", data: seniasAprendiendo}
   ];
 
   return (
@@ -276,12 +166,7 @@ export default function DashboardAlumnoScreen() {
               </Text></Pressable>
               
             </View>
-            {error && (
-              <View style={styles.errorBox}>
-                <Ionicons name="alert-circle" size={18} color="#e74c3c" />
-                <Text style={styles.errorText}> {error} </Text>
-              </View>
-            )}
+           
           </View>
         )}
         ListHeaderComponentStyle={{ paddingHorizontal: 18 }}
@@ -290,17 +175,26 @@ export default function DashboardAlumnoScreen() {
           <Text style={styles.sectionTitle}>{section.title}</Text>          
         )}
         renderSectionFooter={({ section }) => (
-          section.data.length === 0 ? (
+          section.type === 'modules' ? (
+            <>
             <Text style={styles.emptyText}>
-              {section.type === 'modules' ? 'No hay módulos disponibles.' : 'Aún no hay señas aprendidas.'}
+              {section.data.length === 0 ? (<Text style={styles.emptyText}>No hay módulos disponibles.</Text>)  : 
+              <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>setShow(true)}>
+              <ThemedText type='defaultSemiBold' lightColor='white'>Ver todos</ThemedText>
+            </TouchableOpacity>}
             </Text>
+            </>            
           ) : 
           section.type=== 'ranking' ? (
             <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>router.navigate("/tabs/Dashboard_Alumno/ranking")}>
               <ThemedText type='defaultSemiBold' lightColor='white'>Ver ranking completo</ThemedText>
             </TouchableOpacity>
             
-          ):null
+          ):(
+            <Text style={styles.emptyText}>
+              {section.data.length === 0 ? 'Aún no hay señas aprendidas.' : ''}
+            </Text>
+          )
         )}
         renderItem={({ item, section }) => (
           section.type === 'modules' ? (
@@ -315,15 +209,27 @@ export default function DashboardAlumnoScreen() {
           (
             <HistorialItem
               nombre={item.senia_nombre}
-              modulo={item.modulo_nombre}
-              fechaISO={item.created_at}
+              modulo={item.categoria}
+              fechaISO={item.updated_at}
             />
           ): (
             <RatingCard nombre={item.username} rating={item.promedio} cant_reviews={item.cant_reviews}/>
           )
         )}
       />        
-
+      <SmallPopupModal title={"Progreso por módulo"} modalVisible={showModal} setVisible={setShow}>
+        <ScrollView style={styles.modalScrollView}>
+          {progresoPorModulo.map((modulo) => (
+            <View key={String(modulo.id)} style={styles.categoriaItem}>
+              <View style={styles.categoriaHeader}>
+                <Text style={styles.categoriaNombre}>{modulo.nombre}</Text>
+                <Text style={styles.categoriaPorcentaje}>{modulo.learned/modulo.total*100}%</Text>
+              </View>
+              <ProgressBarAnimada progress={modulo.learned/modulo.total*100} />
+            </View>
+          ))}
+        </ScrollView>
+      </SmallPopupModal>
        
       <Toast/>
     </View>
@@ -394,5 +300,46 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     fontWeight: '600',
     
+  },
+  categoriaItem: {
+    marginBottom: 14,
+  },
+  categoriaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  categoriaNombre: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#333',
+  },
+  categoriaPorcentaje: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#20bfa9',
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 12,
+    backgroundColor: '#eee',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#20bfa9',
+    borderRadius: 6,
+  },
+  modalScrollView: {
+    paddingBottom: 20,
+    maxHeight: 400
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e6f7f2',
   },
 });

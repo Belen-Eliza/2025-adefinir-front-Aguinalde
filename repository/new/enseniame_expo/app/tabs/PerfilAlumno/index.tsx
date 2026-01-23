@@ -162,12 +162,7 @@ export default function Perfil (){
                 <ThemedText type='bold'> {racha}</ThemedText>
                 <ThemedText>racha</ThemedText>
               </View>
-              
-              <View style={styles.stats}>
-                <ThemedText type='bold' > {modulos_completos}</ThemedText>
-                <ThemedText>módulos</ThemedText>
-              </View>
-            
+                            
             </View>      
             <View style={styles.nameAndMail}>
               <ThemedText type='title'>{contexto.user.username}</ThemedText>
