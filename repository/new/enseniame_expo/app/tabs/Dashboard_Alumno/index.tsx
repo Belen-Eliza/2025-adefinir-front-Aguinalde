@@ -57,7 +57,7 @@ export default function DashboardAlumnoScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      try {
+      try {      
         setLoading(true);
         fetchHistorial();
         fetchProgresoGlobal();
@@ -86,8 +86,16 @@ export default function DashboardAlumnoScreen() {
   
   const fetchProgresoModulo = async () => {
     const pm= await mi_progreso_x_modulo(user.id);
-    //ordenar
-
+    //ordenar por mayor porcentaje    
+    pm.sort(function (a, b) {
+      if (a.learned/a.total < b.learned/b.total) {
+        return 1;
+      }
+      if (a.learned/a.total > b.learned/b.total) {
+        return -1;
+      }
+      return 0;
+    })
 
     setProgresoPorModulo(pm);
   }
@@ -112,34 +120,7 @@ export default function DashboardAlumnoScreen() {
         setRefreshing(false)
     }
   } 
-
-  /* const progresoPorModulo = useMemo(() => {
-    const byModule: Array<{ id: number; nombre: string; total: number; learned: number }> = [];
-    const relsByModule = new Map<number, number[]>();
-    relaciones.forEach((r) => {
-      const arr = relsByModule.get(r.id_modulo) || [];
-      arr.push(r.id_video);
-      relsByModule.set(r.id_modulo, arr);
-    });
-    modulos.forEach((m) => {
-      const senias = relsByModule.get(m.id) || [];
-      const total = senias.length;
-      //revisar!!!
-      const learned = senias_aprendiendo?.length || 0 //senias.reduce((acc, sid) => acc + (aprendidasMap[sid] ? 1 : 0), 0);
-      byModule.push({ id: m.id, nombre: m.nombre, total, learned });
-    });
-    // Ordenado por porcentaje completado; y luego nombre ascendente
-    byModule.sort((a, b) => {
-      const pa = a.total ? a.learned / a.total : 0;
-      const pb = b.total ? b.learned / b.total : 0;
-      if (pb !== pa) return pb - pa;
-      if (b.learned !== a.learned) return b.learned - a.learned;
-      return a.nombre.localeCompare(b.nombre);
-    });
-    return byModule;
-  }, [modulos, relaciones, senias_aprendiendo]);
-
- */
+ 
   const onRefresh = () => {
     setRefreshing(true);
     fetchHistorial();
@@ -159,7 +140,7 @@ export default function DashboardAlumnoScreen() {
 
   const sections: DashboardSection[] = [
     { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo.slice(0, 3) },
-    { title: 'Señas aprendidas recientemente', type: 'history', data: historial.slice(0, 3) },
+    { title: 'Señas dominadas recientemente', type: 'history', data: historial.slice(0, 3) },
     {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)}
   ];
 
@@ -201,17 +182,26 @@ export default function DashboardAlumnoScreen() {
           <Text style={styles.sectionTitle}>{section.title}</Text>          
         )}
         renderSectionFooter={({ section }) => (
-          section.data.length === 0 ? (
+          section.type === 'modules' ? (
+            <>
             <Text style={styles.emptyText}>
-              {section.type === 'modules' ? 'No hay módulos disponibles.' : 'Aún no hay señas aprendidas.'}
+              {section.data.length === 0 ? (<Text style={styles.emptyText}>'No hay módulos disponibles.'</Text>)  : 
+              <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>router.navigate("/tabs/Dashboard_Alumno/ranking")}>
+              <ThemedText type='defaultSemiBold' lightColor='white'>Ver todos</ThemedText>
+            </TouchableOpacity>}
             </Text>
+            </>            
           ) : 
           section.type=== 'ranking' ? (
             <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>router.navigate("/tabs/Dashboard_Alumno/ranking")}>
               <ThemedText type='defaultSemiBold' lightColor='white'>Ver ranking completo</ThemedText>
             </TouchableOpacity>
             
-          ):null
+          ):(
+            <Text style={styles.emptyText}>
+              {section.data.length === 0 ? 'Aún no hay señas aprendidas.' : ''}
+            </Text>
+          )
         )}
         renderItem={({ item, section }) => (
           section.type === 'modules' ? (

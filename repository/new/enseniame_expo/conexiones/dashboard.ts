@@ -59,8 +59,7 @@ const mi_progreso_x_modulo = async (id_alumno:number) => {
     if (error_s) throw error_s
 
     //todas las señas aprendidas
-    let mis_senias_d = await senias_aprendidas_reporte(id_alumno);
-    console.log("!!",mis_senias_d)
+    let mis_senias_d = await senias_aprendidas_reporte(id_alumno);    
     if (Modulos && Modulos.length>0 && mis_senias_d && mis_senias_d.length>0 && Modulo_Video && Modulo_Video.length>0){    
                   
         Modulos.forEach( m=>{            
