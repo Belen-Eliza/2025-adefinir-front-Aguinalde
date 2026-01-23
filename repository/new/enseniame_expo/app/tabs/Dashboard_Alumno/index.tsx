@@ -29,7 +29,7 @@ type DatosRanking ={
 
 type Modulo = { id: number; nombre: string };
 type RelacionModuloVideo = { id_modulo: number; id_video: number };
-type HistorialRow = { senia_id: number; created_at: string; modulo_nombre: string; senia_nombre: string };
+type HistorialRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string };
 
 type SectionType = 'modules' | 'history' | 'ranking';
 
@@ -46,11 +46,8 @@ export default function DashboardAlumnoScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [modulos, setModulos] = useState<Modulo[]>([]);
-  const [relaciones, setRelaciones] = useState<RelacionModuloVideo[]>([]);
-  //const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({}); 
-  const [senias_pendientes,setPendientes] = useState<Senia[]>();
-  const [senias_aprendiendo,setAprendiendo] = useState<Senia[]>();
-  const [senias_dominadas,setDominadas] = useState<Senia[]>();
+  const [relaciones, setRelaciones] = useState<RelacionModuloVideo[]>([]);    
+  const [senias_aprendiendo,setAprendiendo] = useState<Senia[]>();  
   const [error, setError] = useState<string | null>(null);
   const [historial, setHistorial] = useState<HistorialRow[]>([]);
   
@@ -74,96 +71,11 @@ export default function DashboardAlumnoScreen() {
   );
 
   const fetchHistorial = async () => {
-    const h = await senias_historial(user.id);
-    console.log(h)
-
+    const h = await senias_historial(user.id);    
+    setHistorial(h || [])
   }
 
-  const fetchData = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      //????
-      if (!user?.id) {
-        setModulos([]);
-        setRelaciones([]);        
-        setHistorial([]);
-        router.dismissAll();
-        return;
-      }
-      const { data: mods, error: modErr } = await supabase
-        .from('Modulos')
-        .select('id, nombre')
-        .order('id', { ascending: true });
-      if (modErr) throw modErr;
-
-      const { data: rels, error: relErr } = await supabase
-        .from('Modulo_Video')
-        .select('id_modulo, id_video');
-      if (relErr) throw relErr;
-      
-      try {
-        const seniasA = await mis_senias_aprendiendo(user.id);
-        const seniasD = await mis_senias_dominadas(user.id);
-        const seniasP = await mis_senias_pendientes(user.id);
-        
-        setAprendiendo(seniasA || []);
-        setDominadas(seniasD || []);
-        setPendientes(seniasP || []);
-        
-      } catch (e: any) {
-        console.warn('[dashboard] Alumno_Senia no disponible (aprendidasMap try/catch):', e?.message);
-      }
-
-      let historialRows: HistorialRow[] = [];
-      try {
-        const hist = await senias_aprendidas_reporte(user.id);
-
-        if (hist && hist.length) {
-          const { data: senias, error: seniaErr } = await supabase
-            .from('Senias')
-            .select('id, significado');
-          if (seniaErr) throw seniaErr;
-
-          const { data: relsAll, error: relsAllErr } = await supabase
-            .from('Modulo_Video')
-            .select('id_modulo, id_video');
-          if (relsAllErr) throw relsAllErr;
-
-          const seniaNombreMap = new Map<number, string>();
-          senias?.forEach((s: any) => seniaNombreMap.set(Number(s.id), String(s.significado)));
-          const moduloNombreMap = new Map<number, string>();
-          (mods || []).forEach((m) => moduloNombreMap.set(m.id, m.nombre));
-          const videoToModulo = new Map<number, number>();
-          relsAll?.forEach((r: any) => videoToModulo.set(Number(r.id_video), Number(r.id_modulo)));
-
-          historialRows = hist.map((h: any) => {
-            const seniaId = Number(h.senia_id);
-            const moduloId = videoToModulo.get(seniaId);
-            return {
-              senia_id: seniaId,
-              aprendida: !!h.aprendida,
-              created_at: h.created_at,
-              modulo_nombre: moduloId ? (moduloNombreMap.get(moduloId) || 'Módulo') : 'Módulo',
-              senia_nombre: seniaNombreMap.get(seniaId) || 'Seña',
-            } as HistorialRow;
-          });
-        }
-      } catch (e: any) {
-        console.warn('[dashboard] Historial no disponible:', e?.message);
-      }
-
-      setModulos(mods || []);
-      setRelaciones(rels || []);      
-      setHistorial(historialRows);
-    } catch (e: any) {
-      console.error('[dashboard] fetch error:', e?.message);
-      setError('Ocurrió un problema al cargar algunos datos. Parte del contenido puede no estar disponible.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  
 
   const fetchRanking = async () => {
     setLoading(true);    
@@ -182,33 +94,9 @@ export default function DashboardAlumnoScreen() {
         console.error(error)
     } finally{
         setLoading(false);
+        setRefreshing(false)
     }
   }
-
-  useEffect(() => {
-    fetchData();
-  }, [user?.id]);
-
-  // Suscripción en tiempo real a cambios del historial/aprendidas
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel(`rt-alumno-senia-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'Alumno_Senia', filter: `user_id=eq.${user.id}` },
-        (_payload: any) => {
-          // Ante INSERT/UPDATE/DELETE, refrescar datos; el filtro ya limita al usuario actual
-          fetchData();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      try { supabase.removeChannel(channel); } catch {}
-    };
-  }, [user?.id]);
 
  
 
@@ -247,7 +135,8 @@ export default function DashboardAlumnoScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchData();
+    fetchHistorial();
+    fetchRanking();
   };
 
   if (loading) {
@@ -261,7 +150,7 @@ export default function DashboardAlumnoScreen() {
 
   const sections: DashboardSection[] = [
     { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo },
-    { title: 'Historial de señas aprendidas', type: 'history', data: historial.slice(0, 3) },
+    { title: 'Señas aprendidas recientemente', type: 'history', data: historial.slice(0, 3) },
     {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)}
   ];
 
@@ -328,8 +217,8 @@ export default function DashboardAlumnoScreen() {
           (
             <HistorialItem
               nombre={item.senia_nombre}
-              modulo={item.modulo_nombre}
-              fechaISO={item.created_at}
+              modulo={item.categoria}
+              fechaISO={item.updated_at}
             />
           ): (
             <RatingCard nombre={item.username} rating={item.promedio} cant_reviews={item.cant_reviews}/>
