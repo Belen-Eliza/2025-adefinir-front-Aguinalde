@@ -15,6 +15,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
+import { aprendiendo_dominadas_por_modulo, aprendiendo_por_categoria, aprendiendo_por_modulo, todas_por_categoria } from '@/conexiones/practica';
 
 
 export default  function Practica (){
@@ -44,7 +45,7 @@ export default  function Practica (){
             //elegir 5 para la práctica
             const muestra =s.slice(0,5);
             setSenias(muestra);
-            setSeniaActual(muestra[0]);
+            setSeniaActual(muestra[0]);            
         } catch (error) {
             console.error(error);
             contexto.user.goHome();
