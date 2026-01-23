@@ -18,7 +18,7 @@ import { error_alert } from '@/components/alert';
 import { getRanking } from '@/conexiones/calificaciones';
 import { mis_senias_aprendiendo, mis_senias_dominadas, mis_senias_pendientes, senias_alumno, senias_aprendidas_reporte } from '@/conexiones/aprendidas';
 import { Senia } from '@/components/types';
-import { senias_historial } from '@/conexiones/dashboard';
+import { mi_progreso_global, senias_historial } from '@/conexiones/dashboard';
 
 type DatosRanking ={
     id: number;
@@ -30,6 +30,7 @@ type DatosRanking ={
 type Modulo = { id: number; nombre: string };
 type RelacionModuloVideo = { id_modulo: number; id_video: number };
 type HistorialRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string };
+type ProgresoGlobal = {learned:number,total:number}
 
 type SectionType = 'modules' | 'history' | 'ranking';
 
@@ -49,8 +50,8 @@ export default function DashboardAlumnoScreen() {
   const [relaciones, setRelaciones] = useState<RelacionModuloVideo[]>([]);    
   const [senias_aprendiendo,setAprendiendo] = useState<Senia[]>();  
   const [error, setError] = useState<string | null>(null);
-  const [historial, setHistorial] = useState<HistorialRow[]>([]);
-  
+  const [historial, setHistorial] = useState<HistorialRow[]>([]);  
+  const [progresoGlobal,setProgresoGlobal] = useState<ProgresoGlobal>({learned:0,total:0});
   const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);  
 
   useFocusEffect(
@@ -58,6 +59,7 @@ export default function DashboardAlumnoScreen() {
       try {
         setLoading(true);
         fetchHistorial();
+        fetchProgresoGlobal()
         fetchRanking();
       } catch (error) {
         error_alert("No se pudo generar el reporte.");
@@ -75,6 +77,10 @@ export default function DashboardAlumnoScreen() {
     setHistorial(h || [])
   }
 
+  const fetchProgresoGlobal = async () => {
+    const p = await mi_progreso_global(user.id);
+    setProgresoGlobal(p);
+  }
   
 
   const fetchRanking = async () => {
@@ -126,12 +132,12 @@ export default function DashboardAlumnoScreen() {
     return byModule;
   }, [modulos, relaciones, senias_aprendiendo]);
 
-  const progresoGlobal = useMemo(() => {
+  /* const progresoGlobal = useMemo(() => {
     return progresoPorModulo.reduce(
       (acc, m) => ({ total: acc.total + m.total, learned: acc.learned + m.learned }),
       { total: 0, learned: 0 }
     );
-  }, [progresoPorModulo]);
+  }, [progresoPorModulo]); */
 
   const onRefresh = () => {
     setRefreshing(true);
