@@ -1,6 +1,5 @@
 import { supabase } from '../utils/supabase'
-import { cantidad_aprendidas, mis_senias_dominadas, senias_aprendidas_reporte } from './aprendidas';
-import { buscar_senias_modulo } from './modulos';
+import { cantidad_aprendidas, senias_aprendidas_reporte } from './aprendidas';
 
 type HistorialRow = { senia_id: number;  updated_at: Date ; categoria: string; senia_nombre: string };
 type ProgresoGlobal = {learned:number,total:number};
@@ -19,7 +18,26 @@ const senias_historial = async (id_alumno:number) => {
     if (data && data.length>0){
         res = data.map(senia=>{
             let date = senia.updated_at ? new Date(senia.updated_at) : new Date()
-            return {senia_id:senia.senia_id,updated_at:date,categoria:senia.Senias.Categorias.nombre,senia_nombre:senia.Senias.significado}
+            return {senia_id:senia.id_senia,updated_at:date,categoria:senia.Senias.Categorias.nombre,senia_nombre:senia.Senias.significado}
+        })
+    }
+    return res
+}
+
+const senias_aprendiendo_dash = async (id_alumno:number) => {
+    let res : HistorialRow[]=[]
+    const { data, error } = await supabase
+        .from('Alumno_Senia') 
+        .select('*, Senias(*,Categorias(*))')
+        .eq('id_alumno', id_alumno)
+        .eq("aprendida",false)
+        .order("updated_at",{ascending:false});
+    if (error) throw error
+
+    if (data && data.length>0){
+        res = data.map(senia=>{   
+            let date = senia.updated_at ? new Date(senia.updated_at) : new Date()         
+            return {senia_id:senia.id_senia,updated_at:date,categoria:senia.Senias.Categorias.nombre,senia_nombre:senia.Senias.significado}
         })
     }
     return res
@@ -73,4 +91,4 @@ const mi_progreso_x_modulo = async (id_alumno:number) => {
     return res
 }
 
-export {senias_historial,mi_progreso_global,mi_progreso_x_modulo}
+export {senias_historial,mi_progreso_global,mi_progreso_x_modulo,senias_aprendiendo_dash}

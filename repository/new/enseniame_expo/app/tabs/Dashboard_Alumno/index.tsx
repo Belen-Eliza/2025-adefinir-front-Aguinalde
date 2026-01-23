@@ -1,8 +1,8 @@
 import React, { useCallback,  useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, SectionList, 
-  RefreshControl,  Modal, FlatList, TouchableOpacity, Pressable } from 'react-native';
+  RefreshControl, TouchableOpacity, Pressable, 
+  ScrollView} from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
 import ProgressCard from '@/components/ProgressCard';
 import GlobalProgress from '@/components/GlobalProgress';
@@ -10,14 +10,14 @@ import HistorialItem from '@/components/HistorialItem';
 import { useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ThemedText';
-import { RatingStars, RatingCard } from '@/components/review';
+import {  RatingCard } from '@/components/review';
 import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { error_alert } from '@/components/alert';
 import { getRanking } from '@/conexiones/calificaciones';
-import { mis_senias_aprendiendo, mis_senias_dominadas, mis_senias_pendientes, senias_alumno, senias_aprendidas_reporte } from '@/conexiones/aprendidas';
-import { Senia } from '@/components/types';
-import { mi_progreso_global, mi_progreso_x_modulo, senias_historial } from '@/conexiones/dashboard';
+import { mi_progreso_global, mi_progreso_x_modulo, senias_aprendiendo_dash, senias_historial } from '@/conexiones/dashboard';
+import { SmallPopupModal } from '@/components/modals';
+import { ProgressBarAnimada } from '@/components/animations/ProgressBarAnimada';
 
 type DatosRanking ={
     id: number;
@@ -26,13 +26,11 @@ type DatosRanking ={
     cant_reviews: number
 }
 
-type Modulo = { id: number; nombre: string };
-type RelacionModuloVideo = { id_modulo: number; id_video: number };
 type HistorialRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string };
 type ProgresoGlobal = {learned:number,total:number}
 type ProgresoPorModulo ={ id: number; nombre: string; total: number; learned: number }
 
-type SectionType = 'modules' | 'history' | 'ranking';
+type SectionType = 'modules' | 'history' | 'ranking' | 'aprendiendo';
 
 type DashboardSection = {
   title: string;
@@ -46,19 +44,17 @@ export default function DashboardAlumnoScreen() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modulos, setModulos] = useState<Modulo[]>([]);
-  const [relaciones, setRelaciones] = useState<RelacionModuloVideo[]>([]);    
-  const [senias_aprendiendo,setAprendiendo] = useState<Senia[]>();  
-  const [error, setError] = useState<string | null>(null);
   const [historial, setHistorial] = useState<HistorialRow[]>([]);  
+  const [seniasAprendiendo,setAprendiendo] = useState<HistorialRow[]>([]); 
   const [progresoGlobal,setProgresoGlobal] = useState<ProgresoGlobal>({learned:0,total:0});
   const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);
-  const [progresoPorModulo,setProgresoPorModulo]= useState<ProgresoPorModulo[]>([])  
+  const [progresoPorModulo,setProgresoPorModulo]= useState<ProgresoPorModulo[]>([]);
+
+  const [showModal,setShow]=useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      try {      
-        setLoading(true);
+      try {              
         fetchHistorial();
         fetchProgresoGlobal();
         fetchProgresoModulo();
@@ -66,9 +62,7 @@ export default function DashboardAlumnoScreen() {
       } catch (error) {
         error_alert("No se pudo generar el reporte.");
         console.error("[Dashboard]: ",error);
-      } finally {
-        setLoading(false);
-      }
+      } 
       return () => {
       };
     }, [])
@@ -76,12 +70,16 @@ export default function DashboardAlumnoScreen() {
 
   const fetchHistorial = async () => {
     const h = await senias_historial(user.id);    
-    setHistorial(h || [])
+    setHistorial(h || []);
+
+    /* const a = await senias_aprendiendo_dash(user.id);
+    console.log(a)
+    setAprendiendo(a ); */
   }
 
   const fetchProgresoGlobal = async () => {
     const p = await mi_progreso_global(user.id);
-    setProgresoGlobal(p);
+    setProgresoGlobal(p);    
   }
   
   const fetchProgresoModulo = async () => {
@@ -131,9 +129,8 @@ export default function DashboardAlumnoScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}> 
-        <ActivityIndicator size="large" color="#20bfa9" />
-        <Text style={{ marginTop: 12, color: '#555' }}>Cargando progreso…</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={paleta.dark_aqua} />
       </View>
     );
   }
@@ -141,7 +138,8 @@ export default function DashboardAlumnoScreen() {
   const sections: DashboardSection[] = [
     { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo.slice(0, 3) },
     { title: 'Señas dominadas recientemente', type: 'history', data: historial.slice(0, 3) },
-    {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)}
+    {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)},
+    {title: "Señas a dominar", type:"aprendiendo", data: seniasAprendiendo}
   ];
 
   return (
@@ -168,12 +166,7 @@ export default function DashboardAlumnoScreen() {
               </Text></Pressable>
               
             </View>
-            {error && (
-              <View style={styles.errorBox}>
-                <Ionicons name="alert-circle" size={18} color="#e74c3c" />
-                <Text style={styles.errorText}> {error} </Text>
-              </View>
-            )}
+           
           </View>
         )}
         ListHeaderComponentStyle={{ paddingHorizontal: 18 }}
@@ -186,7 +179,7 @@ export default function DashboardAlumnoScreen() {
             <>
             <Text style={styles.emptyText}>
               {section.data.length === 0 ? (<Text style={styles.emptyText}>'No hay módulos disponibles.'</Text>)  : 
-              <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>router.navigate("/tabs/Dashboard_Alumno/ranking")}>
+              <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>setShow(true)}>
               <ThemedText type='defaultSemiBold' lightColor='white'>Ver todos</ThemedText>
             </TouchableOpacity>}
             </Text>
@@ -224,7 +217,19 @@ export default function DashboardAlumnoScreen() {
           )
         )}
       />        
-
+      <SmallPopupModal title={"Progreso por módulo"} modalVisible={showModal} setVisible={setShow}>
+        <ScrollView style={styles.modalScrollView}>
+          {progresoPorModulo.map((modulo) => (
+            <View key={String(modulo.id)} style={styles.categoriaItem}>
+              <View style={styles.categoriaHeader}>
+                <Text style={styles.categoriaNombre}>{modulo.nombre}</Text>
+                <Text style={styles.categoriaPorcentaje}>{modulo.learned/modulo.total*100}%</Text>
+              </View>
+              <ProgressBarAnimada progress={modulo.learned/modulo.total*100} />
+            </View>
+          ))}
+        </ScrollView>
+      </SmallPopupModal>
        
       <Toast/>
     </View>
@@ -295,5 +300,46 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     fontWeight: '600',
     
+  },
+  categoriaItem: {
+    marginBottom: 14,
+  },
+  categoriaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  categoriaNombre: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#333',
+  },
+  categoriaPorcentaje: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#20bfa9',
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 12,
+    backgroundColor: '#eee',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#20bfa9',
+    borderRadius: 6,
+  },
+  modalScrollView: {
+    paddingBottom: 20,
+    maxHeight: 400
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e6f7f2',
   },
 });
