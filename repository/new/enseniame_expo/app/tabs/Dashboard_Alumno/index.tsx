@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback,  useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, SectionList, 
   RefreshControl,  Modal, FlatList, TouchableOpacity, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserContext } from '@/context/UserContext';
-import { supabase } from '@/utils/supabase';
 import ProgressCard from '@/components/ProgressCard';
 import GlobalProgress from '@/components/GlobalProgress';
 import HistorialItem from '@/components/HistorialItem';
@@ -18,7 +17,7 @@ import { error_alert } from '@/components/alert';
 import { getRanking } from '@/conexiones/calificaciones';
 import { mis_senias_aprendiendo, mis_senias_dominadas, mis_senias_pendientes, senias_alumno, senias_aprendidas_reporte } from '@/conexiones/aprendidas';
 import { Senia } from '@/components/types';
-import { mi_progreso_global, senias_historial } from '@/conexiones/dashboard';
+import { mi_progreso_global, mi_progreso_x_modulo, senias_historial } from '@/conexiones/dashboard';
 
 type DatosRanking ={
     id: number;
@@ -31,6 +30,7 @@ type Modulo = { id: number; nombre: string };
 type RelacionModuloVideo = { id_modulo: number; id_video: number };
 type HistorialRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string };
 type ProgresoGlobal = {learned:number,total:number}
+type ProgresoPorModulo ={ id: number; nombre: string; total: number; learned: number }
 
 type SectionType = 'modules' | 'history' | 'ranking';
 
@@ -52,14 +52,16 @@ export default function DashboardAlumnoScreen() {
   const [error, setError] = useState<string | null>(null);
   const [historial, setHistorial] = useState<HistorialRow[]>([]);  
   const [progresoGlobal,setProgresoGlobal] = useState<ProgresoGlobal>({learned:0,total:0});
-  const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);  
+  const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);
+  const [progresoPorModulo,setProgresoPorModulo]= useState<ProgresoPorModulo[]>([])  
 
   useFocusEffect(
     useCallback(() => {
       try {
         setLoading(true);
         fetchHistorial();
-        fetchProgresoGlobal()
+        fetchProgresoGlobal();
+        fetchProgresoModulo();
         fetchRanking();
       } catch (error) {
         error_alert("No se pudo generar el reporte.");
@@ -82,6 +84,13 @@ export default function DashboardAlumnoScreen() {
     setProgresoGlobal(p);
   }
   
+  const fetchProgresoModulo = async () => {
+    const pm= await mi_progreso_x_modulo(user.id);
+    //ordenar
+
+
+    setProgresoPorModulo(pm);
+  }
 
   const fetchRanking = async () => {
     setLoading(true);    
@@ -102,11 +111,9 @@ export default function DashboardAlumnoScreen() {
         setLoading(false);
         setRefreshing(false)
     }
-  }
+  } 
 
- 
-
-  const progresoPorModulo = useMemo(() => {
+  /* const progresoPorModulo = useMemo(() => {
     const byModule: Array<{ id: number; nombre: string; total: number; learned: number }> = [];
     const relsByModule = new Map<number, number[]>();
     relaciones.forEach((r) => {
@@ -132,17 +139,13 @@ export default function DashboardAlumnoScreen() {
     return byModule;
   }, [modulos, relaciones, senias_aprendiendo]);
 
-  /* const progresoGlobal = useMemo(() => {
-    return progresoPorModulo.reduce(
-      (acc, m) => ({ total: acc.total + m.total, learned: acc.learned + m.learned }),
-      { total: 0, learned: 0 }
-    );
-  }, [progresoPorModulo]); */
-
+ */
   const onRefresh = () => {
     setRefreshing(true);
     fetchHistorial();
-    fetchRanking();
+    fetchProgresoGlobal();
+    fetchProgresoModulo();
+    fetchRanking();    
   };
 
   if (loading) {
@@ -155,7 +158,7 @@ export default function DashboardAlumnoScreen() {
   }
 
   const sections: DashboardSection[] = [
-    { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo },
+    { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo.slice(0, 3) },
     { title: 'Señas aprendidas recientemente', type: 'history', data: historial.slice(0, 3) },
     {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)}
   ];
