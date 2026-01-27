@@ -5,4 +5,4 @@
 
 Un módulo está completo cuando todas sus señas están "dominadas".
 Se puede pasar de pendientes a aprendiendo y viceversa, pero no se puede revertir una dominada.
-En la práctica interactiva, mostrar aprendiendo y dominadas
+En la práctica interactiva, mostrar aprendiendo y dominadas -> dar la opción de elegir entre "todas", "solo aprendiendo" y "aprendiendo y dominadas"
