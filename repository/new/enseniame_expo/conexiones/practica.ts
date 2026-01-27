@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabase'
+import { Estado_Aprendiendo, Estado_Dominada, Estado_Pendiente, Senia_Alumno } from '@/components/types';
 
 const aprendiendo_por_modulo = async (id_alumno:number, id_modulo:number) => {
     let res: any[] = [];
@@ -9,11 +10,21 @@ const aprendiendo_por_modulo = async (id_alumno:number, id_modulo:number) => {
         .eq("aprendida",false);        
     if (error) throw error    
     if (Alumno_Senia && Alumno_Senia.length>0){        
-        res = Alumno_Senia.filter(s=>s.Senias.Modulo_Video.find((m: { id_modulo: number; })=>m.id_modulo==id_modulo))
+        let filtradas = Alumno_Senia.filter(s=>s.Senias.Modulo_Video.find((m: { id_modulo: number; })=>m.id_modulo==id_modulo));
+        res = filtradas.map(e=>{
+            let estado = new Estado_Pendiente();
+            if (e.aprendida){                
+                estado = new Estado_Dominada()
+            } else {
+                estado = new Estado_Aprendiendo(e.cant_aciertos);
+            }
+            return new Senia_Alumno(e.Senias,estado)
+        })
     }
     console.log(res)
     return res
 }
+
 
 const aprendiendo_dominadas_por_modulo = async (id_alumno:number, id_modulo:number) => {
     let res: any[] = [];

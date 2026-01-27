@@ -13,7 +13,7 @@ import { alumno_ver_senia,} from "@/conexiones/visualizaciones";
 import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
 import { estilos } from "@/components/estilos";
-import { traer_senias_leccion } from "@/conexiones/senia_alumno";
+import { traer_senias_leccion,traer_senias_leccion_aprendiendo } from "@/conexiones/senia_alumno";
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -22,8 +22,8 @@ type Senia_Leccion ={
 }
 
 export default function Leccion (){
-  const { id=0 } = useLocalSearchParams<{ id: string }>();
-  if (id==0) router.back();
+  const { id=0, opcion=0 } = useLocalSearchParams<{ id: string, opcion: string }>();
+  if (id==0 || opcion==0) router.back();
   const [modulo,setModulo] = useState<Modulo>();  
   const [senias,setSenias] = useState<Senia_Leccion[]>([]);  
   const [loading, setLoading] = useState(true);
@@ -47,6 +47,8 @@ export default function Leccion (){
         const m = await buscar_modulo(Number(id));
         setModulo(m || {id:0,descripcion:"",nombre:"",autor:0,icon: "paw"});
 
+        console.log(opcion)
+
       } catch (error) {
         error_alert("No se pudo cargar el módulo");
         console.error(error);
@@ -58,7 +60,12 @@ export default function Leccion (){
   const fetch_senias = async ()=>{
     try {
       setLoading(true)
-      const s = await  traer_senias_leccion(contexto.user.id,Number(id)); 
+      let s: Senia_Leccion[] =[];
+      
+      if (opcion=="2") s = await  traer_senias_leccion_aprendiendo(contexto.user.id,Number(id))
+      else if (opcion=="3") s = await traer_senias_leccion(contexto.user.id,Number(id));
+      else s = await traer_senias_leccion(contexto.user.id,Number(id));
+
       const ordenadas = s.sort(function (a, b) {
       if (a.senia.info.significado < b.senia.info.significado) {
         return -1;

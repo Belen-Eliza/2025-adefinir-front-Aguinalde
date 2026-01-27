@@ -21,6 +21,7 @@ import { get_antiguedad } from "@/components/validaciones";
 import { AntDesign } from "@expo/vector-icons";
 import {  traer_senias_modulo } from "@/conexiones/senia_alumno";
 import { BotonLogin } from "@/components/botones";
+import { aprendiendo_por_modulo } from "@/conexiones/practica";
 
 
 type Senia_Modulo ={
@@ -183,8 +184,14 @@ export default function ModuloDetalleScreen() {
 
   const empezarLeccion = ()=>{
     if (value!=undefined) {
-      setShowLeccion(false)
-      router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id } })
+      aprendiendo_por_modulo(contexto.user.id,modulo?.id || 1)
+      setShowLeccion(false);
+      if (practica){
+        router.push({ pathname: '/tabs/Modulos_Alumno/practica', params: { id: modulo?.id, opcion: value } })
+      } else {
+        router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id , opcion: value } })
+      }
+      
     } else {
       setError("Debes seleccionar una opción");
     }
@@ -244,7 +251,10 @@ export default function ModuloDetalleScreen() {
           <View style={styles.card}>
             <View style={{flexDirection:"row", alignContent: "space-around", justifyContent:"space-between"}}>
               <Text style={styles.cardTitle}>{item.senia.info.significado}</Text>
-              <Ionicons style={{display:item.senia.estado.display_checkmark()}} name="checkmark-circle" color={paleta.strong_yellow} size={25}  />
+              <View style={{flexDirection:"row", alignContent: "space-around", justifyContent:"space-between"}}>
+                <ThemedText >{item.senia.estado.toString()}</ThemedText>                
+              </View>
+              
             </View>
            
             <Pressable
