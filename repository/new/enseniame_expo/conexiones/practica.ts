@@ -1,6 +1,30 @@
 import { supabase } from '../utils/supabase'
 import { Estado_Aprendiendo, Estado_Dominada, Estado_Pendiente, Senia_Alumno } from '@/components/types';
 
+const todas_por_modulo = async (id_alumno:number, id_modulo:number) =>{
+    let res: Senia_Alumno[] = [];
+
+    const {data,error} = await supabase.from("Alumno_Senia").select("*, Senias(*)").eq("id_alumno",id_alumno);
+    if (error) throw error
+
+    if (data && data.length>0){
+        //armar los objetos        
+        const s = data.map(e=>{
+            let estado = new Estado_Pendiente();
+            if (e.aprendida){                
+                estado = new Estado_Dominada()
+            } else {
+                estado = new Estado_Aprendiendo(e.cant_aciertos);
+            }
+            return new Senia_Alumno(e.Senias,estado)
+        })
+        return s
+    }
+
+
+    return res
+}
+
 const aprendiendo_por_modulo = async (id_alumno:number, id_modulo:number) => {
     let res: any[] = [];
     let { data: Alumno_Senia, error } = await supabase
@@ -80,4 +104,4 @@ const todas_por_categoria = async (id_cate:number) => {
 }
 
 export {aprendiendo_por_modulo,aprendiendo_dominadas_por_modulo, aprendiendo_por_categoria,aprendiendo_dominadas_por_categoria,
-    todas_por_categoria}
+    todas_por_categoria, todas_por_modulo}

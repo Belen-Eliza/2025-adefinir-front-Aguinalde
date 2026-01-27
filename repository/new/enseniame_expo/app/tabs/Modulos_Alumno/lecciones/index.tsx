@@ -45,10 +45,7 @@ export default function Leccion (){
       try {
         setLoading(true)
         const m = await buscar_modulo(Number(id));
-        setModulo(m || {id:0,descripcion:"",nombre:"",autor:0,icon: "paw"});
-
-        console.log(opcion)
-
+        setModulo(m || {id:0,descripcion:"",nombre:"",autor:0,icon: "paw"});        
       } catch (error) {
         error_alert("No se pudo cargar el módulo");
         console.error(error);

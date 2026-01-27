@@ -6,7 +6,7 @@ import { useUserContext } from '@/context/UserContext';
 import {  Senia_Alumno } from '@/components/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
-import { traer_senias_practica } from '@/conexiones/senia_alumno';
+import { traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas, traer_senias_practica } from '@/conexiones/senia_alumno';
 import { paleta, paleta_colores } from '@/components/colores';
 import { BotonLogin } from '@/components/botones';
 import { estilos } from '@/components/estilos';
@@ -18,6 +18,11 @@ import { awardXPClient } from '@/conexiones/xp';
 import { traer_senias_modulo } from '@/conexiones/senia_alumno';
 import { aprendiendo_dominadas_por_modulo, aprendiendo_por_modulo } from '@/conexiones/practica';
 
+type Senia_Leccion ={
+  senia: Senia_Alumno;    
+  descripcion?: string;
+  aprendiendo: boolean;
+}
 
 export default  function Practica (){
     const { id=0, opcion=0 } = useLocalSearchParams<{ id: string, opcion: string }>();
@@ -25,8 +30,8 @@ export default  function Practica (){
     
     const contexto = useUserContext();
 
-    const [senias,setSenias]= useState<Senia_Alumno[]>([]);
-    const [senia_actual,setSeniaActual] = useState<Senia_Alumno>();
+    const [senias,setSenias]= useState<Senia_Leccion[]>([]);
+    const [senia_actual,setSeniaActual] = useState<Senia_Leccion>();
     const [index_actual,setIndex] =useState(0);
     const [mostrar_res,setMostrarRes]= useState(false);
 
@@ -45,8 +50,11 @@ export default  function Practica (){
 
     const fetch_senias = async ()=>{
         try {
-            const s=await traer_senias_practica(contexto.user.id);
-            //elegir 5 para la práctica
+            let s: Senia_Leccion[] =[];
+      
+            if (opcion=="2") s = await  traer_senias_leccion_aprendiendo(contexto.user.id,Number(id))
+            else if (opcion=="3") s = await traer_senias_leccion_aprendiendo_dominadas(contexto.user.id,Number(id));
+            else s = await traer_senias_leccion(contexto.user.id,Number(id));
             const muestra =s.slice(0,5);
             setSenias(muestra);
             setSeniaActual(muestra[0]);            
@@ -59,7 +67,7 @@ export default  function Practica (){
 
     const exito = async () => {
         try {
-            senia_actual?.sumar_acierto(contexto.user.id);
+            senia_actual?.senia.sumar_acierto(contexto.user.id);
             setCorrectas(cant_correctas+1)
         } catch (error) {
             console.error(error);
@@ -108,7 +116,7 @@ export default  function Practica (){
                         <View style={[styles.card,paleta_colores.dark_aqua,{width:"95%"}]}>
                         
                         <VideoPlayer 
-                        uri={senia_actual.info.video_url}
+                        uri={senia_actual.senia.info.video_url}
                         style={styles.video}
                         />
                         <BotonLogin callback={()=>setMostrarRes(true)} 
@@ -125,7 +133,7 @@ export default  function Practica (){
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Respuesta:</Text>
-                        <ThemedText  style={[styles.modalTitle,{color:paleta.dark_aqua}]} >{senia_actual.info.significado}</ThemedText>
+                        <ThemedText  style={[styles.modalTitle,{color:paleta.dark_aqua}]} >{senia_actual.senia.info.significado}</ThemedText>
 
                         <View style={styles.buttonRow}>
                             <TouchableOpacity onPress={exito}
