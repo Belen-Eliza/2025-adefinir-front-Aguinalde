@@ -1,5 +1,5 @@
 Dashboard:
-* Mostrar aprendiendo y progreso en cantidad de aciertos 
+* Mostrar aprendiendo y progreso en cantidad de aciertos -- Done!!  
 
 Modulos:
 * En "Empezar lección" mostrar opciones:
@@ -23,7 +23,10 @@ Home:
 Práctica:
 * Implementar mostrar nombre y tiene que recordar la seña
 * Mejorar diseño
+* Mezclar las señas para que no siempre toquen las mismas en el mismo orden
 
 API!!
 
 Revisar que se ganen bien todas las insignias
+
+Revisar objetivos
