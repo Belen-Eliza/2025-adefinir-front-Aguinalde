@@ -62,7 +62,8 @@ export default function ModuloDetalleScreen() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState<{value:number,label:string}[]>([{value:1,label:"Todas"},{value:2,label:"Sólo aprendiendo"},{value:3,label:"Aprendiendo y dominadas"}]);
-  
+  const [error,setError] = useState("");
+
   const contexto = useUserContext();
   
    useFocusEffect(
@@ -181,8 +182,13 @@ export default function ModuloDetalleScreen() {
   };
 
   const empezarLeccion = ()=>{
-    setShowLeccion(false)
-    router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id } })
+    if (value!=undefined) {
+      setShowLeccion(false)
+      router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id } })
+    } else {
+      setError("Debes seleccionar una opción");
+    }
+    
   }
 
   if (loading) {
@@ -374,13 +380,13 @@ export default function ModuloDetalleScreen() {
           <View>
             <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
               <TouchableOpacity style={[styles.filtros,
-              practica ? {backgroundColor: paleta.dark_aqua}: {backgroundColor: paleta.turquesa}]} 
+              practica ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
                 onPress={()=>setPractica(true)}>
-                <ThemedText lightColor={practica ? "white":"black"} type="defaultSemiBold">Práctica</ThemedText>
+                <ThemedText lightColor={"black"} type="defaultSemiBold">Práctica</ThemedText>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.filtros,{backgroundColor: practica ? paleta.turquesa:paleta.dark_aqua}]} 
+              <TouchableOpacity style={[styles.filtros,{backgroundColor: practica ? "lightgray":paleta.turquesa}]} 
                 onPress={()=>setPractica(false)}>
-                <ThemedText lightColor={practica ? "black":"white"} type="defaultSemiBold">Teoría</ThemedText>
+                <ThemedText lightColor={"black"} type="defaultSemiBold">Teoría</ThemedText>
               </TouchableOpacity>                    
             </View>
             <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Qué señas deseas repasar?</ThemedText>
@@ -395,6 +401,7 @@ export default function ModuloDetalleScreen() {
               placeholderStyle={{color:"#888"}}
               style={styles.input}
             />
+            {error ? <ThemedText type='error' style={{maxWidth: "80%"}}>{error}</ThemedText> : null}
 
             <BotonLogin callback={empezarLeccion} textColor={"black"} bckColor={paleta.strong_yellow} text={"Empezar lección"}/>
           </View>
