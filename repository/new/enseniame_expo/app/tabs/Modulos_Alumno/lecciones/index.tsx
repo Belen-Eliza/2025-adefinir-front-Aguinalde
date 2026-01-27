@@ -13,7 +13,7 @@ import { alumno_ver_senia,} from "@/conexiones/visualizaciones";
 import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
 import { estilos } from "@/components/estilos";
-import { traer_senias_leccion,traer_senias_leccion_aprendiendo } from "@/conexiones/senia_alumno";
+import { traer_senias_leccion,traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas } from "@/conexiones/senia_alumno";
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -63,7 +63,7 @@ export default function Leccion (){
       let s: Senia_Leccion[] =[];
       
       if (opcion=="2") s = await  traer_senias_leccion_aprendiendo(contexto.user.id,Number(id))
-      else if (opcion=="3") s = await traer_senias_leccion(contexto.user.id,Number(id));
+      else if (opcion=="3") s = await traer_senias_leccion_aprendiendo_dominadas(contexto.user.id,Number(id));
       else s = await traer_senias_leccion(contexto.user.id,Number(id));
 
       const ordenadas = s.sort(function (a, b) {
