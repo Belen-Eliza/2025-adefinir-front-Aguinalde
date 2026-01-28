@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback,  } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Modal, TouchableOpacity } from "react-native";
+import React, { useState,  useCallback,  } from 'react';
+import { View, Text, StyleSheet, Pressable,  Modal, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/context/UserContext';
 import {  Senia_Alumno } from '@/components/types';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
-import { traer_senias_practica } from '@/conexiones/senia_alumno';
+import { traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas, traer_senias_practica } from '@/conexiones/senia_alumno';
 import { paleta, paleta_colores } from '@/components/colores';
 import { BotonLogin } from '@/components/botones';
 import { estilos } from '@/components/estilos';
@@ -15,23 +15,30 @@ import { ThemedText } from '@/components/ThemedText';
 import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
-import { aprendiendo_dominadas_por_modulo, aprendiendo_por_categoria, aprendiendo_por_modulo, todas_por_categoria } from '@/conexiones/practica';
 
+type Senia_Leccion ={
+  senia: Senia_Alumno;    
+  descripcion?: string;
+  aprendiendo: boolean;
+}
 
 export default  function Practica (){
+    const { id=0, opcion=0 } = useLocalSearchParams<{ id: string, opcion: string }>();
+    if (id==0 || opcion==0) router.back();
+    
     const contexto = useUserContext();
 
-    const [senias,setSenias]= useState<Senia_Alumno[]>([]);
-    const [senia_actual,setSeniaActual] = useState<Senia_Alumno>();
+    const [senias,setSenias]= useState<Senia_Leccion[]>([]);
+    const [senia_actual,setSeniaActual] = useState<Senia_Leccion>();
     const [index_actual,setIndex] =useState(0);
     const [mostrar_res,setMostrarRes]= useState(false);
 
     const [terminado,setTerminado] = useState(false);
     const [cant_correctas,setCorrectas] = useState(0);
     
-    const fracaso =require("../../../assets/images/disappointedBeetle.gif");
-    const festejo =require("../../../assets/images/beetle_celebration.gif");
-    const ok =require("../../../assets/images/beetle_bow.gif");
+    const fracaso =require("../../../../assets/images/disappointedBeetle.gif");
+    const festejo =require("../../../../assets/images/beetle_celebration.gif");
+    const ok =require("../../../../assets/images/beetle_bow.gif");
 
     useFocusEffect(
         useCallback(() => {
@@ -41,8 +48,11 @@ export default  function Practica (){
 
     const fetch_senias = async ()=>{
         try {
-            const s=await traer_senias_practica(contexto.user.id);
-            //elegir 5 para la práctica
+            let s: Senia_Leccion[] =[];
+      
+            if (opcion=="2") s = await  traer_senias_leccion_aprendiendo(contexto.user.id,Number(id))
+            else if (opcion=="3") s = await traer_senias_leccion_aprendiendo_dominadas(contexto.user.id,Number(id));
+            else s = await traer_senias_leccion(contexto.user.id,Number(id));
             const muestra =s.slice(0,5);
             setSenias(muestra);
             setSeniaActual(muestra[0]);            
@@ -55,7 +65,7 @@ export default  function Practica (){
 
     const exito = async () => {
         try {
-            senia_actual?.sumar_acierto(contexto.user.id);
+            senia_actual?.senia.sumar_acierto(contexto.user.id);
             setCorrectas(cant_correctas+1)
         } catch (error) {
             console.error(error);
@@ -104,7 +114,7 @@ export default  function Practica (){
                         <View style={[styles.card,paleta_colores.dark_aqua,{width:"95%"}]}>
                         
                         <VideoPlayer 
-                        uri={senia_actual.info.video_url}
+                        uri={senia_actual.senia.info.video_url}
                         style={styles.video}
                         />
                         <BotonLogin callback={()=>setMostrarRes(true)} 
@@ -121,7 +131,7 @@ export default  function Practica (){
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Respuesta:</Text>
-                        <ThemedText  style={[styles.modalTitle,{color:paleta.dark_aqua}]} >{senia_actual.info.significado}</ThemedText>
+                        <ThemedText  style={[styles.modalTitle,{color:paleta.dark_aqua}]} >{senia_actual.senia.info.significado}</ThemedText>
 
                         <View style={styles.buttonRow}>
                             <TouchableOpacity onPress={exito}

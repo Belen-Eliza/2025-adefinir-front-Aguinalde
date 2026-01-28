@@ -12,9 +12,8 @@ export default function Layout(){
               fontWeight: 'bold',
             },
           }}>
-            <Stack.Screen name='index' options={{headerShown:false}}/>
-            <Stack.Screen name='alumno_objetivos' options={{headerShown:false , presentation: "modal"}}   />
-            <Stack.Screen name='practica' options={{headerShown:false}}/>            
+            <Stack.Screen name='por_modulo' options={{headerShown:false}}/>
+            <Stack.Screen name='por_categoria' options={{headerShown:false}}/>
             
     </Stack>)
 }
