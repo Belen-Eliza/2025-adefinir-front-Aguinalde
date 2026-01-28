@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity } from "reac
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/context/UserContext';
-import {  Senia_Alumno } from '@/components/types';
+import {  Modulo, Senia_Alumno } from '@/components/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
 import { traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas } from '@/conexiones/senia_alumno';
@@ -16,6 +16,7 @@ import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
 import { shuffleArray } from '@/components/validaciones';
 import { FlashCardVideo } from '@/components/practica_lecciones';
+import { buscar_modulo } from '@/conexiones/modulos';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -30,6 +31,8 @@ export default  function Practica (){
     const contexto = useUserContext();
 
     const [senias,setSenias]= useState<Senia_Leccion[]>([]);
+    const [modulo,setModulo] = useState<Modulo>();  
+    const [loading, setLoading] = useState(true);
     const [senia_actual,setSeniaActual] = useState<Senia_Leccion>();
     const [index_actual,setIndex] =useState(0);
     const [mostrar_res,setMostrarRes]= useState(false);
@@ -44,8 +47,22 @@ export default  function Practica (){
     useFocusEffect(
         useCallback(() => {
             fetch_senias();
+            fetch_modulo();
         },[])
     );
+
+    const fetch_modulo = async ()=>{
+      try {
+        setLoading(true)
+        const m = await buscar_modulo(Number(id));
+        setModulo(m || {id:0,descripcion:"",nombre:"",autor:0,icon: "paw"});        
+      } catch (error) {
+        error_alert("No se pudo cargar el módulo");
+        console.error(error);
+      } finally {
+          setLoading(false);
+      }
+    } 
 
     const fetch_senias = async ()=>{
         try {
@@ -101,15 +118,19 @@ export default  function Practica (){
 
     return (
         <View style={styles.container}>
-            <Pressable
-                style={[styles.backBtn, { marginBottom: 10, marginTop:30, flexDirection: 'row', alignItems: 'center' }]}
-                onPress={() => { contexto.user.goHome()} }
+            <View style={[estilos.centrado,{flexDirection:"row",justifyContent:"space-between",marginTop:50, marginBottom: 20,width:"100%"}]}>
+                <Pressable
+                style={[styles.backBtn]}
+                onPress={() => { router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })} }
             >
-                <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
-                <Text style={styles.backBtnText}>Volver</Text>
+                <Ionicons name="arrow-back" size={25} color="#20bfa9" style={{ marginRight: 6 }} />                
             </Pressable>
+            <ThemedText style={styles.moduleTitle}>{modulo?.nombre}</ThemedText>
+            <View style={{width:20}}></View>
+            </View>                        
 
-            {senia_actual && (<FlashCardVideo senia_actual={senia_actual?.senia} setMostrarRes={setMostrarRes}/>)}
+            {senia_actual && (<FlashCardVideo currentIndex={index_actual+1} senia_actual={senia_actual?.senia} 
+            setMostrarRes={setMostrarRes} total={senias.length}/> )}
 
                                         
             <Modal animationType="slide"
@@ -186,7 +207,7 @@ export default  function Practica (){
                         </View>                                                
                     </View>
                 
-                <BotonLogin callback={()=>{contexto.user.goHome();setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
+                <BotonLogin callback={()=>{ router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } });setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                     </View>
                 
                 )}                                          
@@ -208,11 +229,12 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     padding: 10,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    elevation: 2,
+    borderRadius: 8,    
+    position:"relative",
+    left: 0,
+    flexDirection: 'row',  
+    alignSelf:"flex-start",
+          
   },
   backBtnText: {
     color: '#20bfa9',
@@ -312,5 +334,11 @@ title_racha: {
     position:"absolute",
     top: 400,
     width:"100%"
+ },
+ moduleTitle:{
+    alignSelf: "center",
+    fontSize: 25,
+    color: paleta.dark_aqua,
+    fontWeight: "600"
  }
 })

@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bck_content:{
-    width: "90%",
+    width: "95%",
     backgroundColor: "#ffffffff",
     height: "85%"
   },

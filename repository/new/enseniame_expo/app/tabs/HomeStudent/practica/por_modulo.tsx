@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable,  Modal, TouchableOpacity } from "rea
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/context/UserContext';
-import {  Senia_Alumno } from '@/components/types';
+import {  Modulo, Senia_Alumno } from '@/components/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
 import { traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas, traer_senias_practica } from '@/conexiones/senia_alumno';
@@ -16,6 +16,8 @@ import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
 import { shuffleArray } from '@/components/validaciones';
+import { buscar_modulo } from '@/conexiones/modulos';
+import { FlashCardVideo } from '@/components/practica_lecciones';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -30,6 +32,8 @@ export default  function Practica (){
     const contexto = useUserContext();
 
     const [senias,setSenias]= useState<Senia_Leccion[]>([]);
+    const [modulo,setModulo] = useState<Modulo>();  
+    const [loading, setLoading] = useState(true);
     const [senia_actual,setSeniaActual] = useState<Senia_Leccion>();
     const [index_actual,setIndex] =useState(0);
     const [mostrar_res,setMostrarRes]= useState(false);
@@ -44,8 +48,22 @@ export default  function Practica (){
     useFocusEffect(
         useCallback(() => {
             fetch_senias();
+            fetch_modulo();
         },[])
     );
+
+    const fetch_modulo = async ()=>{
+      try {
+        setLoading(true)
+        const m = await buscar_modulo(Number(id));
+        setModulo(m || {id:0,descripcion:"",nombre:"",autor:0,icon: "paw"});        
+      } catch (error) {
+        error_alert("No se pudo cargar el módulo");
+        console.error(error);
+      } finally {
+          setLoading(false);
+      }
+    } 
 
     const fetch_senias = async ()=>{
         try {
@@ -103,30 +121,19 @@ export default  function Practica (){
 
     return (
         <View style={styles.container}>
-            <Pressable
-                style={[styles.backBtn, { marginBottom: 10, marginTop:30, flexDirection: 'row', alignItems: 'center' }]}
-                onPress={() => { contexto.user.goHome()} }
+            <View style={[estilos.centrado,{flexDirection:"row",justifyContent:"space-between",marginTop:50, marginBottom: 20,width:"100%"}]}>
+                <Pressable
+                style={[styles.backBtn]}
+                onPress={() => { router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })} }
             >
-                <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
-                <Text style={styles.backBtnText}>Volver</Text>
+                <Ionicons name="arrow-back" size={25} color="#20bfa9" style={{ marginRight: 6 }} />                
             </Pressable>
+            <ThemedText style={styles.moduleTitle}>{modulo?.nombre}</ThemedText>
+            <View style={{width:20}}></View>
+            </View>                        
 
-            <View style={[styles.bck_content,estilos.centrado]}>                
-                {senia_actual && 
-                    <View style={estilos.centrado}>
-                        <ThemedText style={[styles.title]}>Identificar el significado de la seña</ThemedText>
-                        <View style={[styles.card,paleta_colores.dark_aqua,{width:"95%"}]}>
-                        
-                        <VideoPlayer 
-                        uri={senia_actual.senia.info.video_url}
-                        style={styles.video}
-                        />
-                        <BotonLogin callback={()=>setMostrarRes(true)} 
-                            textColor={'white'} bckColor={paleta.blue} text={'Ver respuesta'}    />
-                        </View>
-                    </View>
-                }                           
-            </View>
+            {senia_actual && (<FlashCardVideo currentIndex={index_actual+1} senia_actual={senia_actual.senia} 
+            setMostrarRes={setMostrarRes} total={senias.length}/> )}  
             <Modal animationType="slide"
                 transparent={true}
                 visible={mostrar_res}
@@ -332,5 +339,11 @@ title_racha: {
     position:"absolute",
     top: 400,
     width:"100%"
+ },
+ moduleTitle:{
+    alignSelf: "center",
+    fontSize: 25,
+    color: paleta.dark_aqua,
+    fontWeight: "600"
  }
 })
