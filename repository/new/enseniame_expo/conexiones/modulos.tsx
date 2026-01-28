@@ -4,8 +4,7 @@ import { error_alert } from '@/components/alert';
 import { now } from '@/components/validaciones';
 
 const todos_los_modulos = async () =>{
-    try {
-        
+    try {        
         let { data: Modulos, error } = await supabase.from('Modulos').select('*');
           
         if (Modulos && Modulos.length>0) return Modulos

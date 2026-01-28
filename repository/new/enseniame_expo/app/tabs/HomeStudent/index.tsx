@@ -7,7 +7,7 @@ import { useXP } from '@/components/animations/useXP';
 import { XPGainPop } from '@/components/animations/XPGainPop';
 import { router, useFocusEffect } from 'expo-router';
 import { useUserContext } from '@/context/UserContext';
-import { modulos_completados_por_alumno, progreso_por_categoria } from '@/conexiones/modulos';
+import { modulos_completados_por_alumno, progreso_por_categoria, todos_los_modulos } from '@/conexiones/modulos';
 import { Image } from 'expo-image';
 import Toast from 'react-native-toast-message';
 import { paleta } from '@/components/colores';
@@ -30,6 +30,8 @@ import type { Mission } from '@/conexiones/misiones';
 import { miNivel } from '@/conexiones/xp';
 import { SmallPopupModal } from '@/components/modals';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { traerCategorias } from '@/conexiones/categorias';
+import { Label } from '@react-navigation/elements';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -56,10 +58,17 @@ export default function HomeStudent() {
 
   const [showModalLeccion,setShowLeccion]= useState(false);
   const [practica,setPractica] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState<{value:number,label:string}[]>([{value:1,label:"Todas"},{value:2,label:"Sólo aprendiendo"},{value:3,label:"Aprendiendo y dominadas"}]);
-  const [error,setError] = useState("");
+  const [openTipoSenia, setOpenTipoSenia] = useState(false);
+  const [valueTipoSenia, setValueTipoSenia] = useState(null);
+  const [tipoSenia, setTipoSenia] = useState<{value:number,label:string}[]>([{value:1,label:"Todas"},{value:2,label:"Sólo aprendiendo"},{value:3,label:"Aprendiendo y dominadas"}]);
+  const [errorTipoSenia,setErrorTipoSenia] = useState("");
+
+  const [porCate,setPorCate] = useState(false);
+  const [openPorCate, setOpenPorCate] = useState(false);
+  const [valueCate, setValueCate] = useState(null);
+  const [categorias, setCategorias] = useState<{value:number,label:string}[]>([]);
+  const [modulos, setModulos] = useState<{value:number,label:string}[]>([]);
+  const [errorCategoria,setErrorCategoria] = useState("");
 
   useFocusEffect(
       useCallback(() => {
@@ -162,12 +171,20 @@ export default function HomeStudent() {
   const fetch_misc = async () => {
     const level = await miNivel(contexto.user.id);
     setUser(prev => ({ ...prev, level: level?.nivel || 0 }));
+
+    const cates = await traerCategorias();
+    const items = cates.map(c=>{return {label:c.nombre,value:c.id}});
+    setCategorias(items || []);
+
+    const m = await todos_los_modulos();
+    const itemsM = m?.map(each=>{return {label:each.nombre,value:each.id}});
+    setModulos(itemsM || []);
   }
 
   const empezarLeccion = ()=>{
-    if (value!=undefined) {      
+    if (valueTipoSenia!=undefined && valueCate!=undefined) {      
       setShowLeccion(false);
-      setError("");
+      setErrorTipoSenia("");
       if (practica){
         //router.push({ pathname: '/tabs/Modulos_Alumno/practica', params: { id: modulo?.id, opcion: value } })
       } else {
@@ -175,7 +192,8 @@ export default function HomeStudent() {
       }
       
     } else {
-      setError("Debes seleccionar una opción");
+      if (!valueTipoSenia) setErrorTipoSenia("Debes seleccionar una opción");
+      if (!valueCate) setErrorCategoria("Debes seleccionar una opción");
     }    
   }
 
@@ -349,40 +367,41 @@ export default function HomeStudent() {
             </View>
             <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Qué señas deseas repasar?</ThemedText>
             <DropDownPicker
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
+              open={openTipoSenia}
+              value={valueTipoSenia}
+              items={tipoSenia}
+              setOpen={setOpenTipoSenia}
+              setValue={setValueTipoSenia}
+              setItems={setTipoSenia}
               placeholder={'Elige una opción'}
               placeholderStyle={{color:"#888"}}
               style={styles.input}
             />
-            {error ? <ThemedText type='error' style={{maxWidth: "80%"}}>{error}</ThemedText> : null}
+            {errorTipoSenia ? <ThemedText type='error' style={{maxWidth: "80%"}}>{errorTipoSenia}</ThemedText> : null}
             <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
               <TouchableOpacity style={[styles.filtros,
-              practica ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
-                onPress={()=>setPractica(true)}>
+              porCate ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
+                onPress={()=>setPorCate(true)}>
                 <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Por categoría</ThemedText>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.filtros,{backgroundColor: practica ? "lightgray":paleta.turquesa}]} 
-                onPress={()=>setPractica(false)}>
+              <TouchableOpacity style={[styles.filtros,{backgroundColor: porCate ? "lightgray":paleta.turquesa}]} 
+                onPress={()=>setPorCate(false)}>
                 <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Por módulo</ThemedText>
               </TouchableOpacity>                    
             </View>
-            <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>Selecciona la categoría/módulo</ThemedText>
+            <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>Selecciona {porCate ? "la categoría": "el módulo"} </ThemedText>
             <DropDownPicker
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
+              open={openPorCate}
+              value={valueCate}
+              items={porCate ? categorias : modulos}
+              setOpen={setOpenPorCate}
+              setValue={setValueCate}
+              setItems={setCategorias}
               placeholder={'Elige una opción'}
               placeholderStyle={{color:"#888"}}
               style={styles.input}
             />
+            {errorCategoria ? <ThemedText type='error' style={{maxWidth: "80%"}}>{errorCategoria}</ThemedText> : null}
             <BotonLogin callback={empezarLeccion} textColor={"black"} bckColor={paleta.strong_yellow} text={"Empezar lección"}/>
           </View>
         </SmallPopupModal>
@@ -687,8 +706,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   filtros: {
-    paddingVertical: 18,
-    //paddingHorizontal: 40,
+    paddingVertical: 18,    
     borderRadius: 20,        
     marginHorizontal: 5,
     marginBottom: 15,
