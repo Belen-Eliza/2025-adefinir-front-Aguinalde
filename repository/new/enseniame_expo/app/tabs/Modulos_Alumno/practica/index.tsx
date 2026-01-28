@@ -6,7 +6,7 @@ import { useUserContext } from '@/context/UserContext';
 import {  Senia_Alumno } from '@/components/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
-import { traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas, traer_senias_practica } from '@/conexiones/senia_alumno';
+import { traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas } from '@/conexiones/senia_alumno';
 import { paleta, paleta_colores } from '@/components/colores';
 import { BotonLogin } from '@/components/botones';
 import { estilos } from '@/components/estilos';
@@ -15,8 +15,6 @@ import { ThemedText } from '@/components/ThemedText';
 import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
-import { traer_senias_modulo } from '@/conexiones/senia_alumno';
-import { aprendiendo_dominadas_por_modulo, aprendiendo_por_modulo } from '@/conexiones/practica';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    

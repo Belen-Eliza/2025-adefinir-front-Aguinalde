@@ -15,7 +15,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
-import { traer_senias_practica_x_cate } from '@/conexiones/practica';
+import { aprendiendo_dominadas_practica_x_cate, aprendiendo_practica_x_cate, traer_senias_practica_x_cate } from '@/conexiones/practica';
 
 
 export default  function Practica (){
@@ -43,14 +43,17 @@ export default  function Practica (){
 
     const fetch_senias = async ()=>{
         try {
-            const s=await traer_senias_practica(contexto.user.id);
+            let s: Senia_Alumno[] =[];
+                  
+            if (opcion=="2") s = await  aprendiendo_practica_x_cate(contexto.user.id,Number(id))
+            else if (opcion=="3") s = await aprendiendo_dominadas_practica_x_cate(contexto.user.id,Number(id));
+            else s = await traer_senias_practica_x_cate(contexto.user.id,Number(id));
+            
             //elegir 5 para la práctica
             const muestra =s.slice(0,5);
             setSenias(muestra);
             setSeniaActual(muestra[0]);   
             
-            let aux = await traer_senias_practica_x_cate(contexto.user.id,Number(id));
-            console.log(aux)
         } catch (error) {
             console.error(error);
             contexto.user.goHome();
