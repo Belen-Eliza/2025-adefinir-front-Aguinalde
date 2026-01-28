@@ -151,5 +151,5 @@ const getEstadoSync = (id_senia:number,senias: {id_senia:number,aprendida:boolea
 }
 
 
-export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado,traer_senias_modulo,
+export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado,traer_senias_modulo,getEstadoSync,
     traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas}

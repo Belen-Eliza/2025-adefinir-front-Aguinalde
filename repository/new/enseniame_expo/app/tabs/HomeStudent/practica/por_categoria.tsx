@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/context/UserContext';
 import {  Senia_Alumno } from '@/components/types';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
 import { traer_senias_practica } from '@/conexiones/senia_alumno';
 import { paleta, paleta_colores } from '@/components/colores';
@@ -15,10 +15,13 @@ import { ThemedText } from '@/components/ThemedText';
 import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
+import { traer_senias_practica_x_cate } from '@/conexiones/practica';
 
 
 export default  function Practica (){
     const contexto = useUserContext();
+    const { id=0, opcion=0 } = useLocalSearchParams<{ id: string, opcion: string }>();
+    if (id==0 || opcion==0) router.back();
 
     const [senias,setSenias]= useState<Senia_Alumno[]>([]);
     const [senia_actual,setSeniaActual] = useState<Senia_Alumno>();
@@ -44,7 +47,10 @@ export default  function Practica (){
             //elegir 5 para la práctica
             const muestra =s.slice(0,5);
             setSenias(muestra);
-            setSeniaActual(muestra[0]);            
+            setSeniaActual(muestra[0]);   
+            
+            let aux = await traer_senias_practica_x_cate(contexto.user.id,Number(id));
+            console.log(aux)
         } catch (error) {
             console.error(error);
             contexto.user.goHome();
