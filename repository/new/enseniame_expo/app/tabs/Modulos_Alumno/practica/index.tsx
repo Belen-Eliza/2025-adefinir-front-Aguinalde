@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback,  } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Modal, TouchableOpacity } from "react-native";
+import React, { useState,  useCallback,  } from 'react';
+import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/context/UserContext';
@@ -10,12 +10,12 @@ import { traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_le
 import { paleta, paleta_colores } from '@/components/colores';
 import { BotonLogin } from '@/components/botones';
 import { estilos } from '@/components/estilos';
-import VideoPlayer from '@/components/VideoPlayer';
 import { ThemedText } from '@/components/ThemedText';
 import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
 import { shuffleArray } from '@/components/validaciones';
+import { FlashCardVideo } from '@/components/practica_lecciones';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -109,22 +109,9 @@ export default  function Practica (){
                 <Text style={styles.backBtnText}>Volver</Text>
             </Pressable>
 
-            <View style={[styles.bck_content,estilos.centrado]}>                
-                {senia_actual && 
-                    <View style={estilos.centrado}>
-                        <ThemedText style={[styles.title]}>Identificar el significado de la seña</ThemedText>
-                        <View style={[styles.card,paleta_colores.dark_aqua,{width:"95%"}]}>
-                        
-                        <VideoPlayer 
-                        uri={senia_actual.senia.info.video_url}
-                        style={styles.video}
-                        />
-                        <BotonLogin callback={()=>setMostrarRes(true)} 
-                            textColor={'white'} bckColor={paleta.blue} text={'Ver respuesta'}    />
-                        </View>
-                    </View>
-                }                           
-            </View>
+            {senia_actual && (<FlashCardVideo senia_actual={senia_actual?.senia} setMostrarRes={setMostrarRes}/>)}
+
+                                        
             <Modal animationType="slide"
                 transparent={true}
                 visible={mostrar_res}
@@ -231,12 +218,7 @@ const styles = StyleSheet.create({
     color: '#20bfa9',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  bck_content:{
-    width: "100%",
-    backgroundColor: "#ffffffff",
-    height: "85%"
-  },
+  },  
   video: {
     width: '95%',
     aspectRatio: 16/9,
