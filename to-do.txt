@@ -23,7 +23,7 @@ Home:
 Práctica:
 * Implementar mostrar nombre y tiene que recordar la seña
 * Mejorar diseño
-* Mezclar las señas para que no siempre toquen las mismas en el mismo orden
+* Mezclar las señas para que no siempre toquen las mismas en el mismo orden -- Done!!
 
 API!!
 

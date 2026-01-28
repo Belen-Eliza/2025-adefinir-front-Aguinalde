@@ -15,6 +15,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
+import { shuffleArray } from '@/components/validaciones';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -53,6 +54,9 @@ export default  function Practica (){
             if (opcion=="2") s = await  traer_senias_leccion_aprendiendo(contexto.user.id,Number(id))
             else if (opcion=="3") s = await traer_senias_leccion_aprendiendo_dominadas(contexto.user.id,Number(id));
             else s = await traer_senias_leccion(contexto.user.id,Number(id));
+
+            shuffleArray(s);
+
             const muestra =s.slice(0,5);
             setSenias(muestra);
             setSeniaActual(muestra[0]);            

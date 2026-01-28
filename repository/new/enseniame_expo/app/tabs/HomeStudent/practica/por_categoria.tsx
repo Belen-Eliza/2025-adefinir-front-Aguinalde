@@ -16,6 +16,7 @@ import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
 import { aprendiendo_dominadas_practica_x_cate, aprendiendo_practica_x_cate, traer_senias_practica_x_cate } from '@/conexiones/practica';
+import { shuffleArray } from '@/components/validaciones';
 
 
 export default  function Practica (){
@@ -48,6 +49,8 @@ export default  function Practica (){
             if (opcion=="2") s = await  aprendiendo_practica_x_cate(contexto.user.id,Number(id))
             else if (opcion=="3") s = await aprendiendo_dominadas_practica_x_cate(contexto.user.id,Number(id));
             else s = await traer_senias_practica_x_cate(contexto.user.id,Number(id));
+            
+            shuffleArray(s);            
             
             //elegir 5 para la práctica
             const muestra =s.slice(0,5);
