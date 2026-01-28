@@ -14,7 +14,8 @@ export default function Layout(){
           }}>
             <Stack.Screen name='index' options={{headerShown:false}}/>
             <Stack.Screen name='alumno_objetivos' options={{headerShown:false , presentation: "modal"}}   />
-            <Stack.Screen name='practica' options={{headerShown:false}}/>            
+            <Stack.Screen name='practica' options={{headerShown:false}}/>   
+            <Stack.Screen name='lecciones' options={{headerShown:false}}/>            
             
     </Stack>)
 }

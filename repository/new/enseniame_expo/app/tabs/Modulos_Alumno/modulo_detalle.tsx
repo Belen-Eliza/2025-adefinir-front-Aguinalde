@@ -21,8 +21,6 @@ import { get_antiguedad } from "@/components/validaciones";
 import { AntDesign } from "@expo/vector-icons";
 import {  traer_senias_modulo } from "@/conexiones/senia_alumno";
 import { BotonLogin } from "@/components/botones";
-import { aprendiendo_por_modulo } from "@/conexiones/practica";
-
 
 type Senia_Modulo ={
   senia: Senia_Alumno;    
@@ -165,8 +163,7 @@ export default function ModuloDetalleScreen() {
   };
 
   const empezarLeccion = ()=>{
-    if (value!=undefined) {
-      aprendiendo_por_modulo(contexto.user.id,modulo?.id || 1)
+    if (value!=undefined) {      
       setShowLeccion(false);
       if (practica){
         router.push({ pathname: '/tabs/Modulos_Alumno/practica', params: { id: modulo?.id, opcion: value } })

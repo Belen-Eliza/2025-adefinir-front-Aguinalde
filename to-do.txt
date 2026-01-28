@@ -11,14 +11,14 @@ Modulos:
         
 Home:
 * En "Practicar ahora" mostrar opciones:
-        -Teoría
-        -Práctica
+        -Teoría -- Done!!
+        -Práctica  -- Done!!
      
-        + sólo aprendiendo
-        + aprendiendo y dominadas
+        + sólo aprendiendo -- Done!!
+        + aprendiendo y dominadas -- Done!!
 
-        ♥ por categoría (seleccionar)
-        ♥ por módulo (seleccionar)
+        ♥ por categoría (seleccionar) -- Done!!
+        ♥ por módulo (seleccionar) -- Done!!
 
 Práctica:
 * Implementar mostrar nombre y tiene que recordar la seña

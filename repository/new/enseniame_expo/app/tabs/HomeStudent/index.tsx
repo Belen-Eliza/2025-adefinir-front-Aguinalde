@@ -184,8 +184,20 @@ export default function HomeStudent() {
   const empezarLeccion = ()=>{
     if (valueTipoSenia!=undefined && valueCate!=undefined) {      
       setShowLeccion(false);      
-      if (porCate) router.push({ pathname: '/tabs/HomeStudent/practica/por_categoria', params: { id: valueCate ,opcion: valueTipoSenia } });
-      else router.push({ pathname: '/tabs/HomeStudent/practica/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } });
+      if (porCate) {
+        if (practica) {
+           router.push({ pathname: '/tabs/HomeStudent/practica/por_categoria', params: { id: valueCate ,opcion: valueTipoSenia } });
+        } else {
+          router.push({ pathname: '/tabs/HomeStudent/lecciones/por_categoria', params: { id: valueCate ,opcion: valueTipoSenia } })
+        }
+      }
+      else{
+        if (practica) {
+           router.push({ pathname: '/tabs/HomeStudent/practica/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } });
+        } else {
+          router.push({ pathname: '/tabs/HomeStudent/lecciones/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } })
+        }         
+      }
       setErrorTipoSenia("");
       setErrorCategoria("");
       
@@ -352,7 +364,7 @@ export default function HomeStudent() {
         </Modal>
          <SmallPopupModal title={"Lección"} modalVisible={showModalLeccion} setVisible={setShowLeccion}>          
           <View>
-            {/* <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
+            <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
               <TouchableOpacity style={[styles.filtros,
               practica ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
                 onPress={()=>setPractica(true)}>
@@ -362,7 +374,7 @@ export default function HomeStudent() {
                 onPress={()=>setPractica(false)}>
                 <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Teoría</ThemedText>
               </TouchableOpacity>                    
-            </View> */}
+            </View>
             <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Qué señas deseas repasar?</ThemedText>
             <DropDownPicker
               open={openTipoSenia}

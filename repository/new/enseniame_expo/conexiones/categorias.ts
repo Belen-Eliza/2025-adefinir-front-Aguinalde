@@ -17,4 +17,16 @@ const traerCategorias = async () =>{
     return data
 }
 
-export {crearNuevaCategoria, traerCategorias}
+const buscarCategoria = async (id_cate:number) => {
+    
+    let { data: Categorias, error } = await supabase
+        .from('Categorias')
+        .select('*')
+        .eq("id",id_cate)
+        .maybeSingle();
+    if (error) throw error
+    
+    return Categorias
+}
+
+export {crearNuevaCategoria, traerCategorias, buscarCategoria}

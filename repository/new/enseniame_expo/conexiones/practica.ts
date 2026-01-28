@@ -3,6 +3,12 @@ import { Estado_Aprendiendo, Estado_Dominada, Estado_Pendiente, Senia_Alumno } f
 import { senias_alumno } from './aprendidas';
 import { getEstadoSync } from './senia_alumno';
 
+type Senia_Leccion ={
+  senia: Senia_Alumno;    
+  descripcion?: string;
+  aprendiendo: boolean;
+}
+
 const todas_por_modulo = async (id_alumno:number, id_modulo:number) =>{
     let res: Senia_Alumno[] = [];
 
@@ -80,4 +86,53 @@ const aprendiendo_dominadas_practica_x_cate = async (id_alumno:number,id_cate:nu
     })
     return res
 }
-export { todas_por_modulo, traer_senias_practica_x_cate, aprendiendo_practica_x_cate, aprendiendo_dominadas_practica_x_cate}
+
+const traer_senias_leccion_x_cate = async (id_alumno:number,id_categoria:number) => {
+    let { data: senias_cate, error } = await supabase
+        .from('Senias')
+        .select('*, Profesores(*,Users(*)),  Categorias (nombre)')
+        .eq("categoria",id_categoria);
+    if (error) throw error
+    const senias_al = await senias_alumno(id_alumno);    
+    let res: Senia_Leccion[] = [];
+    senias_cate?.forEach(s=>{
+        let estado = getEstadoSync(s.id,senias_al);
+        let senia = new Senia_Alumno(s,estado);
+        res.push({senia:senia,descripcion:s.descripcion,aprendiendo:estado.esta_aprendiendo()})
+    })
+    return res
+}
+const aprendiendo_leccion_x_cate = async (id_alumno:number,id_categoria:number) => {
+    let { data: senias_cate, error } = await supabase
+        .from('Senias')
+        .select('*, Profesores(*,Users(*)),  Categorias (nombre)')
+        .eq("categoria",id_categoria);
+    if (error) throw error
+    const senias_al = await senias_alumno(id_alumno);    
+    let res: Senia_Leccion[] = [];
+    senias_cate?.forEach(s=>{
+        let estado = getEstadoSync(s.id,senias_al);
+        let senia = new Senia_Alumno(s,estado);
+        if (estado.esta_aprendiendo())   res.push({senia:senia,descripcion:s.descripcion,aprendiendo:estado.esta_aprendiendo()})
+    })
+    return res
+}
+
+const aprendiendo_dominadas_leccion_x_cate = async (id_alumno:number,id_categoria:number) => {
+    let { data: senias_cate, error } = await supabase
+        .from('Senias')
+        .select('*, Profesores(*,Users(*)),  Categorias (nombre)')
+        .eq("categoria",id_categoria);
+    if (error) throw error
+    const senias_al = await senias_alumno(id_alumno);    
+    let res: Senia_Leccion[] = [];
+    senias_cate?.forEach(s=>{
+        let estado = getEstadoSync(s.id,senias_al);
+        let senia = new Senia_Alumno(s,estado);
+        if (estado.toString()!="Pendiente")   res.push({senia:senia,descripcion:s.descripcion,aprendiendo:estado.esta_aprendiendo()})
+    })
+    return res
+}
+export { todas_por_modulo, traer_senias_practica_x_cate, aprendiendo_practica_x_cate, aprendiendo_dominadas_practica_x_cate,
+    traer_senias_leccion_x_cate, aprendiendo_leccion_x_cate, aprendiendo_dominadas_leccion_x_cate
+}
