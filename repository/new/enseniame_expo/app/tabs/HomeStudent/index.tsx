@@ -28,6 +28,8 @@ import { ganar_insignia_racha } from '@/conexiones/insignias';
 import { XPCard } from '@/components/cards';
 import type { Mission } from '@/conexiones/misiones';
 import { miNivel } from '@/conexiones/xp';
+import { SmallPopupModal } from '@/components/modals';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -51,6 +53,13 @@ export default function HomeStudent() {
   const [desbloqueado,setDesbloqueado] = useState(false);
   const [streakPopTrigger, setStreakPopTrigger] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  const [showModalLeccion,setShowLeccion]= useState(false);
+  const [practica,setPractica] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState<{value:number,label:string}[]>([{value:1,label:"Todas"},{value:2,label:"Sólo aprendiendo"},{value:3,label:"Aprendiendo y dominadas"}]);
+  const [error,setError] = useState("");
 
   useFocusEffect(
       useCallback(() => {
@@ -155,6 +164,21 @@ export default function HomeStudent() {
     setUser(prev => ({ ...prev, level: level?.nivel || 0 }));
   }
 
+  const empezarLeccion = ()=>{
+    if (value!=undefined) {      
+      setShowLeccion(false);
+      setError("");
+      if (practica){
+        //router.push({ pathname: '/tabs/Modulos_Alumno/practica', params: { id: modulo?.id, opcion: value } })
+      } else {
+        //router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id , opcion: value } })
+      }
+      
+    } else {
+      setError("Debes seleccionar una opción");
+    }    
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -195,7 +219,7 @@ export default function HomeStudent() {
           </View>
         </View>
         
-        <AnimatedButton title="Practicar ahora" onPress={() => router.push('/tabs/HomeStudent/practica')} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
+        <AnimatedButton title="Practicar ahora" onPress={() => setShowLeccion(true)} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
 
         <View style={styles.shortcutsRow}>
           <Pressable style={styles.shortcutCardCursos} onPress={() => router.push('/tabs/leaderboard_grupo')}>
@@ -310,6 +334,58 @@ export default function HomeStudent() {
             </View>
           </View>
         </Modal>
+         <SmallPopupModal title={"Lección"} modalVisible={showModalLeccion} setVisible={setShowLeccion}>          
+          <View>
+            <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
+              <TouchableOpacity style={[styles.filtros,
+              practica ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
+                onPress={()=>setPractica(true)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Práctica</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.filtros,{backgroundColor: practica ? "lightgray":paleta.turquesa}]} 
+                onPress={()=>setPractica(false)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Teoría</ThemedText>
+              </TouchableOpacity>                    
+            </View>
+            <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Qué señas deseas repasar?</ThemedText>
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              placeholder={'Elige una opción'}
+              placeholderStyle={{color:"#888"}}
+              style={styles.input}
+            />
+            {error ? <ThemedText type='error' style={{maxWidth: "80%"}}>{error}</ThemedText> : null}
+            <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
+              <TouchableOpacity style={[styles.filtros,
+              practica ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
+                onPress={()=>setPractica(true)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Por categoría</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.filtros,{backgroundColor: practica ? "lightgray":paleta.turquesa}]} 
+                onPress={()=>setPractica(false)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Por módulo</ThemedText>
+              </TouchableOpacity>                    
+            </View>
+            <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>Selecciona la categoría/módulo</ThemedText>
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              placeholder={'Elige una opción'}
+              placeholderStyle={{color:"#888"}}
+              style={styles.input}
+            />
+            <BotonLogin callback={empezarLeccion} textColor={"black"} bckColor={paleta.strong_yellow} text={"Empezar lección"}/>
+          </View>
+        </SmallPopupModal>
   {showConfetti && <ConfettiBurst visible={showConfetti} onDone={() => setShowConfetti(false)} />}
   <Toast/>
     </View>
@@ -601,7 +677,32 @@ const styles = StyleSheet.create({
   seeAllLink: {
     color:'#0a7ea4',
     fontWeight:'600'
-  }
+  },
+  label: {
+    fontSize: 16,
+    color: paleta.dark_aqua,
+    fontWeight: '600',
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+    textAlign: 'center',
+  },
+  filtros: {
+    paddingVertical: 18,
+    //paddingHorizontal: 40,
+    borderRadius: 20,        
+    marginHorizontal: 5,
+    marginBottom: 15,
+    width: 150,
+    textAlign:"center"
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 25,
+  },
 });
 
 // Subcomponente para preview de misiones diarias

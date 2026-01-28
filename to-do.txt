@@ -3,12 +3,12 @@ Dashboard:
 
 Modulos:
 * En "Empezar lección" mostrar opciones:
-        -Teoría: lecciones normales
-        -Práctica: señas del módulo
+        -Teoría: lecciones normales -- Done!!
+        -Práctica: señas del módulo -- Done!!
                 + todas (marcar pendientes como aprendiendo?)
                 + sólo aprendiendo
                 + aprendiendo y dominadas
-
+        
 Home:
 * En "Practicar ahora" mostrar opciones:
         -Teoría

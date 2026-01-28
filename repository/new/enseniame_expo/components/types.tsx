@@ -153,8 +153,7 @@ class Logged_Alumno extends Logged_User {
     }
     sumarRacha(){
         this.racha++;
-        this.last_login= new Date();    
-        console.log(this.getLastLogin())
+        this.last_login= new Date();            
     };
     perderRacha(){
         this.racha=1;

@@ -44,8 +44,7 @@ export default function ModuloDetalleScreen() {
   if (id==0) router.back();
   const [modulo,setModulo] = useState<Modulo | undefined>();
   const [completado,setCompletado] =useState(false);
-  const [senias,setSenias] = useState<Senia_Modulo[]>();  
-  const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({});
+  const [senias,setSenias] = useState<Senia_Modulo[]>();    
   const [calificaciones_modulo,setCalificacionesModulo] = useState<Calificaciones[]>()
 
   const [loading, setLoading] = useState(true);
@@ -70,8 +69,7 @@ export default function ModuloDetalleScreen() {
    useFocusEffect(
       useCallback(() => {
         fetch_modulo();
-        fetch_senias();
-        fetch_aprendidas();
+        fetch_senias();        
         verificarCalificacion();
         return () => {};
       }, [])
@@ -113,23 +111,7 @@ export default function ModuloDetalleScreen() {
       setLoading(false)
     }
     
-  }
-  const fetch_aprendidas = async () => {
-    try {
-      if (!contexto.user?.id) return;
-      const data = await senias_aprendidas_alumno(contexto.user.id)
-      const map: Record<number, boolean> = {};
-      (data || []).forEach((row: any) => {
-        map[Number(row.senia_id)] = !!row.aprendida;
-      });
-      setAprendidasMap(map);
-      setLoading(false);
-    } catch (e) {
-      // Si no existe la tabla o hay error, seguimos sin bloquear la vista
-      console.warn('[modulo_detalle] No se pudo cargar Aprendidas:', (e as any)?.message);
-    }
-  }
-
+  }  
 
   const toggle_visualizada = async (item: Senia_Modulo)=>{
     setSelectedSenia(item);
@@ -384,9 +366,7 @@ export default function ModuloDetalleScreen() {
             }
         </SmallPopupModal>
 
-        <SmallPopupModal title={"Lección"} modalVisible={showModalLeccion} setVisible={setShowLeccion}>
-
-          
+        <SmallPopupModal title={"Lección"} modalVisible={showModalLeccion} setVisible={setShowLeccion}>          
           <View>
             <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
               <TouchableOpacity style={[styles.filtros,
