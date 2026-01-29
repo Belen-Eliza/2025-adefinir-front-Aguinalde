@@ -16,6 +16,7 @@ import { estilos } from "@/components/estilos";
 import { traer_senias_leccion,traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas } from "@/conexiones/senia_alumno";
 import { aprendiendo_dominadas_leccion_x_cate, aprendiendo_leccion_x_cate, traer_senias_leccion_x_cate } from "@/conexiones/practica";
 import { buscarCategoria } from "@/conexiones/categorias";
+import { ProgressBarAnimada } from "@/components/animations/ProgressBarAnimada";
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -134,6 +135,11 @@ export default function Leccion (){
           <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
           <Text style={styles.backBtnText}>Volver</Text>
           </Pressable>
+
+          <View style={[styles.progressBarRow,estilos.centrado]}>
+            <ProgressBarAnimada progress={(currentIndex+1)/senias.length*100} />   
+            <ThemedText style={{marginLeft:6}}>{currentIndex+1}/{senias.length}</ThemedText>
+          </View> 
             <View style={[styles.bck_content,estilos.centrado]}>
               
               <View>
@@ -312,4 +318,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width:"100%"
   },
+   progressBarRow:{
+    flexDirection:"row",
+    width:"85%",
+    justifyContent:"space-between",
+    marginBottom:25
+  }
 });

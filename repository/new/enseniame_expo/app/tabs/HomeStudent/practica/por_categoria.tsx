@@ -238,11 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  bck_content:{
-    width: "100%",
-    backgroundColor: "#ffffffff",
-    height: "85%"
-  },
+  
   video: {
     width: '95%',
     aspectRatio: 16/9,

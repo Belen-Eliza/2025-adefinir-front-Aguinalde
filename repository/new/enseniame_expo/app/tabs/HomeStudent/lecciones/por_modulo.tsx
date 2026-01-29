@@ -14,6 +14,7 @@ import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
 import { estilos } from "@/components/estilos";
 import { traer_senias_leccion,traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas } from "@/conexiones/senia_alumno";
+import { ProgressBarAnimada } from "@/components/animations/ProgressBarAnimada";
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -127,11 +128,16 @@ export default function Leccion (){
         <View style={styles.container}>
           <Pressable
               style={[styles.backBtn, { marginBottom: 10, marginTop:30, flexDirection: 'row', alignItems: 'center' }]}
-              onPress={() => { router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } }) }} 
+              onPress={() => { router.back() }} 
           >
           <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
           <Text style={styles.backBtnText}>Volver</Text>
           </Pressable>
+
+          <View style={[styles.progressBarRow,estilos.centrado]}>
+            <ProgressBarAnimada progress={(currentIndex+1)/senias.length*100} />   
+            <ThemedText style={{marginLeft:6}}>{currentIndex+1}/{senias.length}</ThemedText>
+          </View> 
             <View style={[styles.bck_content,estilos.centrado]}>
               
               <View>
@@ -201,7 +207,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bck_content:{
-    width: "90%",
+    width: "95%",
     backgroundColor: "#ffffffff",
     height: "85%"
   },
@@ -314,4 +320,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width:"100%"
   },
+  progressBarRow:{
+    flexDirection:"row",
+    width:"85%",
+    justifyContent:"space-between",
+    marginBottom:25
+  }
 });

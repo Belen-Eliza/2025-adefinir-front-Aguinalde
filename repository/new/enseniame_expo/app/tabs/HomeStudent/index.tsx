@@ -200,6 +200,8 @@ export default function HomeStudent() {
       }
       setErrorTipoSenia("");
       setErrorCategoria("");
+      setValueCate(null);
+      setValueTipoSenia(null);
       
     } else {
       if (!valueTipoSenia) setErrorTipoSenia("Debes seleccionar una opción");
