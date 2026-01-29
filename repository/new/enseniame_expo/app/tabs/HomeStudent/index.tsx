@@ -22,7 +22,7 @@ import { estilos } from '@/components/estilos';
 import { useDailyMissions } from '@/hooks/useDailyMissions';
 import { MissionCard } from '@/components/missions/MissionCard';
 import {  nuevo_avatar_desbloqueado } from '@/conexiones/avatars';
-import { Avatar } from '@/components/types';
+import { Avatar, Insignia } from '@/components/types';
 import { ThemedText } from '@/components/ThemedText';
 import { ganar_insignia_racha } from '@/conexiones/insignias';
 import { XPCard } from '@/components/cards';
@@ -69,6 +69,9 @@ export default function HomeStudent() {
   const [categorias, setCategorias] = useState<{value:number,label:string}[]>([]);
   const [modulos, setModulos] = useState<{value:number,label:string}[]>([]);
   const [errorCategoria,setErrorCategoria] = useState("");
+
+  const [showModalInsignia,setShowInsignia] =useState(false);
+  const [insignia,setI]= useState<Insignia>({id:0,nombre:"",descripcion:"",image_url:"",motivo:1,ganada:true});
 
   useFocusEffect(
       useCallback(() => {
@@ -340,7 +343,7 @@ export default function HomeStudent() {
         </Modal>
         <SuccessModal visible={false} title="¡Excelente!" subtitle="Acción completada" onClose={() => {}} />
 
-        {/* Modal de desbloaquear un nuevo avatar */}
+        {/* Modal de desbloquear un nuevo avatar */}
         <Modal
           visible={showModalAvatar}
           animationType="fade"

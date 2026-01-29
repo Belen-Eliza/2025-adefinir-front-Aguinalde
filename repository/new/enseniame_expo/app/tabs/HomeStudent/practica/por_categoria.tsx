@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable,  Modal, TouchableOpacity } from "rea
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/context/UserContext';
-import {  Modulo, Senia_Alumno } from '@/components/types';
+import {  Insignia, Modulo, Senia_Alumno } from '@/components/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
 import { paleta, paleta_colores } from '@/components/colores';
@@ -18,6 +18,8 @@ import { shuffleArray } from '@/components/validaciones';
 import { FlashCardVideo } from '@/components/practica_lecciones';
 import { buscar_modulo } from '@/conexiones/modulos';
 import { buscarCategoria } from '@/conexiones/categorias';
+import { ModalInsignia } from '@/components/modals';
+import { buscar_insignia, ganar_insignia_modulo, ganar_insignia_senia } from '@/conexiones/insignias';
 
 
 export default  function Practica (){
@@ -34,6 +36,9 @@ export default  function Practica (){
 
     const [terminado,setTerminado] = useState(false);
     const [cant_correctas,setCorrectas] = useState(0);
+
+    const [showModalInsignia,setShowInsignia] =useState(false);
+    const [insignia,setI]= useState<Insignia>({id:0,nombre:"",descripcion:"",image_url:"",motivo:1,ganada:true});
     
     const fracaso =require("../../../../assets/images/disappointedBeetle.gif");
     const festejo =require("../../../../assets/images/beetle_celebration.gif");
@@ -102,10 +107,18 @@ export default  function Practica (){
         }  else {
             //terminar
             setMostrarRes(false);
-            setTerminado(true); 
+            //setTerminado(true); 
             try {
                 await awardXPClient(contexto.user.id,cant_correctas*2);
-                contexto.actualizar_info(contexto.user.id)
+                contexto.actualizar_info(contexto.user.id);
+
+                await ganar_insignia_senia(contexto.user.id);
+                await ganar_insignia_modulo(contexto.user.id);
+
+                /* //debug
+                const i = await buscar_insignia(1);
+                setShowInsignia(true);
+                setI(i); */
             } catch (error) {
                 error_alert("Ocurrió un error al guardar tu progreso");
                 console.error(error)
@@ -214,6 +227,7 @@ export default  function Practica (){
             </View>
           </View>
         </Modal>
+        <ModalInsignia modalVisible={showModalInsignia} setVisible={setShowInsignia} insignia={insignia} cerrar={()=>{setShowInsignia(false),setTerminado(true)}} />
             <Toast/>
         </View>
     )
