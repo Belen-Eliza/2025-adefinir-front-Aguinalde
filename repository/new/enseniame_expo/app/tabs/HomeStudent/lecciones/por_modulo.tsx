@@ -95,7 +95,7 @@ export default function Leccion (){
       else {
         //terminar lección                   
         try {                 
-          router.navigate({ pathname: '/tabs/Modulos_Alumno/lecciones/completado', params: { id: id } })        
+          router.navigate({ pathname: '/tabs/HomeStudent/lecciones/completado', params: { id: id } })        
         } catch (error) {
           console.error(error);
           router.back()
@@ -207,9 +207,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bck_content:{
-    width: "95%",
+    width: "98%",
     backgroundColor: "#ffffffff",
-    height: "85%"
+    height: "85%",   
+    paddingBottom: 60 
   },
   title: {
     fontSize: 26,

@@ -1,7 +1,7 @@
 import { supabase } from '../utils/supabase'
 import { Estado_Aprendiendo, Estado_Dominada, Estado_Pendiente, Senia_Alumno } from '@/components/types';
 import { senias_alumno } from './aprendidas';
-import { getEstadoSync } from './senia_alumno';
+import { getEstadoSync, traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas } from './senia_alumno';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -133,6 +133,22 @@ const aprendiendo_dominadas_leccion_x_cate = async (id_alumno:number,id_categori
     })
     return res
 }
+
+const hay_senias_practica = async (id_alumno:number, por_categoria:boolean,opcion:number,id_cate_modulo:number) => {
+    let s: any[] =[];    
+
+    if (por_categoria){
+        if (opcion==2) s = await  aprendiendo_practica_x_cate(id_alumno,id_cate_modulo)
+        else if (opcion==3) s = await aprendiendo_dominadas_practica_x_cate(id_alumno,id_cate_modulo);
+        else s= await traer_senias_practica_x_cate(id_alumno,id_cate_modulo);
+    } else {
+        if (opcion==2) s = await  traer_senias_leccion_aprendiendo(id_alumno,id_cate_modulo)
+        else if (opcion==3) s = await traer_senias_leccion_aprendiendo_dominadas(id_alumno,id_cate_modulo);
+        else s= await traer_senias_leccion(id_alumno,id_cate_modulo);
+    }
+
+    return s.length!=0
+}
 export { todas_por_modulo, traer_senias_practica_x_cate, aprendiendo_practica_x_cate, aprendiendo_dominadas_practica_x_cate,
-    traer_senias_leccion_x_cate, aprendiendo_leccion_x_cate, aprendiendo_dominadas_leccion_x_cate
+    traer_senias_leccion_x_cate, aprendiendo_leccion_x_cate, aprendiendo_dominadas_leccion_x_cate, hay_senias_practica
 }

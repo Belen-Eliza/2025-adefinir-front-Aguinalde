@@ -22,7 +22,7 @@ import { estilos } from '@/components/estilos';
 import { useDailyMissions } from '@/hooks/useDailyMissions';
 import { MissionCard } from '@/components/missions/MissionCard';
 import {  nuevo_avatar_desbloqueado } from '@/conexiones/avatars';
-import { Avatar, Insignia } from '@/components/types';
+import { Avatar, Insignia, Senia_Alumno } from '@/components/types';
 import { ThemedText } from '@/components/ThemedText';
 import { ganar_insignia_racha } from '@/conexiones/insignias';
 import { XPCard } from '@/components/cards';
@@ -32,6 +32,7 @@ import { SmallPopupModal } from '@/components/modals';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { traerCategorias } from '@/conexiones/categorias';
 import { Label } from '@react-navigation/elements';
+import { aprendiendo_dominadas_practica_x_cate, aprendiendo_practica_x_cate, hay_senias_practica } from '@/conexiones/practica';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -184,27 +185,41 @@ export default function HomeStudent() {
     setModulos(itemsM || []);
   }
 
-  const empezarLeccion = ()=>{
+  const empezarLeccion = async ()=>{
     if (valueTipoSenia!=undefined && valueCate!=undefined) {      
-      setShowLeccion(false);      
+           
+      let path:  '/tabs/HomeStudent/practica/por_categoria' | '/tabs/HomeStudent/lecciones/por_categoria' 
+          | '/tabs/HomeStudent/practica/por_modulo' | '/tabs/HomeStudent/lecciones/por_modulo';
+      
       if (porCate) {
         if (practica) {
-           router.push({ pathname: '/tabs/HomeStudent/practica/por_categoria', params: { id: valueCate ,opcion: valueTipoSenia } });
+          path ='/tabs/HomeStudent/practica/por_categoria';                                       
+           //router.push({ pathname:path , params: { id: valueCate ,opcion: valueTipoSenia } });
         } else {
-          router.push({ pathname: '/tabs/HomeStudent/lecciones/por_categoria', params: { id: valueCate ,opcion: valueTipoSenia } })
+          path= '/tabs/HomeStudent/lecciones/por_categoria';
+          //router.push({ pathname: '/tabs/HomeStudent/lecciones/por_categoria', params: { id: valueCate ,opcion: valueTipoSenia } })
         }
       }
       else{
         if (practica) {
-           router.push({ pathname: '/tabs/HomeStudent/practica/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } });
+          path= '/tabs/HomeStudent/practica/por_modulo';
+           //router.push({ pathname: '/tabs/HomeStudent/practica/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } });
         } else {
-          router.push({ pathname: '/tabs/HomeStudent/lecciones/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } })
+          path='/tabs/HomeStudent/lecciones/por_modulo';
+          //router.push({ pathname: '/tabs/HomeStudent/lecciones/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } })
         }         
       }
-      setErrorTipoSenia("");
-      setErrorCategoria("");
-      setValueCate(null);
-      setValueTipoSenia(null);
+
+      if (await hay_senias_practica(contexto.user.id,porCate,valueTipoSenia,valueCate)) {
+        setShowLeccion(false);
+        router.push({ pathname:path , params: { id: valueCate ,opcion: valueTipoSenia } });
+        setErrorTipoSenia("");
+        setErrorCategoria("");
+        setValueCate(null);
+        setValueTipoSenia(null);        
+      } else{
+        setErrorTipoSenia("No hay señas que cumplan las condiciones");
+      }      
       
     } else {
       if (!valueTipoSenia) setErrorTipoSenia("Debes seleccionar una opción");

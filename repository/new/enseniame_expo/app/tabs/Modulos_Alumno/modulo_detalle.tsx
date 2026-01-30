@@ -21,6 +21,7 @@ import { get_antiguedad } from "@/components/validaciones";
 import { AntDesign } from "@expo/vector-icons";
 import {  traer_senias_modulo } from "@/conexiones/senia_alumno";
 import { BotonLogin } from "@/components/botones";
+import { hay_senias_practica } from "@/conexiones/practica";
 
 type Senia_Modulo ={
   senia: Senia_Alumno;    
@@ -162,13 +163,23 @@ export default function ModuloDetalleScreen() {
     }
   };
 
-  const empezarLeccion = ()=>{
+  const empezarLeccion = async ()=>{
     if (value!=undefined) {      
-      setShowLeccion(false);
+      
+      let path : '/tabs/Modulos_Alumno/practica' | '/tabs/Modulos_Alumno/lecciones'
       if (practica){
-        router.push({ pathname: '/tabs/Modulos_Alumno/practica', params: { id: modulo?.id, opcion: value } })
+        path = '/tabs/Modulos_Alumno/practica';
+        //router.push({ pathname: '/tabs/Modulos_Alumno/practica', params: { id: modulo?.id, opcion: value } })
       } else {
-        router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id , opcion: value } })
+        path = '/tabs/Modulos_Alumno/lecciones';
+        //router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id , opcion: value } })
+      }
+
+      if (await hay_senias_practica(contexto.user.id,false,value,modulo?.id || 0)) {
+        setShowLeccion(false);
+        router.push({ pathname: path, params: { id: modulo?.id , opcion: value } })
+      } else {
+        setError("No hay señas que cumplan esas condiciones");
       }
       
     } else {

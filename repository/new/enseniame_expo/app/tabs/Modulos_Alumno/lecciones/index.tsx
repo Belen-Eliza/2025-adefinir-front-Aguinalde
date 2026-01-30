@@ -209,7 +209,8 @@ const styles = StyleSheet.create({
   bck_content:{
     width: "95%",
     backgroundColor: "#ffffffff",
-    height: "85%"
+    height: "85%",
+    paddingBottom: 60
   },
   title: {
     fontSize: 26,
