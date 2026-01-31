@@ -220,5 +220,18 @@ const cuantos_ganaron_insignia = async (id_insignia:number) => {
     return 0
 }
 
+const buscar_insignia = async (id_insignia:number) => {
+    
+    let { data: Insignias, error } = await supabase
+        .from('Insignias')
+        .select('*')
+        .eq("id",id_insignia)
+        .maybeSingle();
+    if (error) throw error
+
+    return Insignias
+          
+}
+
 export {todas_insignias,categorias_insignias,ganar_insignia_senia, mis_insignias_ganadas, ganar_insignia_modulo, ganar_insignia_racha,
-    insignias_por_categoria,buscar_categoria, ganar_insignia_objetivos, mis_insignias, cuantos_ganaron_insignia }
+    insignias_por_categoria,buscar_categoria, ganar_insignia_objetivos, mis_insignias, cuantos_ganaron_insignia, buscar_insignia }

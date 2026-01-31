@@ -111,6 +111,34 @@ const traer_senias_leccion = async (id_alumno:number,id_modulo:number) => {
     return res
 }
 
+const traer_senias_leccion_aprendiendo = async (id_alumno:number,id_modulo:number) => {
+    const senias_modulo = await buscar_senias_modulo(id_modulo);
+    const senias_al = await senias_alumno(id_alumno);    
+    let res: Senia_Leccion[] = [];
+    senias_modulo?.forEach(s=>{
+        let estado = getEstadoSync(s.id_video,senias_al);
+        let senia = new Senia_Alumno(s.Senias,estado);
+        if (estado.esta_aprendiendo()){
+            res.push({senia:senia,descripcion:s.descripcion,aprendiendo:estado.esta_aprendiendo()});
+        }        
+    })
+    return res
+}
+
+const traer_senias_leccion_aprendiendo_dominadas = async (id_alumno:number,id_modulo:number) => {
+    const senias_modulo = await buscar_senias_modulo(id_modulo);
+    const senias_al = await senias_alumno(id_alumno);    
+    let res: Senia_Leccion[] = [];
+    senias_modulo?.forEach(s=>{
+        let estado = getEstadoSync(s.id_video,senias_al);
+        let senia = new Senia_Alumno(s.Senias,estado);
+        if (estado.toString()!="Pendiente"){
+            res.push({senia:senia,descripcion:s.descripcion,aprendiendo:estado.esta_aprendiendo()});
+        }        
+    })
+    return res
+}
+
 const getEstadoSync = (id_senia:number,senias: {id_senia:number,aprendida:boolean,cant_aciertos:number}[])=>{
     let e = new Estado_Pendiente();
     let aux =senias.find(v=>v.id_senia==id_senia);
@@ -123,4 +151,5 @@ const getEstadoSync = (id_senia:number,senias: {id_senia:number,aprendida:boolea
 }
 
 
-export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado,traer_senias_modulo,traer_senias_leccion}
+export {traer_senias_practica, sumar_acierto,marcar_dominada,getEstado,traer_senias_modulo,getEstadoSync,
+    traer_senias_leccion, traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas}

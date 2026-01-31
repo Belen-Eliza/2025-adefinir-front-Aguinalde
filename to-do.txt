@@ -1,29 +1,35 @@
 Dashboard:
-* Mostrar aprendiendo y progreso en cantidad de aciertos 
+* Mostrar aprendiendo y progreso en cantidad de aciertos -- Done!!  
 
 Modulos:
 * En "Empezar lección" mostrar opciones:
-        -Teoría: lecciones normales
-        -Práctica: señas del módulo
+        -Teoría: lecciones normales -- Done!!
+        -Práctica: señas del módulo -- Done!!
                 + todas (marcar pendientes como aprendiendo?)
                 + sólo aprendiendo
                 + aprendiendo y dominadas
-
+        
 Home:
 * En "Practicar ahora" mostrar opciones:
-        -Teoría
-        -Práctica
+        -Teoría -- Done!!
+        -Práctica  -- Done!!
      
-        + sólo aprendiendo
-        + aprendiendo y dominadas
+        + sólo aprendiendo -- Done!!
+        + aprendiendo y dominadas -- Done!!
 
-        ♥ por categoría (seleccionar)
-        ♥ por módulo (seleccionar)
+        ♥ por categoría (seleccionar) -- Done!!
+        ♥ por módulo (seleccionar) -- Done!!
 
 Práctica:
-* Implementar mostrar nombre y tiene que recordar la seña
-* Mejorar diseño
+* Implementar mostrar nombre y tiene que recordar la seña -- Done!!
+* Mejorar diseño -- Done
+* Mezclar las señas para que no siempre toquen las mismas en el mismo orden -- Done!!
+* Ver qué pasa si no hay señas para ofrecer -- Done!!
 
 API!!
 
+Hosting!!
+
 Revisar que se ganen bien todas las insignias
+
+Revisar objetivos

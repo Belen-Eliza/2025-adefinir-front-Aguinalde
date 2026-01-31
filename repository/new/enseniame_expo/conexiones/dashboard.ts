@@ -2,6 +2,7 @@ import { supabase } from '../utils/supabase'
 import { cantidad_aprendidas, senias_aprendidas_reporte } from './aprendidas';
 
 type HistorialRow = { senia_id: number;  updated_at: Date ; categoria: string; senia_nombre: string };
+type AprendiendoRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string, cant_aciertos: number };
 type ProgresoGlobal = {learned:number,total:number};
 type ProgresoPorModulo ={ id: number; nombre: string; total: number; learned: number };
 
@@ -25,7 +26,7 @@ const senias_historial = async (id_alumno:number) => {
 }
 
 const senias_aprendiendo_dash = async (id_alumno:number) => {
-    let res : HistorialRow[]=[]
+    let res : AprendiendoRow[]=[]
     const { data, error } = await supabase
         .from('Alumno_Senia') 
         .select('*, Senias(*,Categorias(*))')
@@ -37,7 +38,7 @@ const senias_aprendiendo_dash = async (id_alumno:number) => {
     if (data && data.length>0){
         res = data.map(senia=>{   
             let date = senia.updated_at ? new Date(senia.updated_at) : new Date()         
-            return {senia_id:senia.id_senia,updated_at:date,categoria:senia.Senias.Categorias.nombre,senia_nombre:senia.Senias.significado}
+            return {senia_id:senia.id_senia,updated_at:date,categoria:senia.Senias.Categorias.nombre,senia_nombre:senia.Senias.significado,cant_aciertos:senia.cant_aciertos}
         })
     }
     return res

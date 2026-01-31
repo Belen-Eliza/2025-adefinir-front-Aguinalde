@@ -18,6 +18,7 @@ import { getRanking } from '@/conexiones/calificaciones';
 import { mi_progreso_global, mi_progreso_x_modulo, senias_aprendiendo_dash, senias_historial } from '@/conexiones/dashboard';
 import { SmallPopupModal } from '@/components/modals';
 import { ProgressBarAnimada } from '@/components/animations/ProgressBarAnimada';
+import { AprendiendoItem } from '@/components/AprendiendoItem';
 
 type DatosRanking ={
     id: number;
@@ -27,6 +28,7 @@ type DatosRanking ={
 }
 
 type HistorialRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string };
+type AprendiendoRow = { senia_id: number; updated_at: Date; categoria: string; senia_nombre: string, cant_aciertos: number };
 type ProgresoGlobal = {learned:number,total:number}
 type ProgresoPorModulo ={ id: number; nombre: string; total: number; learned: number }
 
@@ -45,12 +47,13 @@ export default function DashboardAlumnoScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [historial, setHistorial] = useState<HistorialRow[]>([]);  
-  const [seniasAprendiendo,setAprendiendo] = useState<HistorialRow[]>([]); 
+  const [seniasAprendiendo,setAprendiendo] = useState<AprendiendoRow[]>([]); 
   const [progresoGlobal,setProgresoGlobal] = useState<ProgresoGlobal>({learned:0,total:0});
   const [dataRanking,setDataRanking] = useState<DatosRanking[]>([]);
   const [progresoPorModulo,setProgresoPorModulo]= useState<ProgresoPorModulo[]>([]);
 
-  const [showModal,setShow]=useState(false);
+  const [showModalModulos,setShowModulos]=useState(false);
+  const [showModalAprendiendo,setShowAprendiendo]=useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,11 +73,10 @@ export default function DashboardAlumnoScreen() {
 
   const fetchHistorial = async () => {
     const h = await senias_historial(user.id);    
-    setHistorial(h || []);
+    setHistorial(h || []);    
 
-    /* const a = await senias_aprendiendo_dash(user.id);
-    console.log(a)
-    setAprendiendo(a ); */
+    const a = await senias_aprendiendo_dash(user.id);    
+    setAprendiendo(a);
   }
 
   const fetchProgresoGlobal = async () => {
@@ -138,8 +140,9 @@ export default function DashboardAlumnoScreen() {
   const sections: DashboardSection[] = [
     { title: 'Progreso por módulo', type: 'modules', data: progresoPorModulo.slice(0, 3) },
     { title: 'Señas dominadas recientemente', type: 'history', data: historial.slice(0, 3) },
+    {title: "Señas a dominar", type:"aprendiendo", data: seniasAprendiendo.slice(0,3)},
     {title: "Ranking profesores", type: "ranking", data: dataRanking?.slice(0,3)},
-    {title: "Señas a dominar", type:"aprendiendo", data: seniasAprendiendo}
+    
   ];
 
   return (
@@ -179,7 +182,7 @@ export default function DashboardAlumnoScreen() {
             <>
             <Text style={styles.emptyText}>
               {section.data.length === 0 ? (<Text style={styles.emptyText}>No hay módulos disponibles.</Text>)  : 
-              <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>setShow(true)}>
+              <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>setShowModulos(true)}>
               <ThemedText type='defaultSemiBold' lightColor='white'>Ver todos</ThemedText>
             </TouchableOpacity>}
             </Text>
@@ -190,10 +193,19 @@ export default function DashboardAlumnoScreen() {
               <ThemedText type='defaultSemiBold' lightColor='white'>Ver ranking completo</ThemedText>
             </TouchableOpacity>
             
-          ):(
+          ): section.type=== 'history' ?(
             <Text style={styles.emptyText}>
               {section.data.length === 0 ? 'Aún no hay señas aprendidas.' : ''}
             </Text>
+          ): (
+            <>
+            <Text style={styles.emptyText}>
+              {section.data.length === 0 ? (<Text style={styles.emptyText}>No tienes señas en progreso.</Text>)  : 
+              <TouchableOpacity style={[styles.badge,estilos.centrado]} onPress={()=>setShowAprendiendo(true)}>
+              <ThemedText type='defaultSemiBold' lightColor='white'>Ver todas</ThemedText>
+            </TouchableOpacity>}
+            </Text>
+            </>     
           )
         )}
         renderItem={({ item, section }) => (
@@ -212,12 +224,14 @@ export default function DashboardAlumnoScreen() {
               modulo={item.categoria}
               fechaISO={item.updated_at}
             />
-          ): (
+          ): section.type === 'ranking'? (
             <RatingCard nombre={item.username} rating={item.promedio} cant_reviews={item.cant_reviews}/>
+          ) : (
+            <AprendiendoItem nombre={item.senia_nombre} categoria={item.categoria} cant_aciertos={item.cant_aciertos}/>
           )
         )}
       />        
-      <SmallPopupModal title={"Progreso por módulo"} modalVisible={showModal} setVisible={setShow}>
+      <SmallPopupModal title={"Progreso por módulo"} modalVisible={showModalModulos} setVisible={setShowModulos}>
         <ScrollView style={styles.modalScrollView}>
           {progresoPorModulo.map((modulo) => (
             <View key={String(modulo.id)} style={styles.categoriaItem}>
@@ -226,6 +240,20 @@ export default function DashboardAlumnoScreen() {
                 <Text style={styles.categoriaPorcentaje}>{modulo.learned/modulo.total*100}%</Text>
               </View>
               <ProgressBarAnimada progress={modulo.learned/modulo.total*100} />
+            </View>
+          ))}
+        </ScrollView>
+      </SmallPopupModal>
+
+      <SmallPopupModal title={"Señas en progreso"} modalVisible={showModalAprendiendo} setVisible={setShowAprendiendo}>
+        <ScrollView style={styles.modalScrollView}>
+          {seniasAprendiendo.map((senia) => (
+            <View key={String(senia.senia_id)} style={styles.categoriaItem}>
+              <View style={styles.categoriaHeader}>
+                <Text style={styles.categoriaNombre}>{senia.senia_nombre}</Text>
+                <Text style={styles.categoriaPorcentaje}>{senia.cant_aciertos/10*100}%</Text>
+              </View>
+              <ProgressBarAnimada progress={senia.cant_aciertos/10*100} />
             </View>
           ))}
         </ScrollView>

@@ -7,7 +7,7 @@ import { useXP } from '@/components/animations/useXP';
 import { XPGainPop } from '@/components/animations/XPGainPop';
 import { router, useFocusEffect } from 'expo-router';
 import { useUserContext } from '@/context/UserContext';
-import { modulos_completados_por_alumno, progreso_por_categoria } from '@/conexiones/modulos';
+import { modulos_completados_por_alumno, progreso_por_categoria, todos_los_modulos } from '@/conexiones/modulos';
 import { Image } from 'expo-image';
 import Toast from 'react-native-toast-message';
 import { paleta } from '@/components/colores';
@@ -22,12 +22,17 @@ import { estilos } from '@/components/estilos';
 import { useDailyMissions } from '@/hooks/useDailyMissions';
 import { MissionCard } from '@/components/missions/MissionCard';
 import {  nuevo_avatar_desbloqueado } from '@/conexiones/avatars';
-import { Avatar } from '@/components/types';
+import { Avatar, Insignia, Senia_Alumno } from '@/components/types';
 import { ThemedText } from '@/components/ThemedText';
 import { ganar_insignia_racha } from '@/conexiones/insignias';
 import { XPCard } from '@/components/cards';
 import type { Mission } from '@/conexiones/misiones';
 import { miNivel } from '@/conexiones/xp';
+import { SmallPopupModal } from '@/components/modals';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { traerCategorias } from '@/conexiones/categorias';
+import { Label } from '@react-navigation/elements';
+import { aprendiendo_dominadas_practica_x_cate, aprendiendo_practica_x_cate, hay_senias_practica } from '@/conexiones/practica';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -51,6 +56,23 @@ export default function HomeStudent() {
   const [desbloqueado,setDesbloqueado] = useState(false);
   const [streakPopTrigger, setStreakPopTrigger] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  const [showModalLeccion,setShowLeccion]= useState(false);
+  const [practica,setPractica] = useState(false);  
+  const [openTipoSenia, setOpenTipoSenia] = useState(false);
+  const [valueTipoSenia, setValueTipoSenia] = useState(null);
+  const [tipoSenia, setTipoSenia] = useState<{value:number,label:string}[]>([{value:1,label:"Todas"},{value:2,label:"Sólo aprendiendo"},{value:3,label:"Aprendiendo y dominadas"}]);
+  const [errorTipoSenia,setErrorTipoSenia] = useState("");
+
+  const [porCate,setPorCate] = useState(false);  
+  const [openPorCate, setOpenPorCate] = useState(false);
+  const [valueCate, setValueCate] = useState(null);
+  const [categorias, setCategorias] = useState<{value:number,label:string}[]>([]);
+  const [modulos, setModulos] = useState<{value:number,label:string}[]>([]);
+  const [errorCategoria,setErrorCategoria] = useState("");
+
+  const [showModalInsignia,setShowInsignia] =useState(false);
+  const [insignia,setI]= useState<Insignia>({id:0,nombre:"",descripcion:"",image_url:"",motivo:1,ganada:true});
 
   useFocusEffect(
       useCallback(() => {
@@ -153,6 +175,56 @@ export default function HomeStudent() {
   const fetch_misc = async () => {
     const level = await miNivel(contexto.user.id);
     setUser(prev => ({ ...prev, level: level?.nivel || 0 }));
+
+    const cates = await traerCategorias();
+    const items = cates.map(c=>{return {label:c.nombre,value:c.id}});
+    setCategorias(items || []);
+
+    const m = await todos_los_modulos();
+    const itemsM = m?.map(each=>{return {label:each.nombre,value:each.id}});
+    setModulos(itemsM || []);
+  }
+
+  const empezarLeccion = async ()=>{
+    if (valueTipoSenia!=undefined && valueCate!=undefined) {      
+           
+      let path:  '/tabs/HomeStudent/practica/por_categoria' | '/tabs/HomeStudent/lecciones/por_categoria' 
+          | '/tabs/HomeStudent/practica/por_modulo' | '/tabs/HomeStudent/lecciones/por_modulo';
+      
+      if (porCate) {
+        if (practica) {
+          path ='/tabs/HomeStudent/practica/por_categoria';                                       
+           //router.push({ pathname:path , params: { id: valueCate ,opcion: valueTipoSenia } });
+        } else {
+          path= '/tabs/HomeStudent/lecciones/por_categoria';
+          //router.push({ pathname: '/tabs/HomeStudent/lecciones/por_categoria', params: { id: valueCate ,opcion: valueTipoSenia } })
+        }
+      }
+      else{
+        if (practica) {
+          path= '/tabs/HomeStudent/practica/por_modulo';
+           //router.push({ pathname: '/tabs/HomeStudent/practica/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } });
+        } else {
+          path='/tabs/HomeStudent/lecciones/por_modulo';
+          //router.push({ pathname: '/tabs/HomeStudent/lecciones/por_modulo', params: { id: valueCate ,opcion: valueTipoSenia } })
+        }         
+      }
+
+      if (await hay_senias_practica(contexto.user.id,porCate,valueTipoSenia,valueCate)) {
+        setShowLeccion(false);
+        router.push({ pathname:path , params: { id: valueCate ,opcion: valueTipoSenia } });
+        setErrorTipoSenia("");
+        setErrorCategoria("");
+        setValueCate(null);
+        setValueTipoSenia(null);        
+      } else{
+        setErrorTipoSenia("No hay señas que cumplan las condiciones");
+      }      
+      
+    } else {
+      if (!valueTipoSenia) setErrorTipoSenia("Debes seleccionar una opción");
+      if (!valueCate) setErrorCategoria("Debes seleccionar una opción");
+    }    
   }
 
   return (
@@ -195,7 +267,7 @@ export default function HomeStudent() {
           </View>
         </View>
         
-        <AnimatedButton title="Practicar ahora" onPress={() => router.push('/tabs/HomeStudent/practica')} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
+        <AnimatedButton title="Practicar ahora" onPress={() => setShowLeccion(true)} style={styles.ctaButtonCursos} textStyle={styles.ctaButtonTextCursos} />
 
         <View style={styles.shortcutsRow}>
           <Pressable style={styles.shortcutCardCursos} onPress={() => router.push('/tabs/leaderboard_grupo')}>
@@ -263,8 +335,9 @@ export default function HomeStudent() {
                 ):(
                   <View >
                     <View style={[{flexDirection:"row",alignSelf:"flex-end"}]}> 
-                      <Ionicons name="flame" size={28} color={paleta.strong_yellow} style={{marginBottom: 8}} />
                       <Text style={[styles.cardTitleCursos,estilos.centrado]}>{user.racha} </Text>
+                      <Ionicons name="flame" size={28} color={paleta.strong_yellow} style={{marginBottom: 8}} />
+                      
                     </View>
                     <Image
                       style={[styles.modal_image,estilos.centrado]}
@@ -286,7 +359,7 @@ export default function HomeStudent() {
         </Modal>
         <SuccessModal visible={false} title="¡Excelente!" subtitle="Acción completada" onClose={() => {}} />
 
-        {/* Modal de desbloaquear un nuevo avatar */}
+        {/* Modal de desbloquear un nuevo avatar */}
         <Modal
           visible={showModalAvatar}
           animationType="fade"
@@ -310,6 +383,59 @@ export default function HomeStudent() {
             </View>
           </View>
         </Modal>
+         <SmallPopupModal title={"Lección"} modalVisible={showModalLeccion} setVisible={setShowLeccion}>          
+          <View>
+            <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
+              <TouchableOpacity style={[styles.filtros,
+              practica ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
+                onPress={()=>setPractica(true)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Práctica</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.filtros,{backgroundColor: practica ? "lightgray":paleta.turquesa}]} 
+                onPress={()=>setPractica(false)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Teoría</ThemedText>
+              </TouchableOpacity>                    
+            </View>
+            <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Qué señas deseas repasar?</ThemedText>
+            <DropDownPicker
+              open={openTipoSenia}
+              value={valueTipoSenia}
+              items={tipoSenia}
+              setOpen={setOpenTipoSenia}
+              setValue={setValueTipoSenia}
+              setItems={setTipoSenia}
+              placeholder={'Elige una opción'}
+              placeholderStyle={{color:"#888"}}
+              style={styles.input}
+            />
+            {errorTipoSenia ? <ThemedText type='error' style={{maxWidth: "80%"}}>{errorTipoSenia}</ThemedText> : null}
+            <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
+              <TouchableOpacity style={[styles.filtros,
+              porCate ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
+                onPress={()=>setPorCate(true)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Por categoría</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.filtros,{backgroundColor: porCate ? "lightgray":paleta.turquesa}]} 
+                onPress={()=>setPorCate(false)}>
+                <ThemedText style={estilos.centrado} lightColor={"black"} type="defaultSemiBold">Por módulo</ThemedText>
+              </TouchableOpacity>                    
+            </View>
+            <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>Selecciona {porCate ? "la categoría": "el módulo"} </ThemedText>
+            <DropDownPicker
+              open={openPorCate}
+              value={valueCate}
+              items={porCate ? categorias : modulos}
+              setOpen={setOpenPorCate}
+              setValue={setValueCate}
+              setItems={setCategorias}
+              placeholder={'Elige una opción'}
+              placeholderStyle={{color:"#888"}}
+              style={styles.input}
+            />
+            {errorCategoria ? <ThemedText type='error' style={{maxWidth: "80%"}}>{errorCategoria}</ThemedText> : null}
+            <BotonLogin callback={empezarLeccion} textColor={"black"} bckColor={paleta.strong_yellow} text={"Empezar lección"}/>
+          </View>
+        </SmallPopupModal>
   {showConfetti && <ConfettiBurst visible={showConfetti} onDone={() => setShowConfetti(false)} />}
   <Toast/>
     </View>
@@ -601,7 +727,31 @@ const styles = StyleSheet.create({
   seeAllLink: {
     color:'#0a7ea4',
     fontWeight:'600'
-  }
+  },
+  label: {
+    fontSize: 16,
+    color: paleta.dark_aqua,
+    fontWeight: '600',
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+    textAlign: 'center',
+  },
+  filtros: {
+    paddingVertical: 18,    
+    borderRadius: 20,        
+    marginHorizontal: 5,
+    marginBottom: 15,
+    width: 150,
+    textAlign:"center"
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 25,
+  },
 });
 
 // Subcomponente para preview de misiones diarias

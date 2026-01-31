@@ -14,6 +14,8 @@ import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
 import { estilos } from "@/components/estilos";
 import { traer_senias_leccion,traer_senias_leccion_aprendiendo, traer_senias_leccion_aprendiendo_dominadas } from "@/conexiones/senia_alumno";
+import { aprendiendo_dominadas_leccion_x_cate, aprendiendo_leccion_x_cate, traer_senias_leccion_x_cate } from "@/conexiones/practica";
+import { buscarCategoria } from "@/conexiones/categorias";
 import { ProgressBarAnimada } from "@/components/animations/ProgressBarAnimada";
 
 type Senia_Leccion ={
@@ -25,7 +27,7 @@ type Senia_Leccion ={
 export default function Leccion (){
   const { id=0, opcion=0 } = useLocalSearchParams<{ id: string, opcion: string }>();
   if (id==0 || opcion==0) router.back();
-  const [modulo,setModulo] = useState<Modulo>();  
+  const [categoria,setCate] = useState<{id:number,nombre:string}>();  
   const [senias,setSenias] = useState<Senia_Leccion[]>([]);  
   const [loading, setLoading] = useState(true);
   const [selectedSenia, setSelectedSenia] = useState<Senia_Leccion | null>(null);
@@ -35,20 +37,20 @@ export default function Leccion (){
 
   useFocusEffect(
     useCallback(() => {
-        fetch_modulo();
+        fetch_categoria();
         fetch_senias();
         
         return () => {};
     }, [])
     );
 
-    const fetch_modulo = async ()=>{
+    const fetch_categoria = async ()=>{
       try {
         setLoading(true)
-        const m = await buscar_modulo(Number(id));
-        setModulo(m || {id:0,descripcion:"",nombre:"",autor:0,icon: "paw"});        
+        const m = await buscarCategoria(Number(id));
+        setCate(m || {id:0,nombre:""});        
       } catch (error) {
-        error_alert("No se pudo cargar el módulo");
+        error_alert("No se pudo cargar la categoria");
         console.error(error);
       } finally {
           setLoading(false);
@@ -60,9 +62,9 @@ export default function Leccion (){
       setLoading(true)
       let s: Senia_Leccion[] =[];
       
-      if (opcion=="2") s = await  traer_senias_leccion_aprendiendo(contexto.user.id,Number(id))
-      else if (opcion=="3") s = await traer_senias_leccion_aprendiendo_dominadas(contexto.user.id,Number(id));
-      else s = await traer_senias_leccion(contexto.user.id,Number(id));
+      if (opcion=="2") s = await  aprendiendo_leccion_x_cate(contexto.user.id,Number(id))
+      else if (opcion=="3") s = await aprendiendo_dominadas_leccion_x_cate(contexto.user.id,Number(id));
+      else s = await traer_senias_leccion_x_cate(contexto.user.id,Number(id));
 
       const ordenadas = s.sort(function (a, b) {
       if (a.senia.info.significado < b.senia.info.significado) {
@@ -95,11 +97,11 @@ export default function Leccion (){
       else {
         //terminar lección                   
         try {                 
-          router.navigate({ pathname: '/tabs/Modulos_Alumno/lecciones/completado', params: { id: id } })        
+          router.navigate({ pathname: "/tabs/HomeStudent/lecciones/completa2", params: { id: id } })        
         } catch (error) {
           console.error(error);
           router.back()
-          contexto.user.gotToModules();
+          contexto.user.goHome();
           setTimeout(()=>error_alert("Ocurrió un error al completar el módulo"),300)
         }                                                  
       }
@@ -128,7 +130,7 @@ export default function Leccion (){
         <View style={styles.container}>
           <Pressable
               style={[styles.backBtn, { marginBottom: 10, marginTop:30, flexDirection: 'row', alignItems: 'center' }]}
-              onPress={() => { router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } }) }} 
+              onPress={() => { contexto.user.goHome() }} 
           >
           <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
           <Text style={styles.backBtnText}>Volver</Text>
@@ -149,17 +151,14 @@ export default function Leccion (){
                   )}
               </View>
                 <View style={[styles.card,paleta_colores.dark_aqua,{width:"95%"}]}>
-                    <ThemedText style={styles.title}>{modulo?.nombre}</ThemedText>
-                    <ThemedText style={styles.cardSubtitle}>{modulo?.descripcion}</ThemedText>
+                    <ThemedText style={styles.title}>{categoria?.nombre}</ThemedText>
+                    
                     <View style={styles.card}>
                         {selectedSenia ? 
                         <>
                         <View style={[{flexDirection:"row",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10},estilos.thinGrayBottomBorder]}>
                         <ThemedText style={styles.cardTitle}>{selectedSenia.senia.info.significado}</ThemedText>
-                        <View style={{alignSelf:"flex-start"}}>
-                          <ThemedText lightColor="gray">Categoría: </ThemedText>
-                          <ThemedText lightColor="gray">{selectedSenia.senia.info.Categorias.nombre}</ThemedText>
-                        </View>
+                        
                         
                         </View>
                         { selectedSenia.descripcion && selectedSenia.descripcion!="" ? 
@@ -189,8 +188,7 @@ export default function Leccion (){
                         </>
                     :null
                     }
-                    </View>
-                    
+                    </View>                    
                     
                 </View>
             </View>
@@ -207,10 +205,9 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bck_content:{
-    width: "95%",
+    width: "90%",
     backgroundColor: "#ffffffff",
-    height: "85%",
-    paddingBottom: 60
+    height: "85%"
   },
   title: {
     fontSize: 26,
@@ -321,7 +318,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width:"100%"
   },
-  progressBarRow:{
+   progressBarRow:{
     flexDirection:"row",
     width:"85%",
     justifyContent:"space-between",

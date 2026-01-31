@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   View, Text, StyleSheet,   TextInput,  
   KeyboardAvoidingView,  Platform,  ScrollView
@@ -6,8 +6,7 @@ import {
 import DropDownPicker from 'react-native-dropdown-picker';
 import VideoPlayer from '@/components/VideoPlayer';
 import { success_alert,error_alert } from '@/components/alert';
-import { paleta,paleta_colores } from '@/components/colores';
-import { estilos } from '@/components/estilos';
+import { paleta } from '@/components/colores';
 import { ThemedText } from '@/components/ThemedText';
 import { useUserContext } from '@/context/UserContext';
 import { router,useLocalSearchParams } from 'expo-router';
@@ -132,9 +131,7 @@ export default function Reportar_senia() {
                         )}
                     </ThemedText>
 
-                    <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Por qué deseas reportar este contenido?</ThemedText>
-                    
-
+                    <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Por qué deseas reportar este contenido?</ThemedText>                    
                     <DropDownPicker
                         open={open}
                         value={value}

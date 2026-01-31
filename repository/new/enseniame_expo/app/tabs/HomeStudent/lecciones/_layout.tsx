@@ -15,10 +15,9 @@ export default function Layout(){
               fontWeight: 'bold',
             },
           }}>
-            <Stack.Screen name='index' options={{headerShown:false}}/>
-            <Stack.Screen name='modulo_detalle' options={{headerShown:false }}   />
-            <Stack.Screen name='lecciones' options={{headerShown:false }}   />
-            <Stack.Screen name='practica' options={{headerShown:false }}   />
-
+            <Stack.Screen name='por_categoria' options={{headerShown:false}}/>
+            <Stack.Screen name='por_modulo' options={{headerShown:false}}/>
+            <Stack.Screen name='completado' options={{headerShown:false , presentation: "fullScreenModal"}}   />  
+            <Stack.Screen name='completa2' options={{headerShown:false , presentation: "fullScreenModal"}}   />            
     </Stack>)
 }

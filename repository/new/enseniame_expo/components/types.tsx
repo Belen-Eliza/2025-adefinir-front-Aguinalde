@@ -153,8 +153,7 @@ class Logged_Alumno extends Logged_User {
     }
     sumarRacha(){
         this.racha++;
-        this.last_login= new Date();    
-        console.log(this.getLastLogin())
+        this.last_login= new Date();            
     };
     perderRacha(){
         this.racha=1;
@@ -306,7 +305,15 @@ type Avatar = {
   image_url: string;
   racha_desbloquear: number;
 }
+type Insignia = {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  image_url: string;
+  motivo:number;
+  ganada: boolean;
+}
 
 export {User,Logged_User, Logged_Profesor, Alumno, Profesor, Logged_Alumno, Senia,  Senia_Info, Modulo, icon_type, Calificaciones,
-    Avatar, Senia_Alumno, Estado_Aprendiendo,Estado_Dominada,Estado_Pendiente,Estado_Senia
+    Avatar, Senia_Alumno, Estado_Aprendiendo,Estado_Dominada,Estado_Pendiente,Estado_Senia,Insignia
 }

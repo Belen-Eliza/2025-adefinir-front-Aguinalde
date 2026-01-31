@@ -95,7 +95,7 @@ export default function Leccion (){
       else {
         //terminar lección                   
         try {                 
-          router.navigate({ pathname: '/tabs/Modulos_Alumno/lecciones/completado', params: { id: id } })        
+          router.navigate({ pathname: '/tabs/HomeStudent/lecciones/completado', params: { id: id } })        
         } catch (error) {
           console.error(error);
           router.back()
@@ -128,7 +128,7 @@ export default function Leccion (){
         <View style={styles.container}>
           <Pressable
               style={[styles.backBtn, { marginBottom: 10, marginTop:30, flexDirection: 'row', alignItems: 'center' }]}
-              onPress={() => { router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } }) }} 
+              onPress={() => { router.back() }} 
           >
           <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
           <Text style={styles.backBtnText}>Volver</Text>
@@ -207,10 +207,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bck_content:{
-    width: "95%",
+    width: "98%",
     backgroundColor: "#ffffffff",
-    height: "85%",
-    paddingBottom: 60
+    height: "85%",   
+    paddingBottom: 60 
   },
   title: {
     fontSize: 26,

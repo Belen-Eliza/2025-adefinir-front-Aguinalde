@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback,  useState } from "react";
 import { View, Text, Pressable, StyleSheet, FlatList,  TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
-import { Senia_Info, Modulo, Senia_Alumno } from "@/components/types";
-import { alumno_completo_modulo, buscar_modulo, buscar_senias_modulo, completar_modulo_alumno } from "@/conexiones/modulos";
+import {  Modulo, Senia_Alumno } from "@/components/types";
+import { alumno_completo_modulo, buscar_modulo} from "@/conexiones/modulos";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import VideoPlayer from "@/components/VideoPlayer";
@@ -10,18 +10,18 @@ import { paleta } from "@/components/colores";
 import { useUserContext } from "@/context/UserContext";
 import { SmallPopupModal } from "@/components/modals";
 import Toast from "react-native-toast-message";
-import { alumno_ver_senia, senias_aprendidas_alumno, visualizaciones_alumno } from "@/conexiones/visualizaciones";
+import { alumno_ver_senia, senias_aprendidas_alumno } from "@/conexiones/visualizaciones";
 import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
-import { marcar_aprendida, marcar_no_aprendida } from "@/conexiones/aprendidas";
+import DropDownPicker from 'react-native-dropdown-picker';
 import { calificacionesModulo, calificarModulo } from "@/conexiones/calificaciones";
 import { RatingStars } from "@/components/review";
 import { estilos } from "@/components/estilos";
 import { get_antiguedad } from "@/components/validaciones";
 import { AntDesign } from "@expo/vector-icons";
-import { ganar_insignia_senia } from "@/conexiones/insignias";
-import { getEstado, traer_senias_modulo } from "@/conexiones/senia_alumno";
-
+import {  traer_senias_modulo } from "@/conexiones/senia_alumno";
+import { BotonLogin } from "@/components/botones";
+import { hay_senias_practica } from "@/conexiones/practica";
 
 type Senia_Modulo ={
   senia: Senia_Alumno;    
@@ -43,9 +43,7 @@ export default function ModuloDetalleScreen() {
   if (id==0) router.back();
   const [modulo,setModulo] = useState<Modulo | undefined>();
   const [completado,setCompletado] =useState(false);
-  const [senias,setSenias] = useState<Senia_Modulo[]>();
-  const [cant_aprendidas, setCantAprendidas] = useState(0);
-  const [aprendidasMap, setAprendidasMap] = useState<Record<number, boolean>>({});
+  const [senias,setSenias] = useState<Senia_Modulo[]>();    
   const [calificaciones_modulo,setCalificacionesModulo] = useState<Calificaciones[]>()
 
   const [loading, setLoading] = useState(true);
@@ -57,14 +55,20 @@ export default function ModuloDetalleScreen() {
   const [yaCalificado, setYaCalificado] = useState(false);
 
   const [modalCalificaciones,setModalCalificaciones] = useState(false);
-  
+
+  const [showModalLeccion,setShowLeccion]= useState(false);
+  const [practica,setPractica] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState<{value:number,label:string}[]>([{value:1,label:"Todas"},{value:2,label:"Sólo aprendiendo"},{value:3,label:"Aprendiendo y dominadas"}]);
+  const [error,setError] = useState("");
+
   const contexto = useUserContext();
   
    useFocusEffect(
       useCallback(() => {
         fetch_modulo();
-        fetch_senias();
-        fetch_aprendidas();
+        fetch_senias();        
         verificarCalificacion();
         return () => {};
       }, [])
@@ -97,7 +101,7 @@ export default function ModuloDetalleScreen() {
       }
       return 0;
     })              
-      setSenias(ordenadas || []);
+      setSenias(ordenadas || []);      
 
     } catch (error) {
       error_alert("No se pudieron cargar las señas");
@@ -106,23 +110,7 @@ export default function ModuloDetalleScreen() {
       setLoading(false)
     }
     
-  }
-  const fetch_aprendidas = async () => {
-    try {
-      if (!contexto.user?.id) return;
-      const data = await senias_aprendidas_alumno(contexto.user.id)
-      const map: Record<number, boolean> = {};
-      (data || []).forEach((row: any) => {
-        map[Number(row.senia_id)] = !!row.aprendida;
-      });
-      setAprendidasMap(map);
-      setLoading(false);
-    } catch (e) {
-      // Si no existe la tabla o hay error, seguimos sin bloquear la vista
-      console.warn('[modulo_detalle] No se pudo cargar Aprendidas:', (e as any)?.message);
-    }
-  }
-
+  }  
 
   const toggle_visualizada = async (item: Senia_Modulo)=>{
     setSelectedSenia(item);
@@ -175,6 +163,31 @@ export default function ModuloDetalleScreen() {
     }
   };
 
+  const empezarLeccion = async ()=>{
+    if (value!=undefined) {      
+      
+      let path : '/tabs/Modulos_Alumno/practica' | '/tabs/Modulos_Alumno/lecciones'
+      if (practica){
+        path = '/tabs/Modulos_Alumno/practica';
+        //router.push({ pathname: '/tabs/Modulos_Alumno/practica', params: { id: modulo?.id, opcion: value } })
+      } else {
+        path = '/tabs/Modulos_Alumno/lecciones';
+        //router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id , opcion: value } })
+      }
+
+      if (await hay_senias_practica(contexto.user.id,false,value,modulo?.id || 0)) {
+        setShowLeccion(false);
+        router.push({ pathname: path, params: { id: modulo?.id , opcion: value } })
+      } else {
+        setError("No hay señas que cumplan esas condiciones");
+      }
+      
+    } else {
+      setError("Debes seleccionar una opción");
+    }
+    
+  }
+
   if (loading) {
       return (
         <View style={styles.loadingContainer}>
@@ -214,7 +227,7 @@ export default function ModuloDetalleScreen() {
         }
       </TouchableOpacity>  
 
-      <Pressable onPress={()=>router.push({ pathname: '/tabs/Modulos_Alumno/lecciones', params: { id: modulo?.id } })} 
+      <Pressable onPress={()=>setShowLeccion(true)} 
         style={styles.ctaButtonCursos}>
         <Ionicons name="flash" size={24} color="#fff" style={styles.buttonIcon} />
         <Text style={styles.ctaButtonTextCursos}>Empezar lección</Text>
@@ -228,7 +241,10 @@ export default function ModuloDetalleScreen() {
           <View style={styles.card}>
             <View style={{flexDirection:"row", alignContent: "space-around", justifyContent:"space-between"}}>
               <Text style={styles.cardTitle}>{item.senia.info.significado}</Text>
-              <Ionicons style={{display:item.senia.estado.display_checkmark()}} name="checkmark-circle" color={paleta.strong_yellow} size={25}  />
+              <View style={{flexDirection:"row", alignContent: "space-around", justifyContent:"space-between"}}>
+                <ThemedText >{item.senia.estado.toString()}</ThemedText>                
+              </View>
+              
             </View>
            
             <Pressable
@@ -357,6 +373,38 @@ export default function ModuloDetalleScreen() {
             <ThemedText lightColor="gray">Este módulo aún no tiene calificaciones</ThemedText>
             }
         </SmallPopupModal>
+
+        <SmallPopupModal title={"Lección"} modalVisible={showModalLeccion} setVisible={setShowLeccion}>          
+          <View>
+            <View style={[{flexDirection:"row",width:"100%"},estilos.centrado]}>
+              <TouchableOpacity style={[styles.filtros,
+              practica ? {backgroundColor: paleta.turquesa}: {backgroundColor:"lightgray"}]} 
+                onPress={()=>setPractica(true)}>
+                <ThemedText lightColor={"black"} type="defaultSemiBold">Práctica</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.filtros,{backgroundColor: practica ? "lightgray":paleta.turquesa}]} 
+                onPress={()=>setPractica(false)}>
+                <ThemedText lightColor={"black"} type="defaultSemiBold">Teoría</ThemedText>
+              </TouchableOpacity>                    
+            </View>
+            <ThemedText type='subtitle' style={[styles.label,{marginTop:20}]}>¿Qué señas deseas repasar?</ThemedText>
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              placeholder={'Elige una opción'}
+              placeholderStyle={{color:"#888"}}
+              style={styles.input}
+            />
+            {error ? <ThemedText type='error' style={{maxWidth: "80%"}}>{error}</ThemedText> : null}
+
+            <BotonLogin callback={empezarLeccion} textColor={"black"} bckColor={paleta.strong_yellow} text={"Empezar lección"}/>
+          </View>
+        </SmallPopupModal>
+
         <Toast/>
     </View>
   );
@@ -513,5 +561,20 @@ const styles = StyleSheet.create({
   },
    buttonIcon: {
     marginRight: 8,
+  },
+  label: {
+    fontSize: 16,
+    color: paleta.dark_aqua,
+    fontWeight: '600',
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+    textAlign: 'center',
+  },
+  filtros: {
+    paddingVertical: 18,
+    paddingHorizontal: 60,
+    borderRadius: 20,        
+    margin: 5,
+    marginBottom: 15
   },
 });

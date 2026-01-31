@@ -80,4 +80,16 @@ const es_hoy=(dia:Date)=>{
     let hoy = new Date();
     return (hoy.toDateString()==dia.toDateString())
 }
-export {validatePassword, validateEmail, validateInstitution, get_antiguedad, now, fue_ayer, es_hoy}
+
+// Source - https://stackoverflow.com/a
+// Posted by Laurens Holst, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-01-28, License - CC BY-SA 4.0
+
+function shuffleArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+export {validatePassword, validateEmail, validateInstitution, get_antiguedad, now, fue_ayer, es_hoy, shuffleArray}
