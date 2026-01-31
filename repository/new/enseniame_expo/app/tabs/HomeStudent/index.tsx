@@ -335,8 +335,9 @@ export default function HomeStudent() {
                 ):(
                   <View >
                     <View style={[{flexDirection:"row",alignSelf:"flex-end"}]}> 
-                      <Ionicons name="flame" size={28} color={paleta.strong_yellow} style={{marginBottom: 8}} />
                       <Text style={[styles.cardTitleCursos,estilos.centrado]}>{user.racha} </Text>
+                      <Ionicons name="flame" size={28} color={paleta.strong_yellow} style={{marginBottom: 8}} />
+                      
                     </View>
                     <Image
                       style={[styles.modal_image,estilos.centrado]}

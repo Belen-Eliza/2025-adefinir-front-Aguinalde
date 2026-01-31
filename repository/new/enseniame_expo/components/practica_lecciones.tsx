@@ -41,7 +41,40 @@ function FlashCardVideo ({senia_actual,setMostrarRes,currentIndex,total}:
     )
 }
 
-export {FlashCardVideo }
+function FlashCardNombre ({senia_actual,setMostrarRes,currentIndex,total}:
+  {senia_actual:Senia_Alumno,
+    setMostrarRes:React.Dispatch<React.SetStateAction<boolean>>,
+    currentIndex:number,
+    total:number
+  }){
+
+    return (
+      <>
+        <View style={[styles.progressBarRow,estilos.centrado]}>
+          <ProgressBarAnimada progress={currentIndex/total*100} />   
+          <ThemedText style={{marginLeft:6}}>{currentIndex}/{total}</ThemedText>
+        </View>   
+      
+        <View style={[styles.bck_content,estilos.centrado]}>                             
+            
+          <View style={[styles.card,paleta_colores.dark_aqua,estilos.centrado]}>
+          <ThemedText style={[styles.title]}>Identificar la seña correspondiente</ThemedText>
+          
+            <View style={[styles.card,estilos.centrado,{marginBottom:10,height:"50%",padding:0}]}>
+              <ThemedText style={[estilos.centrado,{color:paleta.blue,fontSize:40,padding:30,lineHeight:50,textAlign:"center"}]}>
+                {senia_actual.info.significado} 
+              </ThemedText>
+            </View>                  
+          
+          <BotonLogin callback={()=>setMostrarRes(true)} 
+              textColor={'white'} bckColor={"#006868"} text={'Ver respuesta'}    />
+          </View>        
+                                      
+        </View></>
+    )
+}
+
+export {FlashCardVideo, FlashCardNombre }
 
 const styles = StyleSheet.create({
     bck_content:{

@@ -15,8 +15,9 @@ import { XPCard } from '@/components/cards';
 import { Image } from 'expo-image';
 import { awardXPClient } from '@/conexiones/xp';
 import { shuffleArray } from '@/components/validaciones';
-import { FlashCardVideo } from '@/components/practica_lecciones';
+import { FlashCardNombre, FlashCardVideo } from '@/components/practica_lecciones';
 import { buscar_modulo } from '@/conexiones/modulos';
+import VideoPlayer from '@/components/VideoPlayer';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -35,7 +36,8 @@ export default  function Practica (){
     const [loading, setLoading] = useState(true);
     const [senia_actual,setSeniaActual] = useState<Senia_Leccion>();
     const [index_actual,setIndex] =useState(0);
-    const [mostrar_res,setMostrarRes]= useState(false);
+    const [mostrar_significado,setMostrarSignificado]= useState(false);
+    const [mostrar_video,setMostrarVideo]= useState(false);
 
     const [terminado,setTerminado] = useState(false);
     const [cant_correctas,setCorrectas] = useState(0);
@@ -99,10 +101,10 @@ export default  function Practica (){
         if (nuevo_index<senias.length) {
             setSeniaActual(senias[nuevo_index]);
             setIndex(nuevo_index);
-            setMostrarRes(false);
+            setMostrarSignificado(false);
         }  else {
             //terminar
-            setMostrarRes(false);
+            setMostrarSignificado(false);
             setTerminado(true); 
             try {
                 await awardXPClient(contexto.user.id,cant_correctas*2);
@@ -129,18 +131,28 @@ export default  function Practica (){
             <View style={{width:20}}></View>
             </View>                        
 
-            {senia_actual && (<FlashCardVideo currentIndex={index_actual+1} senia_actual={senia_actual?.senia} 
-            setMostrarRes={setMostrarRes} total={senias.length}/> )}
+            {senia_actual && index_actual%2==0 && (                            
+                <FlashCardVideo currentIndex={index_actual+1} senia_actual={senia_actual?.senia} 
+            setMostrarRes={setMostrarSignificado} total={senias.length}/> 
+            )}
 
+            {senia_actual && index_actual%2!=0 && (                            
+                <FlashCardNombre currentIndex={index_actual+1} senia_actual={senia_actual?.senia} 
+            setMostrarRes={setMostrarSignificado} total={senias.length}/> 
+            )}
                                         
             <Modal animationType="slide"
                 transparent={true}
-                visible={mostrar_res}
-                onRequestClose={() => setMostrarRes(false)}>
+                visible={mostrar_significado}
+                onRequestClose={() => setMostrarSignificado(false)}>
                 {senia_actual && 
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Respuesta:</Text>
+                        <VideoPlayer 
+                            uri={senia_actual.senia.info.video_url}
+                            style={styles.video}
+                        /> 
                         <ThemedText  style={[styles.modalTitle,{color:paleta.dark_aqua}]} >{senia_actual.senia.info.significado}</ThemedText>
 
                         <View style={styles.buttonRow}>
@@ -157,6 +169,7 @@ export default  function Practica (){
                     </View>
                 }
             </Modal>
+            
             <Modal
                 visible={terminado}
                 animationType="fade"
