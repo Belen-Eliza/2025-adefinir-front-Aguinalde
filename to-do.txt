@@ -21,12 +21,14 @@ Home:
         ♥ por módulo (seleccionar) -- Done!!
 
 Práctica:
-* Implementar mostrar nombre y tiene que recordar la seña
+* Implementar mostrar nombre y tiene que recordar la seña -- Done!!
 * Mejorar diseño -- Done
 * Mezclar las señas para que no siempre toquen las mismas en el mismo orden -- Done!!
 * Ver qué pasa si no hay señas para ofrecer -- Done!!
 
 API!!
+
+Hosting!!
 
 Revisar que se ganen bien todas las insignias
 
