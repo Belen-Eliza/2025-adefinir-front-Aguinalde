@@ -61,7 +61,7 @@ function FlashCardNombre ({senia_actual,setMostrarRes,currentIndex,total}:
           <ThemedText style={[styles.title]}>Identificar la seña correspondiente</ThemedText>
           
             <View style={[styles.card,estilos.centrado,{marginBottom:10,height:"50%",padding:0}]}>
-              <ThemedText style={[estilos.centrado,{color:paleta.blue,fontSize:40,padding:30,lineHeight:50,textAlign:"center"}]}>
+              <ThemedText style={[estilos.centrado,styles.texto_significado]}>
                 {senia_actual.info.significado} 
               </ThemedText>
             </View>                  
@@ -113,5 +113,13 @@ const styles = StyleSheet.create({
     width:"85%",
     justifyContent:"space-between",
     marginBottom:25
+  },
+  texto_significado:{
+    color:paleta.blue,
+    fontSize:40,
+    padding:30,
+    lineHeight:50,
+    textAlign:"center",
+    fontWeight: "500"
   }
 })
