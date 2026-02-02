@@ -25,6 +25,7 @@ export default function RootLayout() {
   
   return(
     <UserContextProvider>
+      
       <RootNavigator/>
 
     </UserContextProvider>

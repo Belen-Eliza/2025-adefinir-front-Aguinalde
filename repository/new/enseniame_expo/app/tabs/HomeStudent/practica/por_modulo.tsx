@@ -125,7 +125,7 @@ export default  function Practica (){
             <View style={[estilos.centrado,{flexDirection:"row",justifyContent:"space-between",marginTop:50, marginBottom: 20,width:"100%"}]}>
                 <Pressable
                 style={[styles.backBtn]}
-                onPress={() => { router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })} }
+                onPress={() => { contexto.user.goHome()} }
             >
                 <Ionicons name="arrow-back" size={25} color="#20bfa9" style={{ marginRight: 6 }} />                
             </Pressable>
@@ -191,7 +191,7 @@ export default  function Practica (){
                     <ThemedText type='defaultSemiBold' style={estilos.centrado} lightColor={paleta.dark_aqua}>0 de {senias.length} correctas</ThemedText>
                     <ThemedText type='defaultSemiBold' lightColor={paleta.dark_aqua}>Sigue practicando para volver a encaminarte</ThemedText>
                 
-                <BotonLogin callback={()=>{contexto.user.goHome();setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
+                <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent");setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                 </View>
                 ):(
                   <View  >
@@ -221,7 +221,7 @@ export default  function Practica (){
                         </View>                                                
                     </View>
                 
-                <BotonLogin callback={()=>{contexto.user.goHome();setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
+                <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent");setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                     </View>
                 
                 )}                                          

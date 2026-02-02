@@ -96,7 +96,7 @@ export default function ModuloCompletado (){
             </>
             )}
             
-            <BotonLogin callback={()=>{router.back();contexto.user.goHome()}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent")}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
 
             {/* Modal para calificación */}
             <Modal
