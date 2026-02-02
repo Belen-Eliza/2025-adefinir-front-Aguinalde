@@ -74,15 +74,32 @@ const ingresar = async  (mail:string, contraseña: string) =>{
 }
 
 const registrar_profe = async (user:Profesor )=>{
+  let unsecured_pass= user.hashed_password;
   user.hashed_password= await hash(user.hashed_password);
   if (await cuenta_existe(user.mail)) {
     error_alert("Ya existe un usuario con ese mail.");
     return;
   }
   try {
-    const {data, error } = await supabase
+    const { data:auth_user, error: auth_error } = await supabase.auth.signUp({
+      email: user.mail,
+      password: unsecured_pass,   
+      options: {
+          data: {
+            first_name: user.username,            
+          },
+        },    
+      });
+    if (auth_error) {
+      console.error('Error:', auth_error);
+      return;
+    }    
+
+    if (auth_user){
+      const {data, error } = await supabase
         .from('Users')
-        .insert(user.getUser())
+        .insert({mail:user.mail,username:user.username,is_prof:user.is_prof,
+          hashed_password:user.hashed_password,auth_id:auth_user.user?.id})
         .select("*")
         .single()
         ;
@@ -99,6 +116,9 @@ const registrar_profe = async (user:Profesor )=>{
       if (error) throw error
       return new Logged_Profesor(data.mail,data.username,data.hashed_password,profe.institution,data.id,profe.is_admin,data.avatar) ;
     }
+    }
+
+    
 
   } catch (error: any) {
     console.error('Error insertando:', error.message);
@@ -106,32 +126,52 @@ const registrar_profe = async (user:Profesor )=>{
   }
 }
 const registrar_alumno = async (user:User)=>{
+  let unsecured_pass= user.hashed_password;
   user.hashed_password= await hash(user.hashed_password);
   if (await cuenta_existe(user.mail)) {
     error_alert("Ya existe un usuario con ese mail.");
     return;
   }
   try {
-    const {data, error } = await supabase
+    const { data:auth_user, error: auth_error } = await supabase.auth.signUp({
+      email: user.mail,
+      password: unsecured_pass,    
+      options: {
+          data: {
+            first_name: user.username,            
+          },
+        },  
+      });
+    if (auth_error) {
+      console.error('Error:', auth_error);
+      return;
+    }  
+
+    if (auth_user){
+      const {data, error } = await supabase
         .from('Users')
-        .insert(user)
+        .insert({mail:user.mail,username:user.username,is_prof:user.is_prof,
+          hashed_password:user.hashed_password,auth_id:auth_user.user?.id})
         .select("*")
         .single()
         ;
-
-    if (error) {
+         if (error) {
       console.error('Error:', error.message);
       return;
+      }
+      if (data ) {      
+        //insertar alumno
+        const { data: alumno, error } = await supabase.from('Alumnos')
+                                        .insert([{id:data.id,racha:1,racha_maxima:1,xp:0,coins:0}])
+                                        .select().single();
+        if (error) throw error
+        return new Logged_Alumno(user.mail,user.username,user.hashed_password,
+                    alumno.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,data.avatar);
+      }
     }
-    if (data ) {      
-      //insertar alumno
-      const { data: alumno, error } = await supabase.from('Alumnos')
-                                      .insert([{id:data.id,racha:1,racha_maxima:1,xp:0,coins:0}])
-                                      .select().single();
-      if (error) throw error
-      return new Logged_Alumno(user.mail,user.username,user.hashed_password,
-                  alumno.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,data.avatar);
-    }
+    
+
+   
 
   } catch (error: any) {
     console.error('Error insertando:', error.message);
