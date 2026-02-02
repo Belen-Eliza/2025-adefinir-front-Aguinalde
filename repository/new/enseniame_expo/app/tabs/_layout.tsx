@@ -19,7 +19,7 @@ export default function RootLayout() {
         minWidth: 70, 
       },
   }}>
-      <Tabs.Screen name='index'  options={() =>({title:"Home",
+      <Tabs.Screen name='index'  options={() =>({title:"Home",headerShown:false,
         tabBarButton: ((props) => 
           <TouchableOpacity onPress={() => {
             contexto.user.goHome()
