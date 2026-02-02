@@ -47,11 +47,20 @@ const ingresar = async  (mail:string, contraseña: string) =>{
     }
     
     if (user ) {
+      //sign in auth
+
+      const {data:auth,error:auth_error} = await supabase.auth.signInWithPassword({
+        "email": mail,
+        "password": contraseña
+      });
+      
       const password_hash = await hash(contraseña);
       if (password_hash!= user.hashed_password || mail!= user.mail) {
         error_alert("Usuario o contraseña incorrectos");
         
       } else{
+        
+
         //devolver usuario hallado      
         if (user.is_prof){
           const { data: profe, error } = await supabase.from('Profesores').select('*').eq('id', user.id).single();
