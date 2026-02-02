@@ -4,7 +4,7 @@ import { TabBarIcon } from "@/components/TabBarIcon";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, Tabs } from "expo-router";
 import { Platform, StyleSheet, View , Text, TouchableOpacity} from "react-native";
-import { UserContext, useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 
 export default function RootLayout() {
   const contexto = useUserContext()

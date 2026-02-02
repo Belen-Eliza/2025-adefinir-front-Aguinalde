@@ -8,7 +8,7 @@ import { calificacionesModulo } from "@/conexiones/calificaciones";
 import Toast from "react-native-toast-message";
 import { modulosCalificados, promedio_reseñas } from "@/conexiones/calificaciones";
 import { ThemedText } from "@/components/ThemedText";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import { AntDesignStars } from "@/components/review";
 import { paleta } from "@/components/colores";
 import { error_alert } from "@/components/alert";

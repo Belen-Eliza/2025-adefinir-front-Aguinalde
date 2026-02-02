@@ -7,7 +7,7 @@ import { validateEmail, validatePassword, } from '@/components/validaciones';
 import Toast from 'react-native-toast-message';
 import { registrar_alumno } from '@/conexiones/gestion_usuarios';
 import { Alumno } from '@/components/types';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { BotonLogin } from '@/components/botones';
 import { IconTextInput, PasswordInput } from '@/components/inputs';
 import { paleta } from '@/components/colores';

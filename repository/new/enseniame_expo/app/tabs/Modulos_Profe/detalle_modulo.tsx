@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Pressable, Image, TextInput, Alert, A
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../utils/supabase";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import { ThemedText } from "@/components/ThemedText";
 import VideoPlayer from "@/components/VideoPlayer";
 import { Senia_Info } from "@/components/types";

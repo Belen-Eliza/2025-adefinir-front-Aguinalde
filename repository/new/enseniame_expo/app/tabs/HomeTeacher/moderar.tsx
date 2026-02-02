@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {  useFocusEffect } from 'expo-router';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { Senia_Info } from '@/components/types';
 import { error_alert, success_alert } from '@/components/alert';
 import { paleta } from '@/components/colores';

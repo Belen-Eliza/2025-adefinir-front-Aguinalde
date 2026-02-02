@@ -6,7 +6,7 @@ import ConfettiBurst from '@/components/animations/ConfettiBurst';
 import { useXP } from '@/components/animations/useXP';
 import { XPGainPop } from '@/components/animations/XPGainPop';
 import { router, useFocusEffect } from 'expo-router';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { modulos_completados_por_alumno, progreso_por_categoria, todos_los_modulos } from '@/conexiones/modulos';
 import { Image } from 'expo-image';
 import Toast from 'react-native-toast-message';

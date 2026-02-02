@@ -1,6 +1,7 @@
 import { Alumno, Logged_Alumno, Logged_Profesor, Logged_User, User } from '@/components/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useState } from 'react';
+import { UserContext } from '@/hooks/useUserContext';
 import { supabase } from '../utils/supabase'
 import { error_alert } from '@/components/alert';
 import { cuenta_existe } from '@/conexiones/gestion_usuarios';
@@ -14,7 +15,7 @@ const hash = async (text: string) =>{
   return h;
 }
 
-export  const UserContext = createContext({
+/* export  const UserContext = createContext({
     
     user: new  Logged_User("","","",0),
     isLoggedIn: false,
@@ -25,9 +26,9 @@ export  const UserContext = createContext({
     login_app: (user: Logged_User) => {},
     logout: () => { },
     actualizar_info: (id:number)=>{}
-});
+}); */
 
-export const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
+export default function UserContextProvider  ({ children }: { children: React.ReactNode })  {
     const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0,0,0,0,0,new Date(),0));
     
     const [isLoggedIn, setIsLoggedIn] = useState(false); 
@@ -172,6 +173,6 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
 
 
 
-export const useUserContext = () => {
+/* export const useUserContext = () => {
     return useContext(UserContext);
-}
+} */

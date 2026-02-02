@@ -1,12 +1,12 @@
 import React, { useCallback,  useState } from "react";
-import { View, Text, Pressable, StyleSheet, TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
+import { View, Text, Pressable, StyleSheet,  ActivityIndicator } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import {  Modulo } from "@/components/types";
 import { buscar_modulo } from "@/conexiones/modulos";
 import { ThemedText } from "@/components/ThemedText";
 import { Image } from 'expo-image';
 import { paleta, paleta_colores } from "@/components/colores";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import Toast from "react-native-toast-message";
 import { error_alert, success_alert } from "@/components/alert";
 import { estilos } from "@/components/estilos";

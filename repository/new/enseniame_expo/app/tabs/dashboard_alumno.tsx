@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, SectionList, RefreshControl, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useUserContext } from '../../context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { supabase } from '../../utils/supabase';
 import ProgressCard from '../../components/ProgressCard';
 import GlobalProgress from '../../components/GlobalProgress';

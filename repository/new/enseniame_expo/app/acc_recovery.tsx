@@ -16,7 +16,7 @@ import { error_alert, success_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
 import { cuenta_existe, entrar, ingresar } from '@/conexiones/gestion_usuarios';
 import { enviar_mail_recuperacion, generar_otp } from '@/components/mails';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { BotonLogin } from '@/components/botones';
 import { IconTextInput, PasswordInput } from '@/components/inputs';
 import { paleta } from '@/components/colores';

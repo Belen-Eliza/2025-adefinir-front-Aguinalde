@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback,  useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert, SafeAreaView, TextInput, ScrollView } from 'react-native';
 import { supabase } from '@/utils/supabase';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import ObjetivoCard from '@/components/ObjetivoCard';
 import { Ionicons } from '@expo/vector-icons';
 import { paleta } from '@/components/colores';

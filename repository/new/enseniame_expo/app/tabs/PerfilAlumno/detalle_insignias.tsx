@@ -3,10 +3,10 @@ import { View, StyleSheet,   TouchableOpacity, Pressable, ActivityIndicator, Fla
 import {  Ionicons  } from '@expo/vector-icons';
 import {   router, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { error_alert, success_alert } from '@/components/alert';
+import { error_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
-import { useUserContext } from '@/context/UserContext';
-import { paleta, paleta_colores } from '@/components/colores';
+import { useUserContext } from '@/hooks/useUserContext';
+import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { Image } from 'expo-image';
 import { categorias_insignias,  cuantos_ganaron_insignia,  mis_insignias_ganadas,  todas_insignias } from '@/conexiones/insignias';

@@ -11,7 +11,7 @@ import { validateEmail, validatePassword } from '@/components/validaciones';
 import { error_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
 import {ingresar} from "../conexiones/gestion_usuarios"
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { supabase } from '../utils/supabase'
 import { estilos } from '@/components/estilos';
 import { paleta, paleta_colores } from '@/components/colores';
