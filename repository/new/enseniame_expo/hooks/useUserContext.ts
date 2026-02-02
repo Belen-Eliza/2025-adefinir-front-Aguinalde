@@ -1,9 +1,12 @@
-import { Alumno, Logged_Alumno, Logged_Profesor, Logged_User, User } from '@/components/types';
+import { Logged_User,  } from '@/components/types';
+import { Session } from '@supabase/supabase-js';
 import { createContext, useContext } from 'react';
 
 export type UserData={
     user:   Logged_User,
+    session?: Session | null
     isLoggedIn: boolean,
+    isLoading:boolean,
     cambiarNombre: (nombre_nuevo: string) => void,
     cambiar_mail: (mail_nuevo: string) => void,
     cambiar_password: (password_nuevo: string) => void,
@@ -16,7 +19,9 @@ export type UserData={
 export  const UserContext = createContext<UserData>({
     
     user: new  Logged_User("","","",0),
+    session:undefined,
     isLoggedIn: false,
+    isLoading:false,
     cambiarNombre: (nombre_nuevo: string) => { },
     cambiar_mail: (mail_nuevo: string) => { },
     cambiar_password: (password_nuevo: string) => { },

@@ -53,19 +53,7 @@ export default function RootLayout() {
       ) :
     <Tabs.Screen name='Dashboard_Alumno'  options={{href:null}} />
     }
-
-      {/* Alumno: mis objetivos tab */}
-     {/*  {!contexto.user.is_prof ? (
-        <Tabs.Screen name='alumno_objetivos' options={({ navigation }) => ({ title: 'Objetivos', headerShown: false,
-          tabBarButton: ((props) => (
-            <TouchableOpacity onPress={() => navigation.navigate('alumno_objetivos')} style={styles.navItem}>
-              <Ionicons name="flag" size={22} color="#fff" />
-              <Text style={styles.navText}>Objetivos</Text>
-            </TouchableOpacity>
-          )),
-        })} />
-      ) : <Tabs.Screen name='alumno_objetivos' options={{href:null}} />}
- */}
+     
     <Tabs.Screen name='misiones/index' options={{href:null}} />
 
     <Tabs.Screen name='dashboard_alumno' options={{href:null}} />

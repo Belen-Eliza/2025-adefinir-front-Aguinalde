@@ -1,10 +1,10 @@
-import { Alumno, Logged_Alumno, Logged_Profesor, Logged_User, User } from '@/components/types';
+import {  Logged_Alumno, Logged_Profesor, Logged_User,  } from '@/components/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useContext, useState } from 'react';
+import {  useState, useEffect } from 'react';
 import { UserContext } from '@/hooks/useUserContext';
 import { supabase } from '../utils/supabase'
 import { error_alert } from '@/components/alert';
-import { cuenta_existe } from '@/conexiones/gestion_usuarios';
+import type { Session } from '@supabase/supabase-js'
 import * as Crypto from 'expo-crypto';
 
 const hash = async (text: string) =>{
@@ -15,23 +15,58 @@ const hash = async (text: string) =>{
   return h;
 }
 
-/* export  const UserContext = createContext({
-    
-    user: new  Logged_User("","","",0),
-    isLoggedIn: false,
-    cambiarNombre: (nombre_nuevo: string) => { },
-    cambiar_mail: (mail_nuevo: string) => { },
-    cambiar_password: (password_nuevo: string) => { },
-    cambiar_institucion: (i_nueva:string)=> { },
-    login_app: (user: Logged_User) => {},
-    logout: () => { },
-    actualizar_info: (id:number)=>{}
-}); */
-
 export default function UserContextProvider  ({ children }: { children: React.ReactNode })  {
     const [user,setUser] = useState<Logged_User>(new Logged_Alumno("","","",0,0,0,0,0,new Date(),0));
+    const [session, setSession] = useState<Session | undefined | null>()
     
     const [isLoggedIn, setIsLoggedIn] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false); 
+
+    // Fetch the session once, and subscribe to auth state changes
+  useEffect(() => {
+    const fetchSession = async () => {
+      setIsLoading(true)
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession()
+      if (error) {
+        console.error('Error fetching session:', error)
+      }
+      setSession(session)
+      setIsLoading(false)
+    }
+    fetchSession()
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', { event: _event, session })
+      setSession(session)
+    })
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, []);
+
+  // Fetch the profile when the session changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      /* setIsLoading(true)
+      if (session) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        setProfile(data)
+      } else {
+        setProfile(null)
+      }
+      setIsLoading(false) */
+    }
+    fetchProfile()
+  }, [session])
 
     const cambiarNombre = async (nombre_nuevo: string) => {
         //conectar a db, update
@@ -116,9 +151,11 @@ export default function UserContextProvider  ({ children }: { children: React.Re
 
     const logout = async () => {
         setIsLoggedIn(false);
-        setUser(new Logged_Alumno("","","",0,0,0,0,0,new Date(),0))
+        setUser(new Logged_Alumno("","","",0,0,0,0,0,new Date(),0));
         try {
             await  AsyncStorage.removeItem("token");
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error
         } catch (error) {
             console.log(error,"al cerrar la sesión");
         }
@@ -163,7 +200,7 @@ export default function UserContextProvider  ({ children }: { children: React.Re
     }
 
     return (
-      <UserContext.Provider value={{user,isLoggedIn , cambiarNombre,cambiar_institucion,
+      <UserContext.Provider value={{user, session,isLoggedIn, isLoading , cambiarNombre,cambiar_institucion,
                                   login_app, logout, cambiar_mail,cambiar_password,actualizar_info}}>
           {children}
       </UserContext.Provider>
@@ -171,8 +208,3 @@ export default function UserContextProvider  ({ children }: { children: React.Re
     
 }
 
-
-
-/* export const useUserContext = () => {
-    return useContext(UserContext);
-} */
