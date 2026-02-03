@@ -204,22 +204,15 @@ const eliminar_usuario = async (id:number)=>{
   try {
     const {data:auth,error:auth_error} = await supabase.auth.getUser();
     if (auth_error) throw auth_error
-    
+
     if (auth.user){
       const { data, error } = await supabase.functions.invoke('user-self-deletion', {
         body: { name: 'Functions',auth_id: auth.user.id},
       });
       if (error) throw error
-      console.log(data)
+      //console.log(data)
     }
-    
-    
-    
-    /* const { error } = await supabase
-      .from('Users')
-      .delete()
-      .eq('id', id);
-     */
+   
   } catch (error) {
     console.error(error)
   }
