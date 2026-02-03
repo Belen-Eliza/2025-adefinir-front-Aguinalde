@@ -39,29 +39,26 @@ const entrar = async (mail: string)=>{
 
 const ingresar = async  (mail:string, contraseña: string) =>{
   try {
-    const { data: user, error } = await supabase.from('Users').select('*').eq('mail', mail).single();
-
-    if (error) {
-      console.error('Error:', error.message);
-      return;
+    //sign in auth
+    const {data:auth,error:auth_error} = await supabase.auth.signInWithPassword({
+      "email": mail,
+      "password": contraseña
+    });
+    if (auth_error)  {
+      if (auth_error.code=='invalid_credentials') {
+        error_alert("Usuario o contraseña incorrectos");
+        return
+      }
+      else throw auth_error
     }
     
-    if (user ) {
-      //sign in auth
+    if (auth.user){
+      const { data: user, error } = await supabase.from('Users').select('*').eq('mail', mail).single();
+      if (error) throw error
 
-      const {data:auth,error:auth_error} = await supabase.auth.signInWithPassword({
-        "email": mail,
-        "password": contraseña
-      });
-      
-      const password_hash = await hash(contraseña);
-      if (password_hash!= user.hashed_password || mail!= user.mail) {
-        error_alert("Usuario o contraseña incorrectos");
-        
-      } else{
-        
-
-        //devolver usuario hallado      
+      if (user ) {
+                
+      //devolver usuario hallado      
         if (user.is_prof){
           const { data: profe, error } = await supabase.from('Profesores').select('*').eq('id', user.id).single();
           if (error) throw error
@@ -72,11 +69,9 @@ const ingresar = async  (mail:string, contraseña: string) =>{
           return  new Logged_Alumno(user.mail,user.username,user.hashed_password,
                   user.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,user.avatar);
         }
-      }
-    } else{
-      error_alert("Usuario o contraseña incorrectos");
+      } 
     }
-    
+   
   } catch (error: any) {
     console.error('Error fetching user:', error.message);
   }
