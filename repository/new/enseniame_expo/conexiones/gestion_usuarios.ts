@@ -202,11 +202,19 @@ const cuenta_existe = async (mail:string)=>{
 
 const eliminar_usuario = async (id:number)=>{
   try {
-    const { data, error } = await supabase.functions.invoke('user-self-deletion', {
-        body: { name: 'Functions' },
+    const {data:auth,error:auth_error} = await supabase.auth.getUser();
+    if (auth_error) throw auth_error
+    
+    if (auth.user){
+      const { data, error } = await supabase.functions.invoke('user-self-deletion', {
+        body: { name: 'Functions',auth_id: auth.user.id},
       });
-    if (error) throw error
-    console.log(data)
+      if (error) throw error
+      console.log(data)
+    }
+    
+    
+    
     /* const { error } = await supabase
       .from('Users')
       .delete()

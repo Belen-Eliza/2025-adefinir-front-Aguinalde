@@ -76,7 +76,7 @@ export default function Perfil (){
       },
       {text: 'Confirmar', onPress: () => {
         eliminar_usuario(contexto.user.id);
-        //salir();
+        salir();
         }},
     ])
       
@@ -105,8 +105,7 @@ export default function Perfil (){
 
     const salir = ()=>{
       contexto.logout();
-      router.dismissTo("/")
-      
+      router.dismissTo("/");      
     }
 
     const borrar_cambios = ()=>{
