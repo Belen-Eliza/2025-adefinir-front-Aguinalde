@@ -44,7 +44,7 @@ export default function Login() {
     const lower_case_mail = mail.toLowerCase();
     const isEmailValid = validateEmail(lower_case_mail).status;
     const isPasswordValid = validatePassword(password).status;
-    if (isPasswordValid && isEmailValid) {
+    if (isPasswordValid ) {
       try {
         //acceder a db
       setLoading(true)
