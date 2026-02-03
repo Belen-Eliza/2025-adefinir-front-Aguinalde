@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback,  useState } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useUserContext } from '@/context/UserContext';
-import { supabase } from '@/utils/supabase';
-import { mis_objetivos,mis_objetivos_completados } from '@/conexiones/objetivos';
+import { useUserContext } from '@/hooks/useUserContext';
+import { mis_objetivos, } from '@/conexiones/objetivos';
 import { useFocusEffect } from 'expo-router';
 
 // Estructura de objetivo activo esperada en BD

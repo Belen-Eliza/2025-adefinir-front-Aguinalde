@@ -12,7 +12,7 @@ import { validateEmail, validatePassword, validateInstitution } from '@/componen
 import Toast from 'react-native-toast-message';
 import { registrar_profe } from '@/conexiones/gestion_usuarios';
 import { Profesor } from '@/components/types';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { BotonLogin } from '@/components/botones';
 import { IconTextInput, PasswordInput } from '@/components/inputs';
 import { paleta } from '@/components/colores';

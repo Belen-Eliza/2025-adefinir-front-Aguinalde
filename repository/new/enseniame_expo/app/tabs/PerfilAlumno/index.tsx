@@ -5,7 +5,7 @@ import {  router, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { error_alert, success_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { paleta, paleta_colores } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { Image } from 'expo-image';
@@ -21,6 +21,7 @@ type Insignia = {
   nombre: string;
   descripcion: string;
   image_url: string;
+  created_at:Date
 }
 
 export default function Perfil (){
@@ -41,7 +42,7 @@ export default function Perfil (){
         setLoading(true)
         try {
           const p = await my_avatar(contexto.user.id);
-          const img = require("../../../assets/images/pfp.jpg");
+          const img = require("../../../assets/images/LSA.png");
           
           if (p.Avatar) {setPfp(p.Avatar)}
           else setPfp({image_url:img,id:1,racha_desbloquear:1});
@@ -72,8 +73,18 @@ export default function Perfil (){
           const m= await mis_modulos_completos(contexto.user.id);      
           if (m && m.length>0) setModulos(m.length);
 
-          const i = await mis_insignias(contexto.user.id);
-          setInsignias(i || []);                  
+          const i: Insignia[] = await mis_insignias(contexto.user.id);
+          if (i&& i.length>0){
+            let ordenadas =i.sort(function(a,b){
+              if (a.created_at > b.created_at){
+                return -1
+              } if (a.created_at < b.created_at){
+                return 1
+              } return 0
+            })
+            setInsignias(ordenadas); 
+          }
+                           
 
           setLoading(false)
         } catch (error) {

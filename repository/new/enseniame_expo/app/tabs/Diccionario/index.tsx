@@ -14,7 +14,7 @@ import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import {  buscarSenias, eliminar_video } from '@/conexiones/videos';
 import { ThemedText } from '@/components/ThemedText';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { router } from 'expo-router';
 import { SmallPopupModal } from '@/components/modals';
 import Toast from 'react-native-toast-message';

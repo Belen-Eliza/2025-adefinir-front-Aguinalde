@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
-import { useUserContext } from '../../../context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { useDailyMissions } from '../../../hooks/useDailyMissions';
 import { MissionCard } from '../../../components/missions/MissionCard';
 import { MissionRewardModal } from '../../../components/missions/MissionRewardModal';

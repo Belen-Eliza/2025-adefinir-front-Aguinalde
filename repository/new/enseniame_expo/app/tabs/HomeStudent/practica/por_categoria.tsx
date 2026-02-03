@@ -2,11 +2,11 @@ import React, { useState,  useCallback,  } from 'react';
 import { View, Text, StyleSheet, Pressable,  Modal, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import { useUserContext } from '@/context/UserContext';
-import {  Insignia, Modulo, Senia_Alumno } from '@/components/types';
+import { useUserContext } from '@/hooks/useUserContext';
+import {  Insignia,  Senia_Alumno } from '@/components/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { error_alert } from '@/components/alert';
-import { paleta, paleta_colores } from '@/components/colores';
+import { paleta,  } from '@/components/colores';
 import { BotonLogin } from '@/components/botones';
 import { estilos } from '@/components/estilos';
 import { ThemedText } from '@/components/ThemedText';
@@ -135,7 +135,7 @@ export default  function Practica (){
             <View style={[estilos.centrado,{flexDirection:"row",justifyContent:"space-between",marginTop:50, marginBottom: 20,width:"100%"}]}>
                 <Pressable
                 style={[styles.backBtn]}
-                onPress={() => { router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: categoria?.id } })} }
+                onPress={() => { contexto.user.goHome()} }
             >
                 <Ionicons name="arrow-back" size={25} color="#20bfa9" style={{ marginRight: 6 }} />                
             </Pressable>
@@ -201,7 +201,7 @@ export default  function Practica (){
                     <ThemedText type='defaultSemiBold' style={estilos.centrado} lightColor={paleta.dark_aqua}>0 de {senias.length} correctas</ThemedText>
                     <ThemedText type='defaultSemiBold' lightColor={paleta.dark_aqua}>Sigue practicando para volver a encaminarte</ThemedText>
                 
-                <BotonLogin callback={()=>{contexto.user.goHome();setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
+                <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent");setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                 </View>
                 ):(
                   <View  >
@@ -231,7 +231,7 @@ export default  function Practica (){
                         </View>                                                
                     </View>
                 
-                <BotonLogin callback={()=>{contexto.user.goHome();setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
+                <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent");setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                     </View>
                 
                 )}                                          

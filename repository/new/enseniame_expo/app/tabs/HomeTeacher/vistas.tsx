@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TouchableOpacity, FlatList, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Pressable,  FlatList, ActivityIndicator, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
-import { useUserContext } from '@/context/UserContext';
-import { Modulo, Senia, Senia_Info } from '@/components/types';
-import { buscarSenias, mis_senias } from '@/conexiones/videos';
+import { useUserContext } from '@/hooks/useUserContext';
+import {  Senia_Info } from '@/components/types';
+import { mis_senias } from '@/conexiones/videos';
 import { error_alert } from '@/components/alert';
 import { paleta, paleta_colores } from '@/components/colores';
 import { visualizaciones_profe } from '@/conexiones/visualizaciones';

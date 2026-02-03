@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import VideoPlayer from "@/components/VideoPlayer";
 import { paleta, paleta_colores } from "@/components/colores";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import Toast from "react-native-toast-message";
 import { alumno_ver_senia,} from "@/conexiones/visualizaciones";
 import { error_alert, success_alert } from "@/components/alert";

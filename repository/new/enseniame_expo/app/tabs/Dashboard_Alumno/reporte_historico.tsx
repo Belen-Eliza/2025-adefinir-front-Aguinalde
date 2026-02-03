@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, RefreshControl, SafeAreaView, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, RefreshControl, SafeAreaView, TouchableOpacity, TextInput,  } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { supabase } from '@/utils/supabase';
 import { SmallPopupModal } from '@/components/modals';
 import { useFocusEffect } from 'expo-router';
-import { mis_senias_dominadas, senias_aprendidas_reporte } from '@/conexiones/aprendidas';
-import { mis_modulos_completos, mis_modulos_completos_info } from '@/conexiones/modulos';
+import {  senias_aprendidas_reporte } from '@/conexiones/aprendidas';
+import {  mis_modulos_completos_info } from '@/conexiones/modulos';
 import { error_alert, success_alert } from '@/components/alert';
 import { crear_objetivo_mensual, mi_objetivo_mensual } from '@/conexiones/objetivos';
 

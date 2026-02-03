@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, SectionList,
   RefreshControl, TouchableOpacity, Pressable, 
   ScrollView} from 'react-native';
 import { useRouter } from 'expo-router';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import ProgressCard from '@/components/ProgressCard';
 import GlobalProgress from '@/components/GlobalProgress';
 import HistorialItem from '@/components/HistorialItem';

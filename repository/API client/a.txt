@@ -1,0 +1,5 @@
+BEGIN; -- Ensure RLS is enabled (no-op if already enabled) ALTER TABLE public."Alumno_Insignia" ENABLE ROW LEVEL SECURITY;
+
+-- Drop the existing policy if present DO $$ BEGIN IF EXISTS ( SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'Alumno_Insignia' AND policyname = 'Enable all access for all users' ) THEN EXECUTE format('DROP POLICY "%s" ON public."Alumno_Insignia";', 'Enable all access for all users'); END IF; END;
+
+-- Replace with a new policy checking jwt claim pub_key CREATE POLICY "Enable all access for all users" ON public."Alumno_Insignia" FOR ALL TO PUBLIC USING ( ( -- Authenticated users: allow (SELECT auth.uid()) IS NOT NULL ) OR ( -- Anonymous requests: allow only for specific publishable keys in the JWT claim "pub_key" (SELECT auth.uid()) IS NULL AND (auth.jwt() ->> 'pub_key') IN ( 'pk_live_allowedKey1', 'pk_live_allowedKey2', 'pk_test_allowedKey1' ) ) ) WITH CHECK ( ( (SELECT auth.uid()) IS NOT NULL ) OR ( (SELECT auth.uid()) IS NULL AND (auth.jwt() ->> 'pub_key') IN ( 'pk_live_allowedKey1', 'pk_live_allowedKey2', 'pk_test_allowedKey1' ) ) ); COMMIT;

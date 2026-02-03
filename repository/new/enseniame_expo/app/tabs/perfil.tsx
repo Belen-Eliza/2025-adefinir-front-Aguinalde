@@ -5,7 +5,7 @@ import {  router, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { error_alert, success_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { validateEmail, validatePassword } from '@/components/validaciones';
 import { eliminar_usuario } from '@/conexiones/gestion_usuarios';
 import { traerReportesProfe } from '@/conexiones/reportes';
@@ -18,6 +18,7 @@ import { SmallPopupModal } from '@/components/modals';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Avatar } from '@/components/types';
 import { cambiar_mi_avatar, my_avatar, todos_avatares } from '@/conexiones/avatars';
+import { supabase } from '@/utils/supabase';
 
 export default function Perfil (){
     const [name,setName]= useState<string>();
@@ -54,7 +55,7 @@ export default function Perfil (){
             setReportes(reportes || []);
 
             const p = await my_avatar(contexto.user.id);
-            const img = require("../../assets/images/pfp.jpg");
+            const img = require("../../assets/images/LSA.png");
             
             if (p.Avatar) {setPfp(p.Avatar)}
             else setPfp({image_url:img,id:1,racha_desbloquear:1});
@@ -104,8 +105,7 @@ export default function Perfil (){
 
     const salir = ()=>{
       contexto.logout();
-      router.dismissTo("/")
-      
+      router.dismissTo("/");      
     }
 
     const borrar_cambios = ()=>{
@@ -148,7 +148,7 @@ export default function Perfil (){
             } else error_alert("La institución no puede estar vacía");
         }
         
-        setTimeout( ()=> contexto.actualizar_info(contexto.user.id),400);
+        setTimeout( ()=> supabase.auth.refreshSession(),400);
         if (exito) {
             setNameModalVisible(false);
             setMailModalVisible(false);

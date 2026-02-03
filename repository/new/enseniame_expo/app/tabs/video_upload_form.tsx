@@ -12,14 +12,13 @@ import { error_alert, success_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { paleta, paleta_colores } from '@/components/colores';
+import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { BotonLogin } from '@/components/botones';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { SmallPopupModal } from '@/components/modals';
-import { IconTextInput } from '@/components/inputs';
 import { crearNuevaCategoria, traerCategorias } from '@/conexiones/categorias';
-import { router, useFocusEffect } from 'expo-router';
+import {  useFocusEffect } from 'expo-router';
 
 export default function VideoUploadForm() {
   

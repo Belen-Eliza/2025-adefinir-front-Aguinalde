@@ -42,13 +42,12 @@ const sumar_racha= async (id_alumno:number) =>{
 }
 
 const perder_racha = async (id_alumno:number) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('Alumnos')
         .update({ racha: 1, last_login: new Date() })
         .eq('id', id_alumno)
         .select()
-    if (error) throw error
-    console.log(data)
+    if (error) throw error    
 }
 
 export {mi_racha, sumar_racha, perder_racha}

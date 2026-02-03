@@ -1,12 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, View, Text, ScrollView, ActivityIndicator, RefreshControl, StyleSheet, Image } from 'react-native';
-import { useUserContext } from '@/context/UserContext';
-import { PeriodSelector } from '@/components/leaderboard/PeriodSelector';
-import { LeaderboardRow } from '@/components/leaderboard/LeaderboardRow';
-import { LeaderboardMyPositionCard } from '@/components/leaderboard/LeaderboardMyPositionCard';
-import { fetchGroupLeaderboard } from '@/conexiones/leaderboard';
+import { useUserContext } from '@/hooks/useUserContext';
 import { getUserClub, getClubUsersProgress } from '@/conexiones/leaderboard_grupo_lectura';
-import type { PeriodType, LeaderboardEntry, LeaderboardResponse } from '@/components/leaderboard/types';
+import type { PeriodType } from '@/components/leaderboard/types';
 import { supabase } from '@/utils/supabase';
 
 export default function LeaderboardGrupoScreen() {

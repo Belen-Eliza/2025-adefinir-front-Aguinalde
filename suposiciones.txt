@@ -1,8 +1,11 @@
 3 estados de señas:
-*Pendientes: no vistas
-*Aprendiendo: visualizadas. Los profesores ven la vista en sus videos
+*Pendientes: no aparecen en el dashboard
+*Aprendiendo: marcadas por el alumno. Pueden ver el progreso (cantidad de aciertos) en el dashboard
 *Dominadas: 10 marcadas como "supe"
+
+Además, las señas se marcan como "visualizadas" automáticamente apenas el alumno las abre. El profesor ve las vistas en sus videos
 
 Un módulo está completo cuando todas sus señas están "dominadas".
 Se puede pasar de pendientes a aprendiendo y viceversa, pero no se puede revertir una dominada.
-En la práctica interactiva, mostrar aprendiendo y dominadas -> dar la opción de elegir entre "todas", "solo aprendiendo" y "aprendiendo y dominadas"
+En la práctica interactiva, dar la opción de elegir entre "todas", "sólo aprendiendo" y "aprendiendo y dominadas".
+Al elegir "todas", las pendientes no se transforman en aprendiendo, por lo que no se suman los aciertos

@@ -9,7 +9,7 @@ import { estilos } from '@/components/estilos';
 import Toast from 'react-native-toast-message';
 import { getRanking } from '@/conexiones/calificaciones';
 import { RatingCard } from '@/components/review';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 
 type DatosRanking ={
     id: number;

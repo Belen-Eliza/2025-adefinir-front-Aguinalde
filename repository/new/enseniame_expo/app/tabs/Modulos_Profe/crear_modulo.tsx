@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, Pressable, Alert,  TouchableOpacity,  FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import { paleta, paleta_colores } from "@/components/colores";
 import { error_alert } from "@/components/alert";
 import Toast from "react-native-toast-message";

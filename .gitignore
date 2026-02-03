@@ -22,3 +22,5 @@ SqueakDebug.log
 github-*.zip
 node_modules
 node_modules
+
+repository/API client/.env

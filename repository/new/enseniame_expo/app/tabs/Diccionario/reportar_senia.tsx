@@ -8,7 +8,7 @@ import VideoPlayer from '@/components/VideoPlayer';
 import { success_alert,error_alert } from '@/components/alert';
 import { paleta } from '@/components/colores';
 import { ThemedText } from '@/components/ThemedText';
-import { useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { router,useLocalSearchParams } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { traerCategorias } from '@/conexiones/categorias';

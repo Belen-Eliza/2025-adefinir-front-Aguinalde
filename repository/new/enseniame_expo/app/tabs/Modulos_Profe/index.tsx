@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, TextInp
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { eliminar_modulo,  mis_modulos_calificados } from "@/conexiones/modulos";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import { error_alert } from "@/components/alert";
 import Toast from "react-native-toast-message";
 import { ThemedText } from "@/components/ThemedText";

@@ -6,9 +6,8 @@ import { alumno_completo_modulo, buscar_modulo } from "@/conexiones/modulos";
 import { ThemedText } from "@/components/ThemedText";
 import { Image } from 'expo-image';
 import { paleta, paleta_colores } from "@/components/colores";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import Toast from "react-native-toast-message";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { error_alert, success_alert } from "@/components/alert";
 import { alumno_ya_califico_modulo, calificarModulo } from "@/conexiones/calificaciones";
 import { estilos } from "@/components/estilos";
@@ -97,7 +96,7 @@ export default function ModuloCompletado (){
             </>
             )}
             
-            <BotonLogin callback={()=>{router.back();contexto.user.goHome()}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent")}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
 
             {/* Modal para calificación */}
             <Modal

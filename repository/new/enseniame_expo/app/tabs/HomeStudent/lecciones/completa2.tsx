@@ -1,17 +1,13 @@
 import React, { useCallback,  useState } from "react";
-import { View, Text, Pressable, StyleSheet, TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
+import { View, Text,  StyleSheet,  ActivityIndicator,  } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import {  Modulo } from "@/components/types";
-import { alumno_completo_modulo, buscar_modulo } from "@/conexiones/modulos";
-import { ThemedText } from "@/components/ThemedText";
 import { Image } from 'expo-image';
 import { paleta, paleta_colores } from "@/components/colores";
-import { useUserContext } from "@/context/UserContext";
+import { useUserContext } from '@/hooks/useUserContext';
 import Toast from "react-native-toast-message";
-import { error_alert, success_alert } from "@/components/alert";
-import { alumno_ya_califico_modulo, calificarModulo } from "@/conexiones/calificaciones";
+import { error_alert } from "@/components/alert";
 import { estilos } from "@/components/estilos";
-import { AntDesign } from "@expo/vector-icons";
 import { BotonLogin } from "@/components/botones";
 import { buscarCategoria } from "@/conexiones/categorias";
 
@@ -64,7 +60,7 @@ export default function ModuloCompletado (){
               transition={0}
             />       
             
-            <BotonLogin callback={()=>{router.back();contexto.user.goHome()}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent")}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
            
             <Toast/>
         </View>
