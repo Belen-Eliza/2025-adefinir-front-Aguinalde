@@ -116,7 +116,7 @@ class Logged_Alumno extends Logged_User {
     constructor(mail:string,name: string,pass:string,id:number,racha:number,racha_maxima:number,xp:number,
                 coins:number,last_login:Date,nivel:number,avatar?:string){
         super(mail,name,pass,id,avatar);
-        this.racha=racha;
+        this.racha=racha;        
         this.racha_maxima= racha_maxima;
         this.xp=xp;
         this.coins=coins;        

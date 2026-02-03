@@ -1,24 +1,17 @@
-import { Pressable,  Text,  TextInput,  View,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Modal,
-  TouchableOpacity
+import { Pressable,  TextInput,  View,
+  StyleSheet, ScrollView, Modal,TouchableOpacity
 } from 'react-native';
-import { Image } from 'expo-image';
-import { useCallback, useEffect, useState } from "react";
-import { Link, router, useFocusEffect } from 'expo-router';
+import { useState } from "react";
+import { Link, router} from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { validateEmail } from '@/components/validaciones';
-import { error_alert, success_alert } from '@/components/alert';
+import { error_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
-import { cuenta_existe, entrar, enviar_otp, ingresar, verificar_otp } from '@/conexiones/gestion_usuarios';
-import { enviar_mail_recuperacion, generar_otp } from '@/components/mails';
+import { cuenta_existe,  enviar_otp, verificar_otp } from '@/conexiones/gestion_usuarios';
 import { useUserContext } from '@/hooks/useUserContext';
 import { BotonLogin } from '@/components/botones';
-import { IconTextInput, PasswordInput } from '@/components/inputs';
+import { IconTextInput } from '@/components/inputs';
 import { paleta } from '@/components/colores';
 
 export default function Acc_recovery() {
@@ -26,35 +19,21 @@ export default function Acc_recovery() {
   const [errorEmail, setErrorEmail] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [inputCode,setInputCode]= useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [codigo,setCodigo] = useState("1234");
+  const [showPassword, setShowPassword] = useState(false);  
   const contexto=useUserContext();
-
-  const img = require("../assets/images/lsa-aqua.png");
+  
 
   const handleEmailChange = (text:any) => {
       setMail(text);
       setErrorEmail(validateEmail(text).msj);
   };
-
-  useFocusEffect(
-      useCallback(() => {
-        const nuevo_codigo= generar_otp();
-        setCodigo(nuevo_codigo);
-        return () => {
-        };
-      }, [])
-    );
   
-
   async function enviar_codigo() {
      //verificar que la cuenta exista en la db
-    
     const lower_case_mail =mail.toLowerCase();
     if (validateEmail(lower_case_mail).status && await cuenta_existe(lower_case_mail)){
       try {
-        enviar_otp(mail)
-        //enviar_mail_recuperacion(lower_case_mail,codigo);
+        enviar_otp(mail)        
         setModalVisible(true);
       } catch (error) {
         error_alert("No se pudo enviar el mail");
@@ -78,17 +57,7 @@ export default function Acc_recovery() {
       error_alert("Ocurrió un error");
       console.error(error)
     }
-    
-    /* if (inputCode===codigo){
-      success_alert("Código correcto");
-      const usuario=await entrar(lower_case_mail);
-      
-      if (usuario) {        
-        contexto.login_app(usuario);}
-      
-    } else {
-      error_alert("Contraseña incorrecta");
-    } */
+        
   }
   return (
     <View  style={styles.mainView}  >

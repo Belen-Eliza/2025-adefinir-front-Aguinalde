@@ -52,18 +52,16 @@ export default function UserContextProvider  ({ children }: { children: React.Re
   // Fetch the profile when the session changes
   useEffect(() => {
     const fetchProfile = async () => {
-      /* setIsLoading(true)
+      setIsLoading(true)
       if (session) {
         const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-        setProfile(data)
-      } else {
-        setProfile(null)
-      }
-      setIsLoading(false) */
+          .from('Users')
+          .select('id')
+          .eq('auth_id', session.user.id)
+          .single();
+        if (data) actualizar_info(data.id)
+      } 
+      setIsLoading(false)
     }
     fetchProfile()
   }, [session])
@@ -87,18 +85,18 @@ export default function UserContextProvider  ({ children }: { children: React.Re
     const cambiar_mail = async (mail_nuevo: string) => {
         //conectar a db, update
         try {
+            const { data:auth, error:error_auth }=await supabase.auth.updateUser( {email:mail_nuevo});
+            if (error_auth) throw error_auth
             const { data, error } = await supabase
                 .from('Users')
                 .update({ mail: mail_nuevo })
                 .eq('id', user.id)
                 .select("*");
 
-            if (error) error_alert("Error al actualizar perfil");
-            //lidiar con error de repeticion de mails
-
-            if (data && data.length>0) console.log(data);
+            if (error) throw error            
             
         } catch (error) {
+            error_alert("Error al actualizar perfil");
             console.error(error);
         }
     }
@@ -108,16 +106,21 @@ export default function UserContextProvider  ({ children }: { children: React.Re
         //conectar a db, update
         const hashed_password = await hash(password_nuevo);
         try {
+            const { data:auth, error:error_auth } = await supabase.auth.updateUser({
+                password: password_nuevo
+                });
+            if (error_auth) throw error_auth
             const { data, error } = await supabase
                 .from('Users')
                 .update({ hashed_password: hashed_password })
                 .eq('id', user.id)
                 .select();
 
-            if (error) error_alert("Error al actualizar perfil");
-            if (data && data.length>0) console.log(data)
+            if (error) throw error
+            
         } catch (error) {
             console.error(error);
+            error_alert("Error al actualizar perfil");
         }
     }
 
@@ -167,7 +170,7 @@ export default function UserContextProvider  ({ children }: { children: React.Re
             const { data: user, error } = await supabase.from('Users').select('*').eq('id', id).single();
 
             if (error) {
-                console.error('Error:', error.message);
+                console.error('Error de actualización:', error.message);
                 return;
             }
             if (user ) {

@@ -17,7 +17,7 @@ const entrar = async (mail: string)=>{
   const { data: user, error } = await supabase.from('Users').select('*').eq('mail', mail).single();
 
     if (error) {
-      console.error('Error:', error.message);
+      console.error('Error en entrar:', error.message);
       return;
     }
     if (user ) {
@@ -61,10 +61,12 @@ const ingresar = async  (mail:string, contraseña: string) =>{
       //devolver usuario hallado      
         if (user.is_prof){
           const { data: profe, error } = await supabase.from('Profesores').select('*').eq('id', user.id).single();
+          console.log(profe)
           if (error) throw error
           return new Logged_Profesor(user.mail,user.username,user.hashed_password,profe.institucion,user.id,profe.is_admin,user.avatar) ;
         } else {
           const { data: alumno, error } = await supabase.from('Alumnos').select('*').eq('id', user.id).single();
+          console.log(alumno)
           if (error) throw error
           return  new Logged_Alumno(user.mail,user.username,user.hashed_password,
                   user.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,user.avatar);
@@ -95,7 +97,7 @@ const registrar_profe = async (user:Profesor )=>{
         },    
       });
     if (auth_error) {
-      console.error('Error:', auth_error);
+      console.error('Error autenticando:', auth_error);
       return;
     }    
 
@@ -109,7 +111,7 @@ const registrar_profe = async (user:Profesor )=>{
         ;
 
     if (error) {
-      console.error('Error:', error.message);
+      console.error('Error al registrar profe:', error.message);
       return;
     }
     if (data ) {      
@@ -147,7 +149,7 @@ const registrar_alumno = async (user:User)=>{
         },  
       });
     if (auth_error) {
-      console.error('Error:', auth_error);
+      console.error('Error de autenticación:', auth_error);
       return;
     }  
 
@@ -160,7 +162,7 @@ const registrar_alumno = async (user:User)=>{
         .single()
         ;
          if (error) {
-      console.error('Error:', error.message);
+      console.error('Error al registrar alumno:', error.message);
       return;
       }
       if (data ) {      
@@ -172,10 +174,7 @@ const registrar_alumno = async (user:User)=>{
         return new Logged_Alumno(user.mail,user.username,user.hashed_password,
                     alumno.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,data.avatar);
       }
-    }
-    
-
-   
+    }       
 
   } catch (error: any) {
     console.error('Error insertando:', error.message);
@@ -187,7 +186,7 @@ const cuenta_existe = async (mail:string)=>{
     const { data: user, error } = await supabase.from('Users').select('*').eq('mail', mail);
 
     if (error) {
-      console.error('Error:', error.message);
+      console.error('Error al verificar la cuenta:', error.message);
       return false;
     }
 
@@ -203,12 +202,16 @@ const cuenta_existe = async (mail:string)=>{
 
 const eliminar_usuario = async (id:number)=>{
   try {
-    
-    const { error } = await supabase
+    const { data, error } = await supabase.functions.invoke('user-self-deletion', {
+        body: { name: 'Functions' },
+      });
+    if (error) throw error
+    console.log(data)
+    /* const { error } = await supabase
       .from('Users')
       .delete()
       .eq('id', id);
-          
+     */
   } catch (error) {
     console.error(error)
   }

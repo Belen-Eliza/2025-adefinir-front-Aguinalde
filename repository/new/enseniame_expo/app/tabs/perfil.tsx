@@ -18,6 +18,7 @@ import { SmallPopupModal } from '@/components/modals';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Avatar } from '@/components/types';
 import { cambiar_mi_avatar, my_avatar, todos_avatares } from '@/conexiones/avatars';
+import { supabase } from '@/utils/supabase';
 
 export default function Perfil (){
     const [name,setName]= useState<string>();
@@ -148,7 +149,7 @@ export default function Perfil (){
             } else error_alert("La institución no puede estar vacía");
         }
         
-        setTimeout( ()=> contexto.actualizar_info(contexto.user.id),400);
+        setTimeout( ()=> supabase.auth.refreshSession(),400);
         if (exito) {
             setNameModalVisible(false);
             setMailModalVisible(false);
