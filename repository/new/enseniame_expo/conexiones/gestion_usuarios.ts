@@ -61,12 +61,12 @@ const ingresar = async  (mail:string, contraseña: string) =>{
       //devolver usuario hallado      
         if (user.is_prof){
           const { data: profe, error } = await supabase.from('Profesores').select('*').eq('id', user.id).single();
-          console.log(profe)
+          //console.log(profe)
           if (error) throw error
           return new Logged_Profesor(user.mail,user.username,user.hashed_password,profe.institucion,user.id,profe.is_admin,user.avatar) ;
         } else {
           const { data: alumno, error } = await supabase.from('Alumnos').select('*').eq('id', user.id).single();
-          console.log(alumno)
+          //console.log(alumno)
           if (error) throw error
           return  new Logged_Alumno(user.mail,user.username,user.hashed_password,
                   user.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,user.avatar);
@@ -209,8 +209,7 @@ const eliminar_usuario = async (id:number)=>{
       const { data, error } = await supabase.functions.invoke('user-self-deletion', {
         body: { name: 'Functions',auth_id: auth.user.id},
       });
-      if (error) throw error
-      //console.log(data)
+      if (error) throw error    
     }
    
   } catch (error) {

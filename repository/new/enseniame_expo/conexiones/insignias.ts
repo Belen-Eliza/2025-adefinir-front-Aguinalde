@@ -4,6 +4,14 @@ import { modulos_completados_por_alumno } from './modulos';
 import { mis_objetivos_completados } from './objetivos';
 import { mi_racha } from './racha';
 
+type Insignia = {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  image_url: string;
+  created_at:Date
+}
+
 const todas_insignias = async () => {
     
     let { data: Insignias, error } = await supabase
@@ -87,12 +95,18 @@ const mis_insignias_ganadas = async (id_alumno:number) => {
 }
 
 const mis_insignias = async (id_alumno:number) => {
+    let res: Insignia[]=[]
     let {data: mis_i, error: e2} = await supabase
         .from('Alumno_Insignia')
         .select('*, Insignias(*)')
         .eq("id_alumno",id_alumno);
     if (e2) throw e2;
-    return mis_i?.map(e=>e.Insignias)
+    if (mis_i){
+        res = mis_i.map(each=>{return {id:each.Insignias.id,nombre:each.Insignias.nombre,
+            descripcion:each.Insignias.descripcion,image_url:each.Insignias.image_url,created_at:each.created_at
+        }})
+    }
+    return res
 }
 
 const ganar_insignia_senia = async (id_alumno:number) => {

@@ -19,6 +19,7 @@ import { shuffleArray } from '@/components/validaciones';
 import { buscar_modulo } from '@/conexiones/modulos';
 import { FlashCardNombre, FlashCardVideo } from '@/components/practica_lecciones';
 import VideoPlayer from '@/components/VideoPlayer';
+import { ganar_insignia_modulo,  ganar_insignia_senia } from '@/conexiones/insignias';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -110,7 +111,9 @@ export default  function Practica (){
             setTerminado(true); 
             try {
                 await awardXPClient(contexto.user.id,cant_correctas*2);
-                contexto.actualizar_info(contexto.user.id)
+                contexto.actualizar_info(contexto.user.id);
+                await ganar_insignia_senia(contexto.user.id);
+                await ganar_insignia_modulo(contexto.user.id);
             } catch (error) {
                 error_alert("Ocurrió un error al guardar tu progreso");
                 console.error(error)

@@ -21,6 +21,7 @@ type Insignia = {
   nombre: string;
   descripcion: string;
   image_url: string;
+  created_at:Date
 }
 
 export default function Perfil (){
@@ -72,8 +73,18 @@ export default function Perfil (){
           const m= await mis_modulos_completos(contexto.user.id);      
           if (m && m.length>0) setModulos(m.length);
 
-          const i = await mis_insignias(contexto.user.id);
-          setInsignias(i || []);                  
+          const i: Insignia[] = await mis_insignias(contexto.user.id);
+          if (i&& i.length>0){
+            let ordenadas =i.sort(function(a,b){
+              if (a.created_at > b.created_at){
+                return -1
+              } if (a.created_at < b.created_at){
+                return 1
+              } return 0
+            })
+            setInsignias(ordenadas); 
+          }
+                           
 
           setLoading(false)
         } catch (error) {

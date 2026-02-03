@@ -27,7 +27,7 @@ interface Senia {
 }
 type Calificaciones = {
   id_alumno: number;
-  Users?: {username:string};
+  Alumnos?: {Users: {username:string, id:number}};
   id_modulo: number;
   puntaje: number;
   comentario? : string;
@@ -364,7 +364,7 @@ export default function DetalleModuloScreen() {
                       <RatingStars color={paleta.strong_yellow} puntaje={item.puntaje} />
                       <ThemedText>
                         <ThemedText lightColor="gray">{get_antiguedad(item.created_at)}</ThemedText>{' - '}
-                        <ThemedText lightColor="gray">{item.Users? item.Users.username: "Anónimo"}</ThemedText>
+                        <ThemedText lightColor="gray">{item.Alumnos? item.Alumnos.Users.username: "Anónimo"}</ThemedText>
                       </ThemedText>
                       <ThemedText style={{marginTop: 10}} lightColor="#404243ff">{item.comentario ? item.comentario : null}</ThemedText>
                     </View> 

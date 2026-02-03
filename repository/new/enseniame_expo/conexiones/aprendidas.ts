@@ -151,7 +151,7 @@ const sumar_acierto = async (id_alumno:number,id_senia:number) => {
     if (senia){
         const { data, error } = await supabase
             .from('Alumno_Senia')
-            .update({ cant_aciertos: senia.cant_aciertos+1 })
+            .update({ cant_aciertos: senia.cant_aciertos+1, updated_at: new Date() })
             .eq("id_alumno",id_alumno)
             .eq("id_senia",id_senia);
         if (error) throw error

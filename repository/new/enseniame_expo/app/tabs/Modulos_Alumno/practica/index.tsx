@@ -18,6 +18,7 @@ import { shuffleArray } from '@/components/validaciones';
 import { FlashCardNombre, FlashCardVideo } from '@/components/practica_lecciones';
 import { buscar_modulo } from '@/conexiones/modulos';
 import VideoPlayer from '@/components/VideoPlayer';
+import { ganar_insignia_modulo, ganar_insignia_senia } from '@/conexiones/insignias';
 
 type Senia_Leccion ={
   senia: Senia_Alumno;    
@@ -36,8 +37,7 @@ export default  function Practica (){
     const [loading, setLoading] = useState(true);
     const [senia_actual,setSeniaActual] = useState<Senia_Leccion>();
     const [index_actual,setIndex] =useState(0);
-    const [mostrar_significado,setMostrarSignificado]= useState(false);
-    const [mostrar_video,setMostrarVideo]= useState(false);
+    const [mostrar_significado,setMostrarSignificado]= useState(false);    
 
     const [terminado,setTerminado] = useState(false);
     const [cant_correctas,setCorrectas] = useState(0);
@@ -108,7 +108,10 @@ export default  function Practica (){
             setTerminado(true); 
             try {
                 await awardXPClient(contexto.user.id,cant_correctas*2);
-                contexto.actualizar_info(contexto.user.id)
+                contexto.actualizar_info(contexto.user.id);
+
+                await ganar_insignia_senia(contexto.user.id);
+                await ganar_insignia_modulo(contexto.user.id);
             } catch (error) {
                 error_alert("Ocurrió un error al guardar tu progreso");
                 console.error(error)
