@@ -66,8 +66,7 @@ export default function Acc_recovery() {
       success_alert("Código correcto");
       const usuario=await entrar(lower_case_mail);
       
-      if (usuario) {
-        router.back();
+      if (usuario) {        
         contexto.login_app(usuario);}
       
     } else {
