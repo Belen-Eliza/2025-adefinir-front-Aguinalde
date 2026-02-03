@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { validateEmail } from '@/components/validaciones';
 import { error_alert, success_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
-import { cuenta_existe, entrar, ingresar } from '@/conexiones/gestion_usuarios';
+import { cuenta_existe, entrar, enviar_otp, ingresar, verificar_otp } from '@/conexiones/gestion_usuarios';
 import { enviar_mail_recuperacion, generar_otp } from '@/components/mails';
 import { useUserContext } from '@/hooks/useUserContext';
 import { BotonLogin } from '@/components/botones';
@@ -52,17 +52,34 @@ export default function Acc_recovery() {
     
     const lower_case_mail =mail.toLowerCase();
     if (validateEmail(lower_case_mail).status && await cuenta_existe(lower_case_mail)){
-      enviar_mail_recuperacion(lower_case_mail,codigo);
-      setModalVisible(true);
+      try {
+        enviar_otp(mail)
+        //enviar_mail_recuperacion(lower_case_mail,codigo);
+        setModalVisible(true);
+      } catch (error) {
+        error_alert("No se pudo enviar el mail");
+      }
+      
     } else{
       error_alert("Ingrese un mail válido");
     }
   }
 
-  async function recuperar() {
+  async function recuperar() {    
+    try {
+      const lower_case_mail =mail.toLowerCase();
+      const usuario= await verificar_otp(lower_case_mail,inputCode);
+      if (usuario) {        
+          contexto.login_app(usuario);
+      }else {
+        error_alert("Contraseña incorrecta");
+      }
+    } catch (error) {
+      error_alert("Ocurrió un error");
+      console.error(error)
+    }
     
-    const lower_case_mail =mail.toLowerCase();
-    if (inputCode===codigo){
+    /* if (inputCode===codigo){
       success_alert("Código correcto");
       const usuario=await entrar(lower_case_mail);
       
@@ -71,7 +88,7 @@ export default function Acc_recovery() {
       
     } else {
       error_alert("Contraseña incorrecta");
-    }
+    } */
   }
   return (
     <View  style={styles.mainView}  >

@@ -220,4 +220,29 @@ const nombre_usuario = async (uid:number) => {
   if (data && data.length>0) return data[0].username
 }
 
-export {ingresar, registrar_alumno,registrar_profe, cuenta_existe , entrar, eliminar_usuario, nombre_usuario}
+const enviar_otp = async (mail:string) => {
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email: mail,
+    options: {
+      // set this to false if you do not want the user to be automatically signed up
+      shouldCreateUser: false,
+    },
+  });
+  if (error) throw error
+}
+
+const verificar_otp = async (mail:string,codigo:string) => {
+  const {data: { session },error} = await supabase.auth.verifyOtp({
+    email: mail,
+    token: codigo,
+    type: 'email',
+  });
+  if (session) {
+    let usuario = await entrar(mail);
+    return usuario
+  }
+}
+
+export {ingresar, registrar_alumno,registrar_profe, cuenta_existe , entrar, eliminar_usuario, nombre_usuario,
+  enviar_otp, verificar_otp
+}
