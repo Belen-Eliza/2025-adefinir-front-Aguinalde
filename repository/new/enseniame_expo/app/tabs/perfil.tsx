@@ -76,7 +76,7 @@ export default function Perfil (){
       },
       {text: 'Confirmar', onPress: () => {
         eliminar_usuario(contexto.user.id);
-        salir();
+        //salir();
         }},
     ])
       
