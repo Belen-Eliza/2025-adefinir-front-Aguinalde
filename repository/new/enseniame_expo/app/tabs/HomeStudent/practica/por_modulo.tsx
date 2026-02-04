@@ -110,6 +110,7 @@ export default  function Practica (){
             setMostrarRes(false);
             setTerminado(true); 
             try {
+              console.log("Correctas:",cant_correctas)
                 await awardXPClient(contexto.user.id,cant_correctas*2);
                 contexto.actualizar_info(contexto.user.id);
                 await ganar_insignia_senia(contexto.user.id);

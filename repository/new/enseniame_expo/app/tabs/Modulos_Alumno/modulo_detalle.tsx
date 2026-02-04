@@ -381,7 +381,15 @@ export default function ModuloDetalleScreen() {
               
             </View> 
             :
-            <ThemedText lightColor="gray">Este módulo aún no tiene calificaciones</ThemedText>
+            (
+            <>
+            <ThemedText  lightColor="gray">Este módulo aún no tiene calificaciones</ThemedText>
+              {!yaCalificado && completado &&
+                (<BotonLogin callback={()=>{setModalCalificaciones(false);setShowCalificacionModal(true)}} 
+              textColor={"black"} bckColor={paleta.yellow} text={"Calificar"}/>)
+              }
+             </>
+            )
             }
         </SmallPopupModal>
 
