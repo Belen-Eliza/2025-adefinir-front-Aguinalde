@@ -42,6 +42,7 @@ export default  function Practica (){
 
     const [terminado,setTerminado] = useState(false);
     const [cant_correctas,setCorrectas] = useState(0);
+    const [correctas,setArrCorrectas]=useState<string[]>([])
     
     const fracaso =require("../../../../assets/images/disappointedBeetle.gif");
     const festejo =require("../../../../assets/images/beetle_celebration.gif");
@@ -88,15 +89,17 @@ export default  function Practica (){
     } 
 
     const exito = async () => {
-        try {
-            senia_actual?.senia.sumar_acierto(contexto.user.id);
-            setCorrectas(cant_correctas+1)
-        } catch (error) {
-            console.error(error);
-            error_alert("Ocurrió un error al guardar tu progreso")
-        } finally {
-            next();
-        }        
+      try {
+        senia_actual?.senia.sumar_acierto(contexto.user.id);
+        setCorrectas(cant_correctas+1);
+        //para asegurar que se sume bien el xp
+        correctas.push("");
+      } catch (error) {
+        console.error(error);
+        error_alert("Ocurrió un error al guardar tu progreso")
+      } finally {
+        next();
+      }        
     }
 
     const next = async ()=>{
@@ -109,15 +112,14 @@ export default  function Practica (){
             //terminar
             setMostrarRes(false);
             setTerminado(true); 
-            try {
-              console.log("Correctas:",cant_correctas)
-                await awardXPClient(contexto.user.id,cant_correctas*2);
-                contexto.actualizar_info(contexto.user.id);
-                await ganar_insignia_senia(contexto.user.id);
-                await ganar_insignia_modulo(contexto.user.id);
+            try {              
+              await awardXPClient(contexto.user.id,correctas.length*2);
+              contexto.actualizar_info(contexto.user.id);
+              await ganar_insignia_senia(contexto.user.id);
+              await ganar_insignia_modulo(contexto.user.id);
             } catch (error) {
-                error_alert("Ocurrió un error al guardar tu progreso");
-                console.error(error)
+              error_alert("Ocurrió un error al guardar tu progreso");
+              console.error(error);
             }
             
         }        

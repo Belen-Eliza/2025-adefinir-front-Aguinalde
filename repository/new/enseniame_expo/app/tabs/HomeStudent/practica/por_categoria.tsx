@@ -37,6 +37,7 @@ export default  function Practica (){
 
     const [terminado,setTerminado] = useState(false);
     const [cant_correctas,setCorrectas] = useState(0);
+    const [correctas,setArrCorrectas]=useState<string[]>([]);
 
     const [showModalInsignia,setShowInsignia] =useState(false);
     const [insignia,setI]= useState<Insignia>({id:0,nombre:"",descripcion:"",image_url:"",motivo:1,ganada:true});
@@ -90,7 +91,9 @@ export default  function Practica (){
     const exito = async () => {
         try {
             senia_actual?.sumar_acierto(contexto.user.id);
-            setCorrectas(cant_correctas+1)
+            setCorrectas(cant_correctas+1);
+            //para asegurar que se sume bien el xp
+            correctas.push("");
         } catch (error) {
             console.error(error);
             error_alert("Ocurrió un error al guardar tu progreso")
@@ -109,7 +112,7 @@ export default  function Practica (){
             //terminar
             setMostrarRes(false);            
             try {
-                await awardXPClient(contexto.user.id,cant_correctas*2);
+                await awardXPClient(contexto.user.id,correctas.length*2);
                 contexto.actualizar_info(contexto.user.id);
 
                 await ganar_insignia_senia(contexto.user.id);
