@@ -203,16 +203,17 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bck_content:{
-    width: "90%",
+    width: "100%",
     backgroundColor: "#ffffffff",
-    height: "85%"
+    height: "85%",
+    paddingBottom: 40
   },
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    marginTop:20,
+    marginTop:15,
     color: "white",
-    
+    marginBottom: 15
   },
   card: {
     backgroundColor: "#fff",

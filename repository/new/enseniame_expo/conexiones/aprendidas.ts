@@ -133,10 +133,10 @@ const mis_senias_aprendiendo= async (id_alumno:number) => {
 const senias_aprendidas_reporte = async (id_alumno:number) => {
     const {data,error} = await supabase
         .from('Alumno_Senia')
-        .select('id_senia, aprendida, created_at')
+        .select('id_senia, aprendida, updated_at')
         .eq('id_alumno', id_alumno)
         .eq('aprendida', true)
-        .order('created_at', { ascending: true });
+        .order('updated_at', { ascending: true });
         if (error) throw error;
     return data
 }

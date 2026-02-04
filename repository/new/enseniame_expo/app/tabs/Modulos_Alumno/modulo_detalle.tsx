@@ -14,7 +14,7 @@ import { alumno_ver_senia } from "@/conexiones/visualizaciones";
 import { error_alert, success_alert } from "@/components/alert";
 import Checkbox from "expo-checkbox";
 import DropDownPicker from 'react-native-dropdown-picker';
-import { calificacionesModulo, calificarModulo } from "@/conexiones/calificaciones";
+import { alumno_ya_califico_modulo, calificacionesModulo, calificarModulo } from "@/conexiones/calificaciones";
 import { RatingStars } from "@/components/review";
 import { estilos } from "@/components/estilos";
 import { get_antiguedad } from "@/components/validaciones";
@@ -137,11 +137,12 @@ export default function ModuloDetalleScreen() {
   }
   
   const verificarCalificacion = async () => {
-    try {
-      const calificaciones = await calificacionesModulo(Number(id));
-      const ya = calificaciones?.find((c: any) => c.id_alumno === contexto.user.id);
+    try {      
+      const ya = await alumno_ya_califico_modulo(contexto.user.id,Number(id));
+      const c = await alumno_completo_modulo(contexto.user.id,Number(id));
+      
       setYaCalificado(!!ya);
-      if (!ya && senias && senias.length > 0 && senias.every(s => s.aprendida)) {
+      if (!ya && c) {
         setShowCalificacionModal(true);
       }
     } catch (e) {
@@ -351,9 +352,17 @@ export default function ModuloDetalleScreen() {
             <View>
 
               <FlatList
-              style={[{maxHeight:500}]}
+                style={[{maxHeight:500}]}
                 keyExtractor={(item)=>item.id.toString()}
                 data={calificaciones_modulo}
+                ListFooterComponent={({ item }) => (
+                  <>
+                    {!yaCalificado && completado &&
+                      (<BotonLogin callback={()=>{setModalCalificaciones(false);setShowCalificacionModal(true)}} 
+                    textColor={"black"} bckColor={paleta.yellow} text={"Calificar"}/>)
+                    }
+                  </>
+                )}
                 renderItem={({ item }) => (
                   <View style={[styles.card,estilos.shadow, {marginBottom:5,marginHorizontal:5}]}>
                     <RatingStars color={paleta.strong_yellow} puntaje={item.puntaje} />
@@ -367,7 +376,9 @@ export default function ModuloDetalleScreen() {
                     <ThemedText style={{marginVertical: 10}} lightColor="#404243ff">{item.comentario ? item.comentario : null}</ThemedText>
                   </View> 
                 )}
+                
               />
+              
             </View> 
             :
             <ThemedText lightColor="gray">Este módulo aún no tiene calificaciones</ThemedText>

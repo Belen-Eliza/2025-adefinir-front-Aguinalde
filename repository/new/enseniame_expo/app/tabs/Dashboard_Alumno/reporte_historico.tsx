@@ -166,14 +166,14 @@ export default function ReporteHistoricoScreen() {
   }, [objetivo]);
 
   const Chart = () => {
-    const max = Math.max(1, ...series.map((s) => s.cantidad));
+    const max = Math.max(1, ...series.map((s) => s.cantidad));    
     return (
       <View style={styles.chartBox}>
         <Text style={styles.sectionTitle}>Señas aprendidas por mes</Text>
         <View style={styles.chartArea}>
           {series.map((s, idx) => (
             <View key={`${s.anio}-${s.mes}-${idx}`} style={styles.barCol}>
-              <View style={[styles.bar, { height: `${(s.cantidad / max) * 100}%` }]} />
+              <View style={[styles.bar, { height: `${(s.cantidad / max) * 80}%`,  }]} />
               <Text style={styles.barLabel}>{s.label}</Text>
               <Text style={styles.barValue}>{s.cantidad}</Text>
             </View>
@@ -258,8 +258,19 @@ const styles = StyleSheet.create({
   errorText: { color: '#e74c3c', marginLeft: 6 },
   emptyText: { color: '#777', alignSelf: 'center', marginVertical: 12 },
 
-  chartBox: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16, shadowColor: '#222', shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
-  chartArea: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 140, marginTop: 8 },
+  chartBox: { 
+    backgroundColor: '#fff', 
+    borderRadius: 16, padding: 16, marginBottom: 16, 
+    shadowColor: '#222', shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, 
+    elevation: 2 
+  },
+  chartArea: { 
+    flexDirection: 'row', 
+    alignItems: 'flex-end', 
+    justifyContent: 'space-between', 
+    height: 140, 
+    marginTop: 8 
+  },
   barCol: { alignItems: 'center', width: 42 },
   bar: { width: 24, backgroundColor: '#20bfa9', borderTopLeftRadius: 6, borderTopRightRadius: 6 },
   barLabel: { marginTop: 6, fontSize: 11, color: '#555' },
