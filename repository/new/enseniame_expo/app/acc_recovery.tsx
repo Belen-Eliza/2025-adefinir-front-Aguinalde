@@ -13,6 +13,7 @@ import { useUserContext } from '@/hooks/useUserContext';
 import { BotonLogin } from '@/components/botones';
 import { IconTextInput } from '@/components/inputs';
 import { paleta } from '@/components/colores';
+import { estilos } from '@/components/estilos';
 
 export default function Acc_recovery() {
   const [mail, setMail] = useState('');
@@ -111,9 +112,12 @@ export default function Acc_recovery() {
 
                 <View style={{alignSelf:"flex-start"}}>
                   <ThemedText type='title' style={{marginBottom:12}}>Ingresar código</ThemedText>
-                  <ThemedText > Se envió un correo a su casilla </ThemedText>
-                  <ThemedText>con una contraseña temporal.</ThemedText>
-                  <ThemedText>Recuerde restaurarla luego de ingresar.</ThemedText>
+                  <ThemedText style={estilos.centrado}>
+                    <ThemedText > Se envió un correo a su casilla con una contraseña temporal.</ThemedText> {'\n'}                 
+                    <ThemedText>Recuerde restaurarla luego de ingresar.</ThemedText>
+                    {/* <ThemedText style={{marginTop:10}}>Si no ve el mail, revise en Correo No Deseado.</ThemedText> */}
+                  </ThemedText>
+                  
 
                   <View style={{marginVertical:15}}>
                     <TouchableOpacity onPress={()=>{setModalVisible(!modalVisible);router.back();}}>

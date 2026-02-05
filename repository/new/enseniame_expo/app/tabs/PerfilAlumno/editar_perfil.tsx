@@ -240,7 +240,6 @@ export default function Perfil (){
                   placeholder={""}
                 />
               
-
               <BotonLogin callback={verificar_nuevo_mail} textColor='black' text='Confirmar' bckColor={paleta.strong_yellow}/>
             </SmallPopupModal>  
 
