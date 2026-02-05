@@ -17,7 +17,7 @@ export default function Layout(){
           }}>
             <Stack.Screen name='por_categoria' options={{headerShown:false}}/>
             <Stack.Screen name='por_modulo' options={{headerShown:false}}/>
-            <Stack.Screen name='completado' options={{headerShown:false , presentation: "fullScreenModal"}}   />  
-            <Stack.Screen name='completa2' options={{headerShown:false , presentation: "fullScreenModal"}}   />            
+            <Stack.Screen name='completado' options={{headerShown:false , presentation: "card"}}   />  
+            <Stack.Screen name='completa2' options={{headerShown:false , presentation: "card"}}   />            
     </Stack>)
 }

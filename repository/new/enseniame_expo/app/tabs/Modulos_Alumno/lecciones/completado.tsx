@@ -77,15 +77,15 @@ export default function ModuloCompletado (){
     }
 
       return (
-        <View style={styles.container}>
-            <Text style={styles.title}> ¡¡Felicidades!!</Text>
-            <Text style={[styles.cardTitle,estilos.centrado]}>Completaste la lección {modulo?.nombre}</Text>
-            <Image
-              style={[styles.image,estilos.centrado]}
-              source={aplausos}
-              contentFit="contain"
-              transition={0}
-            />
+        <View style={[styles.container]}>
+          <Text style={styles.title}> ¡¡Felicidades!!</Text>
+          <Text style={[styles.cardTitle,estilos.centrado]}>Completaste la lección {modulo?.nombre}</Text>
+          <Image
+            style={[styles.image,estilos.centrado]}
+            source={aplausos}
+            contentFit="contain"
+            transition={0}
+          />
             
            
             {!yaCalificado && completado && (
@@ -96,7 +96,11 @@ export default function ModuloCompletado (){
             </>
             )}
             
-            <BotonLogin callback={()=>{router.back();contexto.user.goHome()}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            <View style={{marginBottom:90}}>
+              <BotonLogin callback={()=>{router.back();contexto.user.goHome()}} 
+              textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            </View>
+            
 
             {/* Modal para calificación */}
                     <Modal
@@ -149,7 +153,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#e6f7f2",
     padding: 16,
-    paddingTop: 40
+    paddingTop: 40,
+    height:"80%"
   },
   title: {
     fontSize: 26,
