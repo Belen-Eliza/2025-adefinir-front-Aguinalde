@@ -42,10 +42,10 @@ export default function Perfil (){
         setLoading(true)
         try {
           const p = await my_avatar(contexto.user.id);
-          const img = require("../../../assets/images/LSA.png");
+          const img = require("../../../assets/images/person.png");
           
           if (p.Avatar) {setPfp(p.Avatar)}
-          else setPfp({image_url:img,id:1,racha_desbloquear:1});
+          else setPfp({image_url:img,id:0,racha_desbloquear:1});
 
           const a = await todos_avatares();            
           const r = await mi_racha(contexto.user.id);
