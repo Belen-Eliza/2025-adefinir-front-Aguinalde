@@ -159,7 +159,7 @@ const completar_modulo_alumno = async (id_alumno:number,id_modulo:number) =>{
         if (data && data.length>0) {
             const { error } = await supabase
                 .from('Alumno_Modulo')
-                .update({ completado: true, fecha_completado:now() })
+                .update({ completado: true, fecha_completado:new Date() })
                 .eq('id_alumno', id_alumno)            
                 .eq('id_modulo', id_modulo)
                 

@@ -229,7 +229,7 @@ export default function ModulosScreen() {
                   if (!calificacionesPorModulo[item.id]) {
                     await fetchCalificaciones(item.id);
                   }
-                  setComentariosSeleccionados((calificacionesPorModulo[item.id] || []).filter(c => c.comentario));                  
+                  setComentariosSeleccionados((calificacionesPorModulo[item.id] || []).filter(c => c.comentario));                             
                   setComentariosModalVisible(true);
                 }}
               >
@@ -268,7 +268,8 @@ export default function ModulosScreen() {
               ) : (
                 comentariosSeleccionados.map((c, idx) => (
                   <View key={idx} style={{ marginBottom: 16 }}>
-                    <Text style={{ fontWeight: "bold", color: "#20bfa9" }}>{c.Alumnos?.Users.username || "Anónimo"}</Text>
+                    <Text style={{ fontWeight: "bold", color: "#20bfa9" }}>{c.Alumnos?.Users.username || "Anónimo"}
+                      {c.id_alumno==contexto.user.id ? " (Yo)":""}</Text>
                     <Text>{c.comentario}</Text>
                   </View>
                 ))
