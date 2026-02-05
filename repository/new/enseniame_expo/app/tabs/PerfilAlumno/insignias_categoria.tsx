@@ -3,13 +3,13 @@ import { View, StyleSheet,   TouchableOpacity, Pressable, ActivityIndicator, Fla
 import {  Ionicons  } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { error_alert, success_alert } from '@/components/alert';
+import { error_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/hooks/useUserContext';
-import { paleta, paleta_colores } from '@/components/colores';
+import { paleta } from '@/components/colores';
 import { estilos } from '@/components/estilos';
 import { Image } from 'expo-image';
-import {  insignias_por_categoria, todas_insignias, buscar_categoria, mis_insignias_ganadas, mis_insignias, cuantos_ganaron_insignia } from '@/conexiones/insignias';
+import {  insignias_por_categoria, buscar_categoria, mis_insignias_ganadas, cuantos_ganaron_insignia } from '@/conexiones/insignias';
 import { SmallPopupModal } from '@/components/modals';
 
 type Insignia = {
@@ -17,7 +17,8 @@ type Insignia = {
   nombre: string;
   descripcion: string;
   image_url: string;
-  ganada: boolean
+  ganada: boolean;
+  cantidad:number
 }
 type I ={
   id: number;
@@ -52,37 +53,46 @@ export default function Categorias_Insignias () {
     );
 
     const fetchData = async ()=>{
-        try {
-            setLoading(true);
-            const i = await insignias_por_categoria(Number(id));
-            const ganadas = await mis_insignias_ganadas(contexto.user.id);
+      try {
+        setLoading(true);
+        const i = await insignias_por_categoria(Number(id));
+        const ganadas = await mis_insignias_ganadas(contexto.user.id);
             
-            if (i && ganadas) {
-              const res = i.map(each=>{
-                  let g = false;
-                  if (fue_ganada(ganadas,each)) {
-                    g=true;
-                    setCant(prev=>prev+1);
-                  }
-                  return {id:each.id,image_url:each.image_url,ganada:g,nombre:each.nombre,motivo:each.motivo,descripcion:each.descripcion}
-                })
-              setInsignias(res || []);
-              
-            }
-            
-            const c = await buscar_categoria(Number(id));
-            if (c) setCategoria(c)
-            setLoading(false);
-        } catch (error) {
-            console.error(error);
-            error_alert("No se pudo cargar la información de las insignias");
+        if (i && ganadas) {
+          const res = i.map(each=>{
+              let g = false;
+              if (fue_ganada(ganadas,each)) {
+                g=true;
+                setCant(prev=>prev+1);
+              }
+              return {id:each.id,image_url:each.image_url,ganada:g,nombre:each.nombre,
+                motivo:each.motivo,descripcion:each.descripcion,cantidad:each.cantidad}
+            });
+            res.sort(function (a, b) {
+              if (a.cantidad < b.cantidad) {
+                return -1;
+              }
+              if (a.cantidad > b.cantidad) {
+                return 1;
+              }
+              return 0;
+            })
+          setInsignias(res || []);
+          
         }
-        
+            
+          const c = await buscar_categoria(Number(id));
+          if (c) setCategoria(c)
+          setLoading(false);
+        } catch (error) {
+          console.error(error);
+          error_alert("No se pudo cargar la información de las insignias");
+        }        
     }
-   const fue_ganada = (ganadas:{id_insignia:number}[],i:Insignia)=>{
+  const fue_ganada = (ganadas:{id_insignia:number}[],i:Insignia)=>{
     return ganadas.find(each=>each.id_insignia==i.id) != undefined
   }
-const renderInsignia = ({ item }: { item: Insignia }) =>(
+  const renderInsignia = ({ item }: { item: Insignia }) =>(
     <TouchableOpacity onPress={async ()=>{
         let c = await cuantos_ganaron_insignia(item.id)
         setSelectedInsignia({id:item.id,descripcion:item.descripcion,ganada:item.ganada,cant_personas:c,nombre:item.nombre,image_url:item.image_url});

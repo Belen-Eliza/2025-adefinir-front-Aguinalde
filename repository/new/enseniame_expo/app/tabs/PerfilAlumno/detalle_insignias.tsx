@@ -18,6 +18,7 @@ type Insignia = {
   descripcion: string;
   image_url: string;
   motivo:number;
+  cantidad:number;
   ganada: boolean;
 }
 
@@ -62,7 +63,16 @@ export default function Detalle_Insignias () {
                   let g = false;
                   if (fue_ganada(ganadas,each)) {g=true;}
                   
-                  return {id:each.id,image_url:each.image_url,ganada:g,nombre:each.nombre,motivo:each.motivo,descripcion:each.descripcion}
+                  return {id:each.id,image_url:each.image_url,ganada:g,nombre:each.nombre,motivo:each.motivo,descripcion:each.descripcion,cantidad:each.cantidad}
+                });
+                res.sort(function (a, b) {
+                  if (a.cantidad < b.cantidad) {
+                    return -1;
+                  }
+                  if (a.cantidad > b.cantidad) {
+                    return 1;
+                  }
+                  return 0;
                 })
                 s.push({title:each.motivo,data:[res]});
               });
