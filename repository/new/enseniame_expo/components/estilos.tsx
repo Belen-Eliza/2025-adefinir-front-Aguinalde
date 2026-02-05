@@ -6,7 +6,8 @@ export const estilos = StyleSheet.create({
     alignContent: "center",
     alignItems: "center",
     alignSelf: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    textAlign:"center"
   },
   shadow:{
     shadowColor: "#000",

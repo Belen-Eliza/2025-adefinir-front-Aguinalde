@@ -246,6 +246,21 @@ const verificar_otp = async (mail:string,codigo:string) => {
   }
 }
 
+const confirmar_mail = async (mail:string,codigo:string) => {
+  const {data: { session },error} = await supabase.auth.verifyOtp({ email: mail, token: codigo, type: "email_change" });
+  if (error) throw error
+  if (session){
+    const { data, error } = await supabase
+        .from('Users')
+        .update({ mail: mail })
+        .eq('auth_id', session.user.id)
+        .select("*");
+    if (error) throw error
+    if (data) return true
+    return false
+  }
+}
+
 export {ingresar, registrar_alumno,registrar_profe, cuenta_existe , entrar, eliminar_usuario, nombre_usuario,
-  enviar_otp, verificar_otp
+  enviar_otp, verificar_otp, confirmar_mail
 }

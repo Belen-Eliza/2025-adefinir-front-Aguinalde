@@ -7,7 +7,7 @@ import { error_alert, success_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/hooks/useUserContext';
 import { validateEmail, validatePassword } from '@/components/validaciones';
-import { eliminar_usuario } from '@/conexiones/gestion_usuarios';
+import { confirmar_mail, eliminar_usuario } from '@/conexiones/gestion_usuarios';
 import { paleta } from '@/components/colores';
 import { IconTextInput, PasswordInput } from '@/components/inputs';
 import { estilos } from '@/components/estilos';
@@ -21,7 +21,10 @@ export default function Perfil (){
 
     const [mailModalVisible, setMailModalVisible] = useState(false);
     const [nameModalVisible, setNameModalVisible] = useState(false);
-    const [PassModalVisible, setPassModalVisible] = useState(false);    
+    const [PassModalVisible, setPassModalVisible] = useState(false);
+    
+    const [confirmarMail, setConfirmarMail] = useState(false);
+    const [otp,setOTP] = useState('');
 
     const [errorEmail, setErrorEmail] = useState('');
     const [errorPassword, setErrorPassword] = useState('');
@@ -83,13 +86,7 @@ export default function Perfil (){
             }
             else  error_alert("El nombre no puede estar vacío");
         } 
-        if (mail!= undefined) {
-            const lower_case_mail=mail.toLowerCase();
-            if (validateEmail(lower_case_mail).status) {
-                contexto.cambiar_mail(lower_case_mail);
-                exito=true;
-            } else error_alert("Formato inválido de mail");              
-        }
+        
         if (pass!=undefined){
             if (validatePassword(pass).status) {
                 contexto.cambiar_password(pass);
@@ -106,6 +103,32 @@ export default function Perfil (){
             borrar_cambios();            
         }        
     }
+
+  const confirmar_cambio_mail = async () => {
+    if (mail!= undefined) {
+      const lower_case_mail=mail.toLowerCase();
+      if (validateEmail(lower_case_mail).status) {
+          contexto.cambiar_mail(lower_case_mail);
+          setMailModalVisible(false);
+          setConfirmarMail(true);
+      } else error_alert("Formato inválido de mail");              
+    }
+  }
+  
+  const verificar_nuevo_mail = async () => {
+    try {
+      if (mail){
+      let exito = await confirmar_mail(mail,otp);
+
+      if (exito) {
+        success_alert("Tu mail fue cambiado con éxito");
+        setConfirmarMail(false);
+      }
+    }
+    } catch (error) {
+      error_alert("No se pudo actualizar tu mail");
+    }        
+  }
 
 
     return(
@@ -186,8 +209,9 @@ export default function Perfil (){
                   placeholder={contexto.user.mail}
                 />
                 {errorEmail ? <ThemedText type='error'>{errorEmail}</ThemedText> : null}
-
-              <BotonLogin callback={confirmar} textColor='black' text='Guardar cambios' bckColor={paleta.strong_yellow}/>
+              <ThemedText style={[estilos.centrado,{marginTop:15}]} >
+                Recibirás un mail de confirmación en tu nuevo correo para verificar el cambio.</ThemedText>
+              <BotonLogin callback={confirmar_cambio_mail} textColor='black' text='Guardar cambios' bckColor={paleta.strong_yellow}/>
             </SmallPopupModal>            
 
             <SmallPopupModal title='Cambiar contraseña' modalVisible={PassModalVisible} setVisible={setPassModalVisible}>
@@ -203,7 +227,22 @@ export default function Perfil (){
               {errorPassword ? <ThemedText type='error' style={{maxWidth: "80%"}}>{errorPassword}</ThemedText> : null}
 
               <BotonLogin callback={confirmar} textColor='black' text='Guardar cambios' bckColor={paleta.strong_yellow}/>
-            </SmallPopupModal>    
+            </SmallPopupModal>   
+
+            <SmallPopupModal title='Confirmar nuevo mail' modalVisible={confirmarMail} setVisible={setConfirmarMail}>
+              <ThemedText type='defaultSemiBold' lightColor='gray' style={{alignSelf:"flex-start", marginTop:25,marginHorizontal:15}}>Introduce el código recibido </ThemedText>
+              <IconTextInput 
+                  icon={{Ionicon_name: "lock-closed-outline"}} 
+                  value={otp} 
+                  bck_color="white"
+                  onChange={setOTP}
+                  keyboardType='numeric'
+                  placeholder={""}
+                />
+              
+
+              <BotonLogin callback={verificar_nuevo_mail} textColor='black' text='Confirmar' bckColor={paleta.strong_yellow}/>
+            </SmallPopupModal>  
 
           <Toast/>
         </View>

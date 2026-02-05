@@ -86,14 +86,7 @@ export default function UserContextProvider  ({ children }: { children: React.Re
         //conectar a db, update
         try {
             const { data:auth, error:error_auth }=await supabase.auth.updateUser( {email:mail_nuevo});
-            if (error_auth) throw error_auth
-            const { data, error } = await supabase
-                .from('Users')
-                .update({ mail: mail_nuevo })
-                .eq('id', user.id)
-                .select("*");
-
-            if (error) throw error            
+            if (error_auth) throw error_auth                        
             
         } catch (error) {
             error_alert("Error al actualizar perfil");
