@@ -184,10 +184,8 @@ export default function UserContextProvider  ({ children }: { children: React.Re
                     if (error) throw error
                     const nuevo =new Logged_Alumno(mailNorm, usernameNorm, passwordHash, id,alumno.racha,
                                             alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,alumno.nivel,raw.avatar)
-                    setUser(nuevo);
-                    console.log(nuevo)
-                }
-                console.log(user)
+                    setUser(nuevo);                    
+                }            
             }
         }
         catch (error){
