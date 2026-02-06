@@ -97,7 +97,10 @@ export default function ModuloCompletado (){
             )}
             
             <View style={{marginBottom:90}}>
-              <BotonLogin callback={()=>{ router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })} }
+              <BotonLogin callback={()=>{ 
+                //router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })
+                router.dismissTo({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })
+              } }
               textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
             </View>
             

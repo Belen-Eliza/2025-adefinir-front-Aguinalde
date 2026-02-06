@@ -1,7 +1,5 @@
-import { Pressable,  TextInput,  View,
-  StyleSheet,  ScrollView,  AppState, 
-  TouchableOpacity, KeyboardAvoidingView,  Platform,
-  ActivityIndicator
+import {   View,  StyleSheet,  ScrollView,  AppState, 
+   KeyboardAvoidingView,  Platform,  ActivityIndicator
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useState } from "react";
@@ -34,7 +32,7 @@ export default function Login() {
   const [mail, setMail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,setLoading]= useState(false)
+  const [loading,setLoading]= useState(false);
 
   const {login_app} = useUserContext();
 
@@ -47,7 +45,7 @@ export default function Login() {
     if (isPasswordValid ) {
       try {
         //acceder a db
-      setLoading(true)
+      setLoading(true);
       const usuario = await ingresar(lower_case_mail,password);
       if (usuario) login_app(usuario);
       setMail("");

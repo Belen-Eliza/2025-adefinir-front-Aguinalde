@@ -96,16 +96,16 @@ export default function Categorias_Insignias () {
     <TouchableOpacity onPress={async ()=>{
         let c = await cuantos_ganaron_insignia(item.id)
         setSelectedInsignia({id:item.id,descripcion:item.descripcion,ganada:item.ganada,cant_personas:c,nombre:item.nombre,image_url:item.image_url});
-        setShowModalI(true)}} style={styles.dataInsignia}>
+        setShowModalI(true)}} style={[styles.dataInsignia]}>
       <Image
         style={[styles.insignia,{opacity: item.ganada ? 1:0.5}]}
         source={item.image_url}
         contentFit="cover"
         transition={0}
       /> 
-      <View style={{alignSelf:"center",flexWrap:"wrap",}}>
+      <View style={[{alignSelf:"center",width:"60%"}]}>
         <ThemedText style={{fontSize:18}} type='bold'>{item.nombre}</ThemedText>
-        <ThemedText style={styles.subtitle}>{item.descripcion}</ThemedText>
+        <ThemedText style={[styles.subtitle]}>{item.descripcion}</ThemedText>
       </View>
     </TouchableOpacity>
   )

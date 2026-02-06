@@ -1,4 +1,4 @@
-import { View,  StyleSheet,  Platform,  ScrollView, KeyboardAvoidingView} from 'react-native';
+import { View,  StyleSheet,  Platform,  ScrollView, KeyboardAvoidingView, ActivityIndicator} from 'react-native';
 import { useState } from "react";
 import { Link,} from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -26,6 +26,8 @@ export default function Signup() {
 
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
+
+  const [loading,setLoading]= useState(false);
 
   const {login_app} = useUserContext();
 
@@ -69,11 +71,18 @@ export default function Signup() {
     const isNameValid = name !== '';
     const isPasswordValid = validatePassword(password1).status;
     const isPasswordConfirmValid = password1==password2;
-
+    setLoading(true);
     if (isEmailValid && isNameValid && isPasswordValid && isPasswordConfirmValid ) {
-      const user = new Alumno(lower_case_mail,name,password1);
-      const usuario_log = await registrar_alumno(user);
-      if (usuario_log) login_app(usuario_log);
+      try {
+        const user = new Alumno(lower_case_mail,name,password1);
+        const usuario_log = await registrar_alumno(user);
+        if (usuario_log) login_app(usuario_log);
+      } catch (error) {
+        error_alert("Ocurrió un error al registrarte");
+      } finally{
+        setLoading(false)
+      }
+      
     }
     else {
       error_alert("Complete todos los campos para continuar");  
@@ -82,8 +91,14 @@ export default function Signup() {
 
   return (
     <View style={styles.mainView} >
+
+      {loading && (
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}> 
+          <ActivityIndicator size="large" color="#20bfa9" />          
+        </View>
+      )}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{flex: 1}}
       >
       <ScrollView contentContainerStyle={[styles.scrollViewContent]}>
@@ -179,4 +194,14 @@ const styles=StyleSheet.create({
     alignItems: 'center',
     height: "100%"
   },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#e6f7f287',
+    height:"100%",
+    width:"100%",
+    position: "absolute",
+    top:0 ,
+    zIndex: 9999,
+    elevation:5 
+   },
 })

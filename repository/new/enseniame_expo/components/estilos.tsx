@@ -13,6 +13,7 @@ export const estilos = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
+    elevation: 2
   },
   modalHeader: {
     flexDirection: 'row',

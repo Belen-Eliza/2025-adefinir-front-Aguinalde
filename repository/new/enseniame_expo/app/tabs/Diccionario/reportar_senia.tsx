@@ -151,6 +151,7 @@ export default function Reportar_senia() {
                         value={comentario}
                         onChangeText={setComentario}
                         style={styles.input}
+                        multiline={true}
                     />
                     
                     <BotonLogin callback={submit} textColor={'white'} bckColor={paleta.dark_aqua} text={'Reportar'}                    

@@ -227,7 +227,7 @@ export default  function Practica (){
                         </View>                                                
                     </View>
                 
-                <BotonLogin callback={()=>{ router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } });setTerminado(false)}} 
+                <BotonLogin callback={()=>{ router.dismissTo({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } });setTerminado(false)}} 
                 textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                     </View>
                 

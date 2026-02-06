@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     minHeight: '70%',
   },
   badge: {
-    backgroundColor: paleta.aqua,    
+    backgroundColor: paleta.dark_aqua,    
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
