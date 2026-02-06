@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, StyleSheet,  ScrollView, TouchableOpacity,  Alert, FlatList,  } from 'react-native';
+import { View, StyleSheet,  ScrollView, TouchableOpacity,  Alert, FlatList, Dimensions, Platform,  } from 'react-native';
 import {  Ionicons, MaterialIcons  } from '@expo/vector-icons';
 import {  router, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -197,7 +197,7 @@ export default function Perfil (){
 
     return(
         <View style={[styles.mainView,{backgroundColor:"#ebfbfbff"}]}>
-          <ScrollView contentContainerStyle={[styles.scrollViewContent]}>
+          <ScrollView contentContainerStyle={[Platform.OS !== "web" ? styles.scrollViewContent: styles.scrollViewContentWeb]}>
             <View style={styles.formAndImg}>
               <Image
                 style={[styles.image,{borderColor:paleta.aqua}]}
@@ -415,6 +415,12 @@ const styles = StyleSheet.create({
     minWidth: "80%",
     paddingBottom:60 
   },
+  scrollViewContentWeb: {    
+      justifyContent: 'space-between',    
+      paddingBottom:60 ,    
+      width: Dimensions.get("window").width,
+      flex: 1
+    },
   formAndImg: {
     width: '100%',
     borderRadius: 10,
@@ -471,7 +477,7 @@ const styles = StyleSheet.create({
       marginLeft: 10
   },
   image: {
-    flex: 1,
+    //flex: 1,
     width: 100,
     height: 100,
     borderRadius: 20,

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, Text, StyleSheet, FlatList, Pressable, 
-  SafeAreaView, ActivityIndicator, Modal, TextInput,
+   ActivityIndicator, TextInput,
   TouchableOpacity, Alert
 } from 'react-native';
 import { Checkbox } from 'expo-checkbox';

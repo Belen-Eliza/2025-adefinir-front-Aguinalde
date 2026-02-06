@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video'
 import { Ionicons } from '@expo/vector-icons';
+import { useEvent } from 'expo';
 
 interface VideoPlayerProps {
   uri: string;
@@ -9,6 +11,46 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ uri, style }) => {
+  const video = useRef<Video>(null);
+  const [status, setStatus] = useState<AVPlaybackStatus | null>(null);  
+
+  const player = useVideoPlayer(uri, player => {
+    player.loop = true;
+    player.play();
+  });
+
+  const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+
+  const handlePlayPause = async () => {
+    if (!video.current) return;
+
+    if (isPlaying) {
+      player.pause
+    } else {
+      player.play
+    }
+    
+  };
+
+  return (
+    <View style={[styles.container, style]}>
+      
+      <VideoView style={styles.video} player={player} fullscreenOptions={{enable:true}} allowsPictureInPicture />
+     {/*  <TouchableOpacity 
+        style={styles.playButton} 
+        onPress={handlePlayPause}
+      >
+        <Ionicons 
+          name={isPlaying ? "pause" : "play"} 
+          size={24} 
+          color="white" 
+        />
+      </TouchableOpacity> */}
+    </View>
+  );
+};
+
+/* const VideoPlayer: React.FC<VideoPlayerProps> = ({ uri, style }) => {
   const video = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -47,7 +89,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ uri, style }) => {
       </TouchableOpacity>
     </View>
   );
-};
+}; */
+
+
 
 const styles = StyleSheet.create({
   container: {

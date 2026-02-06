@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, StyleSheet,   TouchableOpacity, Pressable, ActivityIndicator, FlatList } from 'react-native';
+import { View, StyleSheet,   TouchableOpacity, Pressable, ActivityIndicator, FlatList, Platform } from 'react-native';
 import {  Ionicons  } from '@expo/vector-icons';
 import {  router, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -113,7 +113,7 @@ export default function Perfil (){
       onPress={()=>cambiar_avatar(item)}
       style={[{margin:5},item.id==pfp?.id ? styles.round_border:{}]}>
       <Image
-        style={[styles.image]}
+        style={[Platform.OS !== "web" ? styles.image: styles.image_web]}
         source={item.image_url}
         contentFit="contain"
         transition={0}
@@ -206,7 +206,7 @@ export default function Perfil (){
               
             </View>
 
-            <View style={styles.seccion}>
+            <View style={[styles.seccion]}>
               <View style={[styles.row,{marginBottom:3}]}>
                 <ThemedText style={styles.title}>Avatares desbloqueados</ThemedText>
                 <Pressable onPress={()=>router.push("/tabs/PerfilAlumno/gestion_avatars")}>
@@ -297,6 +297,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: paleta.dark_aqua,
     
+  },
+  image_web: {    
+    width: 100,
+    maxWidth: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: paleta.dark_aqua,    
   },
   loadingContainer: {
     flex: 1,
