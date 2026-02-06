@@ -16,7 +16,7 @@ export default function Layout(){
             },
           }}>
             <Stack.Screen name='index' options={{headerShown:false}}/>
-            <Stack.Screen name='completado' options={{headerShown:false , presentation: "card"}}   /> {/*Mejor card?*/}
+            <Stack.Screen name='completado' options={{headerShown:false , presentation: "card"}}   /> 
             <Stack.Screen name='no_completado' options={{headerShown:false , presentation: "fullScreenModal"}}   />
     </Stack>)
 }
