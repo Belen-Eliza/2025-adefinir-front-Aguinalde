@@ -139,12 +139,12 @@ export default function Categorias_Insignias () {
            
 
             <FlatList 
-                keyExtractor={(item) => item.id.toString()}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
-                data={insignias}
-                renderItem={renderInsignia}  
-                contentContainerStyle={styles.listContent}    
-                ListFooterComponent={() => <View style={{height:250}} />}     
+              keyExtractor={(item) => item.id.toString()}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              data={insignias}
+              renderItem={renderInsignia}  
+              contentContainerStyle={styles.listContent}    
+              ListFooterComponent={() => <View style={{height:250}} />}     
             />   
         </View>
 

@@ -74,7 +74,7 @@ export default function Detalle_Insignias () {
                   }
                   return 0;
                 })
-                s.push({title:each.motivo,data:[res]});
+                s.push({title:each.motivo,data:[res.slice(0,3)]});
               });
               
               setSecciones(s || [])

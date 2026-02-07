@@ -109,6 +109,9 @@ export default  function Practica (){
             //terminar
             setMostrarSignificado(false);
             setTerminado(true); 
+
+            await ganar_insignia_senia(contexto.user.id);
+            await ganar_insignia_modulo(contexto.user.id);
             try {
                 await awardXPClient(contexto.user.id,correctas.length*2);
                 contexto.actualizar_info(contexto.user.id);
