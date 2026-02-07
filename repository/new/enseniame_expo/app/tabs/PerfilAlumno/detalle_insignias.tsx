@@ -74,7 +74,7 @@ export default function Detalle_Insignias () {
                   }
                   return 0;
                 })
-                s.push({title:each.motivo,data:[res]});
+                s.push({title:each.motivo,data:[res.slice(0,3)]});
               });
               
               setSecciones(s || [])
@@ -111,7 +111,7 @@ export default function Detalle_Insignias () {
         /> 
         <View style={estilos.centrado} >
           <ThemedText style={{fontSize:15}} type='bold'>{item.nombre}</ThemedText>
-          <ThemedText style={styles.subtitle}>{item.descripcion}</ThemedText>          
+          <ThemedText style={[styles.subtitle,{flexWrap:"wrap"}]}>{item.descripcion}</ThemedText>          
         </View>
       </TouchableOpacity>
     )

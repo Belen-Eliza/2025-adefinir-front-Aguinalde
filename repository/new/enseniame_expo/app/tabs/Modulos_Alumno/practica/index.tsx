@@ -109,6 +109,9 @@ export default  function Practica (){
             //terminar
             setMostrarSignificado(false);
             setTerminado(true); 
+
+            await ganar_insignia_senia(contexto.user.id);
+            await ganar_insignia_modulo(contexto.user.id);
             try {
                 await awardXPClient(contexto.user.id,correctas.length*2);
                 contexto.actualizar_info(contexto.user.id);
@@ -196,7 +199,8 @@ export default  function Practica (){
                     <ThemedText type='defaultSemiBold' style={estilos.centrado} lightColor={paleta.dark_aqua}>0 de {senias.length} correctas</ThemedText>
                     <ThemedText type='defaultSemiBold' lightColor={paleta.dark_aqua}>Sigue practicando para volver a encaminarte</ThemedText>
                 
-                <BotonLogin callback={()=>{contexto.user.goHome();setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
+                <BotonLogin callback={()=>{router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } });setTerminado(false)}} 
+                    textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                 </View>
                 ):(
                   <View  >
@@ -226,7 +230,8 @@ export default  function Practica (){
                         </View>                                                
                     </View>
                 
-                <BotonLogin callback={()=>{ router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } });setTerminado(false)}} textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
+                <BotonLogin callback={()=>{ router.dismissTo({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } });setTerminado(false)}} 
+                textColor={'black'} bckColor={paleta.turquesa} text={'Aceptar'}  />
                     </View>
                 
                 )}                                          

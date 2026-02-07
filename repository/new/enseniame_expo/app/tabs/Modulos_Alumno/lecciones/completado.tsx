@@ -77,15 +77,15 @@ export default function ModuloCompletado (){
     }
 
       return (
-        <View style={styles.container}>
-            <Text style={styles.title}> ¡¡Felicidades!!</Text>
-            <Text style={[styles.cardTitle,estilos.centrado]}>Completaste la lección {modulo?.nombre}</Text>
-            <Image
-              style={[styles.image,estilos.centrado]}
-              source={aplausos}
-              contentFit="contain"
-              transition={0}
-            />
+        <View style={[styles.container]}>
+          <Text style={styles.title}> ¡¡Felicidades!!</Text>
+          <Text style={[styles.cardTitle,estilos.centrado]}>Completaste la lección {modulo?.nombre}</Text>
+          <Image
+            style={[styles.image,estilos.centrado]}
+            source={aplausos}
+            contentFit="contain"
+            transition={0}
+          />
             
            
             {!yaCalificado && completado && (
@@ -96,50 +96,57 @@ export default function ModuloCompletado (){
             </>
             )}
             
-            <BotonLogin callback={()=>{router.back();contexto.user.goHome()}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            <View style={{marginBottom:90}}>
+              <BotonLogin callback={()=>{ 
+                //router.push({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })
+                router.dismissTo({ pathname: '/tabs/Modulos_Alumno/modulo_detalle', params: { id: modulo?.id } })
+              } }
+              textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            </View>
+            
 
             {/* Modal para calificación */}
-                    <Modal
-                      visible={showCalificacionModal}
-                      animationType="slide"
-                      transparent={true}
-                    >
-                      <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                          <Text style={styles.modalTitle}>Califica este módulo</Text>
-                          {/* Estrellas para puntaje */}
-                          <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 15 }}>
-                            {[...Array(5)].map((_, i) => (
-                              <TouchableOpacity key={i} onPress={() => setPuntaje(i + 1)}>
-                                <AntDesign
-                                  name={puntaje > i ? "star" : "star"}
-                                  size={32}
-                                  color={puntaje > i ? "#FFD700" : "#E0E0E0"}
-                                  style={{ marginHorizontal: 2 }}
-                                />
-                              </TouchableOpacity>
-                            ))}
-                          </View>
-                          <Text style={{textAlign:'center', marginBottom:10}}>Puntaje: {puntaje} estrellas</Text>
-                          <TextInput
-                            style={[styles.input, { height: 60 }]}
-                            placeholder="Comentario (opcional)"
-                            value={comentario}
-                            onChangeText={setComentario}
-            
-                          />
-                    <View style={styles.modalButtons}>
-                    <Pressable style={styles.button} onPress={enviarCalificacion} disabled={puntaje === 0}>
-                        <Text style={styles.buttonText}>Enviar calificación</Text>
-                    </Pressable>
-                    <Pressable style={styles.button} onPress={() => setShowCalificacionModal(false)}>
-                        <Text style={styles.buttonText}>Cerrar</Text>
-                    </Pressable>
-                    </View>
+              <Modal
+                visible={showCalificacionModal}
+                animationType="slide"
+                transparent={true}
+              >
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Califica este módulo</Text>
+                  {/* Estrellas para puntaje */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 15 }}>
+                    {[...Array(5)].map((_, i) => (
+                      <TouchableOpacity key={i} onPress={() => setPuntaje(i + 1)}>
+                        <AntDesign
+                          name={puntaje > i ? "star" : "star"}
+                          size={32}
+                          color={puntaje > i ? "#FFD700" : "#E0E0E0"}
+                          style={{ marginHorizontal: 2 }}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <Text style={{textAlign:'center', marginBottom:10}}>Puntaje: {puntaje} estrellas</Text>
+                  <TextInput
+                    style={[styles.input, { height: 60 }]}
+                    placeholder="Comentario (opcional)"
+                    value={comentario}
+                    onChangeText={setComentario}
+    
+                  />
+                <View style={styles.modalButtons}>
+                <Pressable style={styles.button} onPress={enviarCalificacion} disabled={puntaje === 0}>
+                    <Text style={styles.buttonText}>Enviar calificación</Text>
+                </Pressable>
+                <Pressable style={styles.button} onPress={() => setShowCalificacionModal(false)}>
+                    <Text style={styles.buttonText}>Cerrar</Text>
+                </Pressable>
                 </View>
-                </View>
-            </Modal>
-            <Toast/>
+            </View>
+            </View>
+        </Modal>
+        <Toast/>
         </View>
       )
 }
@@ -149,7 +156,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#e6f7f2",
     padding: 16,
-    paddingTop: 40
+    paddingTop: 40,
+    height:"80%"
   },
   title: {
     fontSize: 26,

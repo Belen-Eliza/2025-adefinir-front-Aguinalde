@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, StyleSheet,   TouchableOpacity, Pressable, ActivityIndicator, FlatList,Text } from 'react-native';
+import { View, StyleSheet,   TouchableOpacity, Pressable, ActivityIndicator, FlatList,Text, Platform } from 'react-native';
 import {  Ionicons  } from '@expo/vector-icons';
 import {   useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -90,7 +90,7 @@ export default function Perfil () {
       onPress={()=>{if (fue_desbloqueado(item))cambiar_avatar(item)}}
       style={[{margin:10},item.id==pfp?.id ? styles.round_border:{}]}>
       <Image
-        style={[styles.image]}
+        style={[Platform.OS !== "web" ? styles.image: styles.image_web]}
         source={fue_desbloqueado(item) ? item.image_url: candado}
         contentFit="contain"
         transition={0}
@@ -236,5 +236,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     position:"absolute",
     top:0 
+  },
+  image_web: {    
+    width: 100,
+    maxWidth: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: paleta.dark_aqua,    
   },
 });

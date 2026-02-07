@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import { View, StyleSheet,  ScrollView, TouchableOpacity,  Alert, Pressable, Text } from 'react-native';
+import { View, StyleSheet,  ScrollView, TouchableOpacity,  Alert, Pressable, Text, Platform } from 'react-native';
 import {  Ionicons, MaterialIcons  } from '@expo/vector-icons';
 import {  router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -13,6 +13,7 @@ import { IconTextInput, PasswordInput } from '@/components/inputs';
 import { estilos } from '@/components/estilos';
 import { BotonLogin } from '@/components/botones';
 import { SmallPopupModal } from '@/components/modals';
+import {Dimensions} from 'react-native';
 
 export default function Perfil (){
     const [name,setName]= useState<string>();
@@ -140,7 +141,7 @@ export default function Perfil (){
             <Ionicons name="arrow-back" size={20} color="#20bfa9" style={{ marginRight: 6 }} />
             <Text style={styles.backBtnText}>Volver</Text>
             </Pressable>
-          <ScrollView contentContainerStyle={[styles.scrollViewContent]}>
+          <ScrollView contentContainerStyle={[Platform.OS !== "web" ? styles.scrollViewContent: styles.scrollViewContentWeb]}>
             <View style={styles.formAndImg}>
               
               <ThemedText style={styles.title} type='title'>Editar perfil</ThemedText>
@@ -265,6 +266,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minWidth: "80%",
     paddingBottom:60 
+  },
+  scrollViewContentWeb: {    
+    justifyContent: 'space-between',    
+    paddingBottom:60 ,    
+    width: Dimensions.get("window").width,
+    flex: 1
   },
   formAndImg: {
     width: '100%',

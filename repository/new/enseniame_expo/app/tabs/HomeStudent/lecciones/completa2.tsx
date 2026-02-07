@@ -60,7 +60,10 @@ export default function ModuloCompletado (){
               transition={0}
             />       
             
-            <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent")}} textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            <View style={{marginBottom:90}}>
+              <BotonLogin callback={()=>{router.dismissTo("/tabs/HomeStudent")}} 
+              textColor={"white"} bckColor={paleta.dark_aqua} text={"Aceptar"} />
+            </View>
            
             <Toast/>
         </View>
