@@ -50,9 +50,7 @@ export default function Leccion (){
       } catch (error) {
         error_alert("No se pudo cargar el módulo");
         console.error(error);
-      } finally {
-          setLoading(false);
-      }
+      } 
     } 
 
   const fetch_senias = async ()=>{
