@@ -164,7 +164,7 @@ export default function Perfil (){
       try {
         const data = await traerReportesProfe(contexto.user.id);
         setReportes(data || []);
-        console.log(data);
+        //console.log(data);
       } catch (e) {
         error_alert("No se pudieron cargar los reportes");
       }
@@ -187,7 +187,7 @@ export default function Perfil (){
       onPress={()=>{cambiar_avatar(item)}}
       style={[{margin:10},item.id==pfp?.id ? styles.round_border:{}]}>
       <Image
-        style={[styles.image,{borderRadius:50}]}
+        style={[styles.avatar,{borderRadius:50}]}
         source={ item.image_url}
         contentFit="contain"
         transition={0}
@@ -480,6 +480,12 @@ const styles = StyleSheet.create({
     //flex: 1,
     width: 100,
     height: 100,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  avatar: {    
+    width: 90,
+    height: 90,
     borderRadius: 20,
     borderWidth: 1,
   },
