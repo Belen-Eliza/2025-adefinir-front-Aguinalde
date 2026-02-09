@@ -31,8 +31,7 @@ import { miNivel } from '@/conexiones/xp';
 import { SmallPopupModal } from '@/components/modals';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { traerCategorias } from '@/conexiones/categorias';
-import { Label } from '@react-navigation/elements';
-import { aprendiendo_dominadas_practica_x_cate, aprendiendo_practica_x_cate, hay_senias_practica } from '@/conexiones/practica';
+import {  hay_senias_practica } from '@/conexiones/practica';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -74,6 +73,11 @@ export default function HomeStudent() {
   const [showModalInsignia,setShowInsignia] =useState(false);
   const [insignia,setI]= useState<Insignia>({id:0,nombre:"",descripcion:"",image_url:"",motivo:1,ganada:true});
 
+   // Confetti al entrar a la app (refuerzo visual inmediato)
+  useEffect(() => {    
+    setShowConfetti(true);
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       const fetchModulosCompletados = async () => {
@@ -81,7 +85,7 @@ export default function HomeStudent() {
         setUser(prev => ({ ...prev, modulosCompletados: completados || 0 }));
         //console.log('Modulos completados actualizados:', completados);
       };
-
+      
       fetchModulosCompletados();
       fetch_progreso_categoria();
       fetch_misc();
@@ -90,10 +94,7 @@ export default function HomeStudent() {
       }, [])
     );
 
-  // Confetti al entrar a la app (refuerzo visual inmediato)
-  useEffect(() => {    
-    setShowConfetti(true);
-  }, []);
+ 
 
   // Solo mostrar las primeras 3 categorías en la vista principal
   const topCategorias = progresoCategorias.slice(0, 3);
@@ -435,7 +436,7 @@ export default function HomeStudent() {
             <BotonLogin callback={empezarLeccion} textColor={"black"} bckColor={paleta.strong_yellow} text={"Empezar lección"}/>
           </View>
         </SmallPopupModal>
-  <ConfettiBurst visible={showConfetti} onDone={() => setShowConfetti(false)} />
+  {showConfetti && <ConfettiBurst visible={showConfetti} onDone={() => {setShowConfetti(false),fetch_progreso_categoria()}} />}
   <Toast/>
     </View>
   );

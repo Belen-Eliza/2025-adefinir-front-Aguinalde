@@ -34,8 +34,8 @@ export const ConfettiBurst: React.FC<ConfettiBurstProps> = ({
 
   // Cuando visible cambia a true, al terminar animaciones llamar onDone.
   React.useEffect(() => {
-    if (!visible) return;
-    done.current = false;
+    if (!visible) return;    
+    done.current = false;    
     const t = setTimeout(() => {
       if (!done.current) {
         done.current = true;
