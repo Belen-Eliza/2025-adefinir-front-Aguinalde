@@ -1,5 +1,5 @@
 import React, { useState,  useCallback,  } from 'react';
-import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/hooks/useUserContext';
@@ -126,6 +126,13 @@ export default  function Practica (){
         }        
     }
     
+    if (loading) {
+        return (
+        <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#20bfa9" />
+        </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -364,5 +371,11 @@ title_racha: {
     fontSize: 25,
     color: paleta.dark_aqua,
     fontWeight: "600"
- }
+ },
+ loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: paleta.aqua_bck
+  },
 })

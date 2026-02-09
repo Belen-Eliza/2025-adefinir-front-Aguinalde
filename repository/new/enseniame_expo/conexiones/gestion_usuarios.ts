@@ -31,7 +31,7 @@ const entrar = async (mail: string)=>{
         const { data: alumno, error } = await supabase.from('Alumnos').select('*').eq('id', user.id).single();
         if (error) throw error
         return  new Logged_Alumno(user.mail,user.username,user.hashed_password,
-                user.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.nivel,user.avatar);
+                user.id,alumno.racha,alumno.racha_maxima,alumno.xp,alumno.coins,alumno.last_login,alumno.nivel,user.avatar);
       }
      
     }
@@ -241,7 +241,7 @@ const verificar_otp = async (mail:string,codigo:string) => {
     type: 'email',
   });
   if (session) {
-    let usuario = await entrar(mail);
+    let usuario = await entrar(mail);    
     return usuario
   }
 }

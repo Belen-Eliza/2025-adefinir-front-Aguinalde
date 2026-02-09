@@ -1,11 +1,8 @@
-import { Pressable,  Text,  TextInput,  View,
-  StyleSheet,  Platform,  ScrollView, KeyboardAvoidingView,
-  TouchableOpacity
+import {   View,  StyleSheet,  Platform,  ScrollView, KeyboardAvoidingView,
 } from 'react-native';
 import { useEffect, useState } from "react";
-import { Link, router, useLocalSearchParams } from 'expo-router';
+import { Link} from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { Ionicons } from '@expo/vector-icons';
 import { estilos } from '@/components/estilos';
 import { error_alert,success_alert } from '@/components/alert';
 import { validateEmail, validatePassword, validateInstitution } from '@/components/validaciones';
@@ -95,9 +92,9 @@ export default function Signup() {
   }
 
   return (
-    <View style={styles.mainView} >
+    <View style={[styles.mainView]} >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : "padding"}
         style={{flex: 1}}
       >
       <ScrollView contentContainerStyle={[styles.scrollViewContent,estilos.centrado]}>
@@ -191,7 +188,8 @@ const styles=StyleSheet.create({
   },
   
   scrollViewContent: {
-    flexGrow: 1,
+    //flexGrow: 1,
+    height:"110%",
     justifyContent: 'space-between',
     minWidth: "80%",
   },

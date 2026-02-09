@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback,  } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Modal, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, Modal, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, runOnJS } from 'react-native-reanimated';
 import ConfettiBurst from '@/components/animations/ConfettiBurst';
@@ -31,8 +31,7 @@ import { miNivel } from '@/conexiones/xp';
 import { SmallPopupModal } from '@/components/modals';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { traerCategorias } from '@/conexiones/categorias';
-import { Label } from '@react-navigation/elements';
-import { aprendiendo_dominadas_practica_x_cate, aprendiendo_practica_x_cate, hay_senias_practica } from '@/conexiones/practica';
+import {  hay_senias_practica } from '@/conexiones/practica';
 
 export default function HomeStudent() {
   const contexto = useUserContext();
@@ -74,39 +73,28 @@ export default function HomeStudent() {
   const [showModalInsignia,setShowInsignia] =useState(false);
   const [insignia,setI]= useState<Insignia>({id:0,nombre:"",descripcion:"",image_url:"",motivo:1,ganada:true});
 
+   // Confetti al entrar a la app (refuerzo visual inmediato)
+  useEffect(() => {    
+    setShowConfetti(true);
+  }, []);
+
   useFocusEffect(
-      useCallback(() => {
-        const fetchModulosCompletados = async () => {
+    useCallback(() => {
+      const fetchModulosCompletados = async () => {
         const completados = await modulos_completados_por_alumno(contexto.user.id);
         setUser(prev => ({ ...prev, modulosCompletados: completados || 0 }));
         //console.log('Modulos completados actualizados:', completados);
-        };
+      };
+      
+      fetchModulosCompletados();
+      fetch_progreso_categoria();
+      fetch_misc();
+      fetch_racha();
+        return () => {};
+      }, [])
+    );
 
-        fetchModulosCompletados();
-        fetch_misc();
-        fetch_racha();
-          return () => {};
-        }, [])
-      );
-
-
-  useEffect(()=>{
-    let mounted = true;
-    const load = async () =>{
-      try{
-        const data = await progreso_por_categoria(contexto.user.id);
-        if(mounted) setProgresoCategorias(data || []);
-        //console.log('Progreso por categoría cargado:', data);
-      }catch(err){ console.error('Error cargando progreso por categoría', err) }
-    }
-    if(contexto.user && contexto.user.id) load();
-    return ()=>{ mounted = false }
-  }, [contexto.user.id]);
-
-  // Confetti al entrar a la app (refuerzo visual inmediato)
-  useEffect(() => {
-    setShowConfetti(true);
-  }, []);
+ 
 
   // Solo mostrar las primeras 3 categorías en la vista principal
   const topCategorias = progresoCategorias.slice(0, 3);
@@ -120,6 +108,7 @@ export default function HomeStudent() {
         <Text style={styles.categoriaPorcentaje}>{categoria.porcentaje}%</Text>
       </View>
       <ProgressBarAnimada progress={categoria.porcentaje} />
+      
     </View>
   );
   
@@ -183,6 +172,17 @@ export default function HomeStudent() {
     const m = await todos_los_modulos();
     const itemsM = m?.map(each=>{return {label:each.nombre,value:each.id}});
     setModulos(itemsM || []);
+  }
+
+  const fetch_progreso_categoria = async () => {        
+    try{
+      const data = await progreso_por_categoria(contexto.user.id);
+      setProgresoCategorias(data || []);
+      //console.log('Progreso por categoría cargado:', data);
+    } catch(err){ 
+      console.error('Error cargando progreso por categoría', err) ;
+    }
+      
   }
 
   const empezarLeccion = async ()=>{
@@ -436,7 +436,7 @@ export default function HomeStudent() {
             <BotonLogin callback={empezarLeccion} textColor={"black"} bckColor={paleta.strong_yellow} text={"Empezar lección"}/>
           </View>
         </SmallPopupModal>
-  {showConfetti && <ConfettiBurst visible={showConfetti} onDone={() => setShowConfetti(false)} />}
+  {showConfetti && <ConfettiBurst visible={showConfetti} onDone={() => {setShowConfetti(false),fetch_progreso_categoria()}} />}
   <Toast/>
     </View>
   );
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: Platform.OS !== "android" ? 40:20,
     paddingBottom: 60,
     zIndex: 2,
   },
@@ -751,6 +751,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 25,
+  },
+  progressBar: {
+    height: 10,
+    backgroundColor: '#e9f7f4',
+    borderRadius: 8,
+    overflow: 'hidden',    
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#20bfa9',
+    borderRadius: 8,
   },
 });
 

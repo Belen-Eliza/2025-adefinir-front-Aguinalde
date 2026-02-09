@@ -75,7 +75,8 @@ export default function Perfil (){
         setPass(undefined);        
         setErrorEmail("");
         setErrorPassword("");
-        setErrorName("");        
+        setErrorName("");      
+        setOTP("");  
     }
 
     const confirmar = async () => {
@@ -121,9 +122,10 @@ export default function Perfil (){
       if (mail){
       let exito = await confirmar_mail(mail,otp);
 
-      if (exito) {
-        success_alert("Tu mail fue cambiado con éxito");
+      if (exito) {        
         setConfirmarMail(false);
+        setTimeout(()=>success_alert("Tu mail fue cambiado con éxito"),200);
+        borrar_cambios();
       }
     }
     } catch (error) {

@@ -7,7 +7,7 @@ import { error_alert, success_alert } from '@/components/alert';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from '@/hooks/useUserContext';
 import { validateEmail, validatePassword } from '@/components/validaciones';
-import { eliminar_usuario } from '@/conexiones/gestion_usuarios';
+import { confirmar_mail, eliminar_usuario } from '@/conexiones/gestion_usuarios';
 import { traerReportesProfe } from '@/conexiones/reportes';
 import { paleta, paleta_colores } from '@/components/colores';
 import { IconTextInput, PasswordInput } from '@/components/inputs';
@@ -38,6 +38,9 @@ export default function Perfil (){
     const [errorPassword, setErrorPassword] = useState('');
     const [errorName,setErrorName] = useState('');
     const [errorI, setErrorI] = useState('');
+
+    const [confirmarMail, setConfirmarMail] = useState(false);
+    const [otp,setOTP] = useState('');
 
     const [showPassword, setShowPassword] = useState(false);
     const [reportes, setReportes] = useState<any[]>([]);
@@ -116,7 +119,8 @@ export default function Perfil (){
         setErrorEmail("");
         setErrorPassword("");
         setErrorName("");
-        setErrorI("")
+        setErrorI("");
+        setOTP("");
     }
 
     const confirmar = async () => {
@@ -128,13 +132,7 @@ export default function Perfil (){
             }
             else  error_alert("El nombre no puede estar vacío");
         } 
-        if (mail!= undefined) {
-            const lower_case_mail=mail.toLowerCase();
-            if (validateEmail(lower_case_mail).status) {
-                contexto.cambiar_mail(lower_case_mail);
-                exito=true;
-            } else error_alert("Formato inválido de mail");              
-        }
+        
         if (pass!=undefined){
             if (validatePassword(pass).status) {
                 contexto.cambiar_password(pass);
@@ -159,12 +157,39 @@ export default function Perfil (){
         }        
     }
 
+    const confirmar_cambio_mail = async () => {
+      if (mail!= undefined) {
+        const lower_case_mail=mail.toLowerCase();
+        if (validateEmail(lower_case_mail).status) {
+            contexto.cambiar_mail(lower_case_mail);
+            setMailModalVisible(false);
+            setConfirmarMail(true);
+        } else error_alert("Formato inválido de mail");              
+      }
+    }
+
+    const verificar_nuevo_mail = async () => {
+    try {
+      if (mail){
+      let exito = await confirmar_mail(mail,otp);
+
+      if (exito) {        
+        setConfirmarMail(false);
+        setTimeout(()=>success_alert("Tu mail fue cambiado con éxito"),200);
+        borrar_cambios();
+      }
+    }
+    } catch (error) {
+      error_alert("No se pudo actualizar tu mail");
+    }        
+  }
+
     const abrirModalReportes = async () => {
       setLoadingReportes(true);
       try {
         const data = await traerReportesProfe(contexto.user.id);
         setReportes(data || []);
-        console.log(data);
+        //console.log(data);
       } catch (e) {
         error_alert("No se pudieron cargar los reportes");
       }
@@ -187,7 +212,7 @@ export default function Perfil (){
       onPress={()=>{cambiar_avatar(item)}}
       style={[{margin:10},item.id==pfp?.id ? styles.round_border:{}]}>
       <Image
-        style={[styles.image,{borderRadius:50}]}
+        style={[styles.avatar,{borderRadius:50}]}
         source={ item.image_url}
         contentFit="contain"
         transition={0}
@@ -296,8 +321,10 @@ export default function Perfil (){
                   placeholder={contexto.user.mail}
                 />
                 {errorEmail ? <ThemedText type='error'>{errorEmail}</ThemedText> : null}
-
-              <BotonLogin callback={confirmar} textColor='black' text='Guardar cambios' bckColor={paleta.strong_yellow}/>
+                <ThemedText style={[estilos.centrado,{marginTop:15}]} >
+                  Recibirás un mail de confirmación en tu nuevo correo para verificar el cambio.
+                </ThemedText>
+              <BotonLogin callback={confirmar_cambio_mail} textColor='black' text='Guardar cambios' bckColor={paleta.strong_yellow}/>
             </SmallPopupModal>
 
             <SmallPopupModal setVisible={setInstModalVisible} modalVisible={instModalVisible} title="Editar institución">
@@ -382,6 +409,20 @@ export default function Perfil (){
               </View>
               
             </SmallPopupModal>
+
+          <SmallPopupModal title='Confirmar nuevo mail' modalVisible={confirmarMail} setVisible={setConfirmarMail}>
+            <ThemedText type='defaultSemiBold' lightColor='gray' style={{alignSelf:"flex-start", marginTop:25,marginHorizontal:15}}>Introduce el código recibido </ThemedText>
+            <IconTextInput 
+                icon={{Ionicon_name: "lock-closed-outline"}} 
+                value={otp} 
+                bck_color="white"
+                onChange={setOTP}
+                keyboardType='numeric'
+                placeholder={""}
+              />
+            
+            <BotonLogin callback={verificar_nuevo_mail} textColor='black' text='Confirmar' bckColor={paleta.strong_yellow}/>
+          </SmallPopupModal>  
 
           <Toast/>
         </View>
@@ -480,6 +521,12 @@ const styles = StyleSheet.create({
     //flex: 1,
     width: 100,
     height: 100,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  avatar: {    
+    width: 90,
+    height: 90,
     borderRadius: 20,
     borderWidth: 1,
   },

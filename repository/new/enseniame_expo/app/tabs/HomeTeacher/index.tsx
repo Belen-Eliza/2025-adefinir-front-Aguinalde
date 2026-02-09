@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useUserContext } from '@/hooks/useUserContext';
@@ -87,7 +87,7 @@ export default function HomeTeacher() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent]} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Panel del Profesor</Text>
         <Text style={styles.subtitle}>Bienvenido, {teacherName}</Text>
         {contexto.user.id==1 && (
@@ -96,16 +96,16 @@ export default function HomeTeacher() {
 
         <View style={styles.stackCards}>
           <TouchableOpacity style={[styles.card, styles.cardLeft]} onPress={()=>router.push("/tabs/HomeTeacher/vistas")}> 
-            <Ionicons name="flame" size={28} color={paleta.strong_yellow} style={{marginBottom: 8}} />
-            <Text style={styles.cardTitleCursos}>{visualizaciones?.length} {visualizaciones?.length==1 ? "vista" : "vistas"} en tus videos</Text>
+            <Ionicons name="flame" size={28} color={paleta.strong_yellow} style={[{marginBottom: 8},estilos.centrado]} />
+            <Text style={[styles.cardTitleCursos,estilos.centrado]}>{visualizaciones?.length} {visualizaciones?.length==1 ? "vista" : "vistas"} en tus videos</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.card, styles.cardRight]} onPress={()=>contexto.user.gotToModules()}> 
-            <Text style={styles.cardTitleCursos}>{misSenias?.length} </Text>
-            <Text style={styles.cardTextCursos}> señas subidas</Text>
+            <Text style={[styles.cardTitleCursos,estilos.centrado]}>{misSenias?.length} </Text>
+            <Text style={[styles.cardTextCursos,estilos.centrado]}> señas subidas</Text>
 
-            <Text style={styles.cardTitleCursos}>{misModulos?.length} </Text>
-            <Text style={styles.cardTextCursos}> {misModulos && misModulos.length != 1 ? "módulos creados":"módulo creado"} </Text>
+            <Text style={[styles.cardTitleCursos,estilos.centrado]}>{misModulos?.length} </Text>
+            <Text style={[styles.cardTextCursos,estilos.centrado]}> {misModulos && misModulos.length != 1 ? "módulos creados":"módulo creado"} </Text>
           </TouchableOpacity>
         </View>
 
@@ -114,7 +114,7 @@ export default function HomeTeacher() {
           {cant_reviews>0?
           <>
           <ThemedText style={[estilos.centrado,{margin:5}]} type='title'>{promedio.toFixed(2)}</ThemedText>
-          <ThemedText>{cant_reviews} reseñas en tus módulos</ThemedText>
+          <ThemedText>{cant_reviews} {cant_reviews!=1 ? "reseñas": "reseña"}  en tus módulos</ThemedText>
           </>:
           <ThemedText lightColor='gray'>Todavía no tienes ninguna calificación</ThemedText>
         }
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 15,
+    paddingTop: Platform.OS !== "android" ? 15:0,
     paddingBottom: 60,
     zIndex: 2,
   },
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#222',
-    marginTop: 100,
+    marginTop: Platform.OS !== "android" ? 100:70,
     marginBottom: 10,
     alignSelf: 'center',
     zIndex: 2,
