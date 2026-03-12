@@ -233,7 +233,7 @@ export default  function Practica (){
                         </View>
                         <View style={{width:190}}>
                             <XPCard borderColor={paleta.sea_green} bckColor={paleta.sea_green} textColor={'white'} 
-                        title={'Precisión'} cant={cant_correctas/senias.length*100+" %"}/>
+                        title={'Precisión'} cant={Math.round(cant_correctas/senias.length*100)+" %"}/>
                         </View>                                                
                     </View>
                 

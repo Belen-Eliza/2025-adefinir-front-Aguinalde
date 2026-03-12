@@ -82,20 +82,14 @@ const getEstado = async (id_alumno:number,id_senia:number) => {
 }
 
 const traer_senias_modulo = async (id_alumno:number,id_modulo:number) => {
-    const {data,error} = await supabase
-        .from("Modulo_Video")
-        .select("*,  Senias(*, Profesores(Users(username)), Categorias(nombre))")        
-        .eq("id_modulo",id_modulo)
-
-    if (error) throw error
-    let res: Senia_Modulo[]= []
-    if (data && data.length>0){        
-        data.forEach(async each=>{
-            let estado = await getEstado(id_alumno,each.id_video);
-            let s =new Senia_Alumno(each.Senias,estado);
-            res.push({senia:s,descripcion:each.descripcion,aprendida:s.estado.dominada()})
-        })
-    }
+    const senias_modulo = await buscar_senias_modulo(id_modulo);
+    const senias_al = await senias_alumno(id_alumno);    
+    let res: Senia_Modulo[] = [];
+    senias_modulo?.forEach(s=>{
+        let estado = getEstadoSync(s.id_video,senias_al);
+        let senia = new Senia_Alumno(s.Senias,estado);
+        res.push({senia:senia,descripcion:s.descripcion,aprendida:estado.dominada()})
+    })
     return res
 }
 

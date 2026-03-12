@@ -31,12 +31,12 @@ const buscar_modulo = async (id:number) =>{
 const buscar_senias_modulo = async (id:number)=>{
     
     let {data, error} = await supabase.from('Modulo_Video')
-        .select("*, Senias(*, Profesores(*,Users(*)),  Categorias (nombre))")
-        .eq("id_modulo",id);
+        .select(`*, Senias(*, Profesores(*,Users(*)),  Categorias (nombre))`)
+        .eq("id_modulo",id)
+        .order('Senias(significado)',{ascending:true}); 
     
-    if (error) throw error
-    
-    return data
+    if (error) throw error    
+    return data || []
 }
 
 
